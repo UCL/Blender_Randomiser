@@ -13,8 +13,13 @@ Three main ways to run Python code in Blender:
 Useful resources:
 - [Blender Python API docs](https://docs.blender.org/api/current/)
 - [A guide to Scripting in Blender](https://docs.blender.org/manual/en/3.4/advanced/scripting/index.html) from the docs.
+- [Using an external editor](https://docs.blender.org/api/current/info_tips_and_tricks.html#use-an-external-editor):
+    ```python
+        filename = "/full/path/to/myscript.py"
+        exec(compile(open(filename).read(), filename, 'exec'))
+    ```
 
-
+> A handy (hidden) feature is that you can press Ctrl-C over any menu item or button to copy the command shown in the tooltip into the clipboard.
 
 
 ## Virtual environment for development
@@ -40,6 +45,7 @@ setuptools==65.6.3
 wheel==0.37.1
 ```
 
+[Bundled Python and extensions](https://docs.blender.org/api/current/info_tips_and_tricks.html#bundled-python-extensions)
 
 
 ## Running Python script in Blender from the terminal
@@ -81,7 +87,10 @@ Below the main command line arguments for Blender are summarised. The full list 
         path/to/blender/exe --background --factory-startup --python path/to/python/file.py
 
     ```
-
+- To run on an existing blend file:
+    ```python
+        blender myscene.blend --background --python myscript.py
+    ```
 
 ## Scripting using Blender text editor
 Running scripts from the text editor in Blender can be useful to explore / debug. The following template script is provided in Blender:
@@ -108,7 +117,18 @@ with open(filepath, 'rb') as file:
 
 [Add-on tutorial from docs](https://docs.blender.org/manual/en/3.4/advanced/scripting/addon_tutorial.html)
 
+[Developer documentation: Python](https://wiki.blender.org/wiki/Python)
+
 *An add-on is simply a Python module with some additional requirements so Blender can display it in a list with useful information.*
+
+
+Addons are saved into one of (not sure why would it be one or the other)
+```
+    ['/Applications/Blender.app/Contents/Resources/3.4/scripts/addons', 
+    '/Users/sofia/Library/Application Support/Blender/3.4/scripts/addons', 
+    '/Applications/Blender.app/Contents/Resources/3.4/scripts/addons_contrib']
+```
+
 
 ---
 
