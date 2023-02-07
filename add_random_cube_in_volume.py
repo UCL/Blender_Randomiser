@@ -1,5 +1,9 @@
-# A commented template for making simple UI in blender using the bpy python API: https://gist.github.com/tin2tin/ce4696795ad918448dfbad56668ed4d5
-# https://medium.com/geekculture/creating-a-custom-panel-with-blenders-python-api-b9602d890663
+# - A commented template for making simple UI in blender using the bpy python API: https://gist.github.com/tin2tin/ce4696795ad918448dfbad56668ed4d5
+# - Addon tutorial blog: https://medium.com/geekculture/creating-a-custom-panel-with-blenders-python-api-b9602d890663
+# - A great example of custom operator and panel: 
+#   https://blender.stackexchange.com/questions/201360/how-to-control-spacing-alignment-of-label-horizontal-enum-property 
+# - Another great one:
+#   https://blender.stackexchange.com/questions/57306/how-to-create-a-custom-ui/57332#57332
 
 ### Imports
 import bpy  # Python API
@@ -38,26 +42,45 @@ class PanelAddRandomCube(bpy.types.Panel):
     bl_space_type = 'PROPERTIES' # see: https://docs.blender.org/api/current/bpy_types_enum_items/space_type_items.html#rna-enum-space-type-items
     bl_region_type = 'WINDOW' # see full list: https://docs.blender.org/api/current/bpy_types_enum_items/region_type_items.html#rna-enum-region-type-items
     
-
+    @classmethod
+    def poll(self,context):
+        return context.object is not None
+    
     def draw(self,context):
 
-        ## Add multiple items in the same column
-        # col = self.layout.column()
-        # col.prop(context.scene.random_cube_props, "vol_size")
-        # col.prop(context.scene.random_cube_props, "seed_toggle")
-        # col.prop(context.scene.random_cube_props, "seed")
+        # Target volume (align text label and field)
+        layout = self.layout
+        row = layout.row()
+        split = row.split()
+        left_col = split.column(align=True)
+        right_col = split.column(align=True)
 
-        ## Add a new row
-        row = self.layout.row()
-        row.prop(context.scene.random_cube_props, "vol_size")
-        
-        row = self.layout.row(align=True)
-        row.prop(context.scene.random_cube_props, "seed_toggle")
-
-        subrow = row.row()
-        subrow.enabled = context.scene.random_cube_props.seed_toggle # only disable the next part of the row
-        subrow.prop(context.scene.random_cube_props, "seed")
+        left_col.alignment='RIGHT'
+        left_col.label(text='Target volume size')
+        right_col.prop(context.scene.random_cube_props, 
+                       "vol_size",
+                       icon_only=True)
+        # alternative: layout.prop(context.scene.random_cube_props, "vol_size")
+                        
     
+        # Seed
+        row = self.layout.row(align=True)
+        split = row.split()
+        left_col = split.column(align=True)
+        right_col = split.column(align=True)
+
+        # put the toggle on the left col
+        left_col_row = left_col.row(align=True)
+        left_col_row.alignment='RIGHT' # alignment first!
+        left_col_row.prop(context.scene.random_cube_props, "seed_toggle", icon_only=True)
+        left_col_row.label(text='Set random seed')
+       
+        # put field in right col
+        right_col.enabled = context.scene.random_cube_props.seed_toggle # only disable the next part of the row
+        right_col.prop(context.scene.random_cube_props, "seed")
+        # alternative:
+        # row = self.layout.row(align=True)
+        # row.prop(context.scene.random_cube_props, "seed_toggle")
 
         # add a button for the operator
         row = self.layout.row(align=True)
