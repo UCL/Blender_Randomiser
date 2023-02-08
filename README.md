@@ -24,9 +24,9 @@ Useful resources:
 
 ## Virtual environment for development
 From [this discussion](https://blender.stackexchange.com/questions/181928/does-blender-use-a-python-virtual-environment):
-- Blender has its own Python interpreter, modules and libraries and is therefore entirely separated from your system's Python installation(s). 
-- The interpreter is linked into Blender's binary. 
-- It does not create or use virtual environments. 
+- Blender has its own Python interpreter, modules and libraries and is therefore entirely separated from your system's Python installation(s).
+- The interpreter is linked into Blender's binary.
+- It does not create or use virtual environments.
 - The add-ons and commands from the Python console are executed by the same Python interpreter and therefore have access to the same modules and libraries.
 
 
@@ -57,11 +57,11 @@ When working from the terminal, it is convenient to [add Blender to the system p
 The full docs on running Blender from the terminal can be found [here](https://docs.blender.org/manual/en/3.4/advanced/command_line/index.html).
 
 
-## Command line arguments for Blender 
-Below the main command line arguments for Blender are summarised. The full list can be found [here](https://docs.blender.org/manual/en/latest/advanced/command_line/arguments.html). 
+## Command line arguments for Blender
+Below the main command line arguments for Blender are summarised. The full list can be found [here](https://docs.blender.org/manual/en/latest/advanced/command_line/arguments.html).
 
 
-- The following command will run the selected Python script in Blender and start the GUI. Typically the Python script will define a scene (geometry, virtual cameras, etc.) and its animation 
+- The following command will run the selected Python script in Blender and start the GUI. Typically the Python script will define a scene (geometry, virtual cameras, etc.) and its animation
     ```python
         path/to/blender/exe --python path/to/python/file.py
     ```
@@ -129,12 +129,12 @@ with open(filepath, 'rb') as file:
 
 Addons are saved into one of (not sure why would it be one or the other)
 ```
-    ['/Applications/Blender.app/Contents/Resources/3.4/scripts/addons', 
-    '/Users/sofia/Library/Application Support/Blender/3.4/scripts/addons', 
+    ['/Applications/Blender.app/Contents/Resources/3.4/scripts/addons',
+    '/Users/sofia/Library/Application Support/Blender/3.4/scripts/addons',
     '/Applications/Blender.app/Contents/Resources/3.4/scripts/addons_contrib']
 ```
 
-To install an add-on (maybe we have this command in the main.py file, called from the launching bash script?): 
+To install an add-on (maybe we have this command in the main.py file, called from the launching bash script?):
 ```python
     bpy.ops.preferences.addon_install()
 ```
@@ -152,7 +152,7 @@ To enable an already installed add-on from the CLI:
 
 
 ### To inspect variables / debug:
-- #### Option 1:  Use 'code' module 
+- #### Option 1:  Use 'code' module
     Works in Python interactive terminal in Blender and in Windows terminal). See further info in [docs](https://docs.blender.org/api/2.81/info_tips_and_tricks.html#drop-into-a-python-interpreter-in-your-script). For me, pdb works if run from terminal but not with Python console in Blender
     ```
     import code
@@ -164,7 +164,7 @@ To enable an already installed add-on from the CLI:
     IPython.embed()
     ```
 
-- #### Option 3: use pdb 
+- #### Option 3: use pdb
     run from Blender gui after opening Python terminal from Blender (a bit buggy tho, sometimes Blender crashes)
 
 ### To get path to Python executable:
