@@ -92,6 +92,11 @@ Below the main command line arguments for Blender are summarised. The full list 
         blender myscene.blend --background --python myscript.py
     ```
 
+- To run Blender from the terminal and enable an (already installed) add-on
+    ```python
+        blender --addons add_array_objects_to_cursor
+    ```
+
 ## Scripting using Blender text editor
 Running scripts from the text editor in Blender can be useful to explore / debug. The following template script is provided in Blender:
 ```python
@@ -127,6 +132,17 @@ Addons are saved into one of (not sure why would it be one or the other)
     ['/Applications/Blender.app/Contents/Resources/3.4/scripts/addons', 
     '/Users/sofia/Library/Application Support/Blender/3.4/scripts/addons', 
     '/Applications/Blender.app/Contents/Resources/3.4/scripts/addons_contrib']
+```
+
+To install an add-on (maybe we have this command in the main.py file, called from the launching bash script?): 
+```python
+    bpy.ops.preferences.addon_install()
+```
+
+
+To enable an already installed add-on from the CLI:
+```python
+    blender --addons add_array_objects_to_cursor
 ```
 
 
