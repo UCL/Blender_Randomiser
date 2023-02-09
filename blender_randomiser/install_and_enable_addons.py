@@ -1,13 +1,15 @@
 """
-To run
+To run in Blender from the terminal:
     blender
     --python <path to this script>
     -- <space-separated list of paths to the addons to enable>
+
 Example:
     blender
     --python ./blender_randomiser/install_and_enable_addons.py
     -- ./blender_randomiser/add_array_objects_to_cursor.py
     ./blender_randomiser/add_random_cube_in_volume.py
+
 
 
 """
@@ -30,27 +32,29 @@ def main():
 
     # ---------
     # initialise parser
-    usage_text = (
-        "To launch Blender and install+enable the desired add-ons, run:"
-        "  blender --python "
-        + __file__
-        + " -- [list of paths to addons to install and enable]"
-        "To launch Blender *with factory settings* add:"
-        "  blender --factory-startup --python "
-        + __file__
-        + " -- [list of paths to addons to install and enable]"
+    parser = argparse.ArgumentParser(
+        description=(
+            "To launch Blender and install+enable the desired add-ons, run:"
+            "  blender --python "
+            + __file__
+            + " -- [list of paths to addons to install and enable OR"
+            " path to parent dir]"
+            "To launch Blender *with factory settings* add:"
+            "  blender --factory-startup --python "
+            + __file__
+            + " -- [list of paths to addons to install and enable]"
+        )
     )
-    parser = argparse.ArgumentParser(description=usage_text)
 
-    # add arguments to parser
-    # Possible types are: string, int, long, choice, float and complex.
-    # required
+    # add arguments
+    # required (positonal)
     parser.add_argument(
         "addons_paths",
         nargs="*",
-        type=str,
+        type=str,  # types: string, int, long, choice, float and complex.
         metavar="ADDONS_PATHS",  # A name for the argument in usage messages.
-        help="Space-separated list of the paths to the add-ons to enable",
+        help="Space-separated list of the paths to the add-ons to enable OR"
+        "path to parent dir",
     )
 
     # build parser object
@@ -69,23 +73,21 @@ def main():
         return
     # ---------
 
-    for p in args.addons_paths:
-        ### Install the addons
-        bpy.ops.preferences.addon_install(filepath=p)
+    # extract list of python files
+    # TODO: option to exclude files (w regex?)
+    if len(args.addons_paths) == 1 and Path(args.addons_paths[0]).is_dir():
+        list_files = [
+            str(item) for item in Path(args.addons_paths[0]).glob("*.py")
+        ]
 
-        ### Enable them
+    else:  # TODO: check if list of paths?
+        list_files = args.addons_paths
+
+    # install and enable addons in list
+    for p in list_files:
+        bpy.ops.preferences.addon_install(filepath=p)
         bpy.ops.preferences.addon_enable(module=Path(p).stem)
 
-        # alternative using addon_utils:
-        # https://blender.stackexchange.com/questions/32409/how-to-enable-and-disable-add-ons-via-python
-        # addon_utils.enable(
-        #     Path(p).stem,
-        #     default_set=True, # if True, it will be synced with the userprefs
-        #     # persistent=False # not sure what this does
-        # (it is not presistency across sessions)
-        # )
-
-        ### Print
         print(f'"{Path(p).stem}" installed from source script and enabled')
 
 
