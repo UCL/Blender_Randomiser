@@ -1,6 +1,8 @@
 # Blender_Randomiser
 
-Blender 3.4 uses Python 3.10.8
+Blender 3.4 uses Python 3.10.8.
+
+This repository uses the cookiecutter template from the [SainsburyWellcomeCentre](https://github.com/SainsburyWellcomeCentre/python-cookiecutter)
 
 ## Python scripting in Blender
 The docs provide a good list of first steps to get started with Python scripting, including enabling developer mode. See [here](https://docs.blender.org/api/current/info_quickstart.html).
