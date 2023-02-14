@@ -1,7 +1,8 @@
 ### Imports
-# check /Applications/Blender.app/Contents/Resources/3.4/scripts/addons/object_scatter
+# for reference check:
+# /Applications/Blender.app/Contents/Resources/3.4/scripts/addons/object_scatter
 
-from . import transforms, geometry, material
+from . import geometry, material, transforms
 
 bl_info = {
     "name": "Add randomisations",
@@ -14,10 +15,7 @@ bl_info = {
     # optional
     "version": (1, 0, 0),
     "author": "Sofia Miñano",
-    "description": """
-        "Add a a random displacement
-        to the active object location"
-        """,
+    "description": ("Randomise selected parameters" "of the active object"),
 }
 
 

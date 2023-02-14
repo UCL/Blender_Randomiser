@@ -1,6 +1,6 @@
 """
-An add-on to randomise location,
-the material properties of selected objects
+An add-on to randomise the material parameters
+of the selected objects
 
 """
 ### Imports
@@ -10,7 +10,7 @@ import numpy as np
 
 # ---------------------------
 # Properties
-class PropertiesAddRandomDisplacement(
+class PropertiesAddRandomMaterial(
     bpy.types.PropertyGroup
 ):  # ---these will be added to context.scene.<custom_prop> in registration
     vol_size_prop = bpy.props.FloatProperty(
@@ -33,7 +33,7 @@ class PropertiesAddRandomDisplacement(
 
 # -------------------------------
 ## Operators
-class AddRandomDisplacement(bpy.types.Operator):  # ---check types
+class AddRandomMaterial(bpy.types.Operator):  # ---check types
     # docstring shows as a tooltip for menu items and buttons.
     """Add a random cube within a predefined volume"""
 
@@ -83,8 +83,8 @@ class AddRandomDisplacement(bpy.types.Operator):  # ---check types
 
 # -------
 # Panel
-class PanelAddRandomDisplacement(bpy.types.Panel):
-    bl_idname = "VIEW3D_PT_add_random_cube"
+class PanelAddRandomMaterial(bpy.types.Panel):
+    bl_idname = "VIEW3D_PT_random_material"
     bl_label = "Randomise MATERIAL"
     # title of the panel / label displayed to the user
     bl_space_type = "VIEW_3D"
@@ -149,9 +149,9 @@ class PanelAddRandomDisplacement(bpy.types.Panel):
 # --------------------------------------------------
 # Register and unregister functions:
 list_classes_to_register = [
-    PropertiesAddRandomDisplacement,
-    PanelAddRandomDisplacement,
-    AddRandomDisplacement,
+    PropertiesAddRandomMaterial,
+    PanelAddRandomMaterial,
+    AddRandomMaterial,
 ]
 
 
@@ -161,9 +161,9 @@ def register():
     for cls in list_classes_to_register:
         bpy.utils.register_class(cls)
         # add custom props to the scene! before registering the rest?
-        if cls == PropertiesAddRandomDisplacement:
+        if cls == PropertiesAddRandomMaterial:
             bpy.types.Scene.random_cube_props = bpy.props.PointerProperty(
-                type=PropertiesAddRandomDisplacement
+                type=PropertiesAddRandomMaterial
             )
             # alternative: setattr(bpy.types.Scene, prop_name, prop_value)?
 

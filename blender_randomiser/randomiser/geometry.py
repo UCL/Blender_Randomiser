@@ -1,6 +1,6 @@
 """
-An add-on to randomise the geometry
-of selected objects
+An add-on to randomise the geometry parameters
+of the selected objects
 
 """
 ### Imports
@@ -10,16 +10,15 @@ import numpy as np
 
 # ---------------------------
 # Properties
-class PropertiesAddRandomDisplacement(
-    bpy.types.PropertyGroup
-):  # ---these will be added to context.scene.<custom_prop> in registration
+# these will be added to context.scene.<custom_prop> in registration
+class PropertiesAddRandomGeometry(bpy.types.PropertyGroup):
     vol_size_prop = bpy.props.FloatProperty(
         name="Target volume size",
         default=1.0,
         soft_min=0.0,
         soft_max=10.0,
         step=50,
-    )  # OJO in step: the actual value is the value set here divided by 100
+    )  # the actual step value in the GUI is the value set here divided by 100
     vol_size: vol_size_prop  # type: ignore
 
     seed_toggle_prop = bpy.props.BoolProperty(
@@ -33,9 +32,9 @@ class PropertiesAddRandomDisplacement(
 
 # -------------------------------
 ## Operators
-class AddRandomDisplacement(bpy.types.Operator):  # ---check types
+class AddRandomGeometry(bpy.types.Operator):  # ---check types
     # docstring shows as a tooltip for menu items and buttons.
-    """Add a random cube within a predefined volume"""
+    """Add a random displ within a predefined volume"""
 
     bl_idname = "object.add_random_cube"  # appended to bpy.ops.
     bl_label = "Add random cube in volume"
@@ -83,7 +82,7 @@ class AddRandomDisplacement(bpy.types.Operator):  # ---check types
 
 # -------
 # Panel
-class PanelAddRandomDisplacement(bpy.types.Panel):
+class PanelAddRandomGeometry(bpy.types.Panel):
     bl_idname = "VIEW3D_PT_random_geometry"
     bl_label = "Randomise GEOMETRY"
     # title of the panel / label displayed to the user
@@ -149,9 +148,9 @@ class PanelAddRandomDisplacement(bpy.types.Panel):
 # --------------------------------------------------
 # Register and unregister functions:
 list_classes_to_register = [
-    PropertiesAddRandomDisplacement,
-    PanelAddRandomDisplacement,
-    AddRandomDisplacement,
+    PropertiesAddRandomGeometry,
+    PanelAddRandomGeometry,
+    AddRandomGeometry,
 ]
 
 
@@ -161,9 +160,9 @@ def register():
     for cls in list_classes_to_register:
         bpy.utils.register_class(cls)
         # add custom props to the scene! before registering the rest?
-        if cls == PropertiesAddRandomDisplacement:
+        if cls == PropertiesAddRandomGeometry:
             bpy.types.Scene.random_cube_props = bpy.props.PointerProperty(
-                type=PropertiesAddRandomDisplacement
+                type=PropertiesAddRandomGeometry
             )
             # alternative: setattr(bpy.types.Scene, prop_name, prop_value)?
 
@@ -188,10 +187,3 @@ def unregister():
     # Remove the operator from existing menu.
     # bpy.types.VIEW3D_MT_object.remove(menu_func)
     print("unregistered")
-
-
-# -------------------------------
-# This allows you to run the script directly from Blender's Text editor
-# to test the add-on without having to install it.
-# if __name__ == "__main__":
-#     register()

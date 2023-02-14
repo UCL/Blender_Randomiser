@@ -1,6 +1,6 @@
 """
 An add-on to randomise location,
-rotation and scale of selected objects
+rotation and scale of the selected objects
 
 """
 ### Imports
@@ -84,8 +84,8 @@ class AddRandomTransform(bpy.types.Operator):  # ---check types
 # -------
 # Panel
 class PanelAddRandomTransform(bpy.types.Panel):
-    bl_idname = "VIEW3D_PT_add_random_cube"
-    bl_label = "Randomise transform"
+    bl_idname = "VIEW3D_PT_random_transform"
+    bl_label = "Randomise TRANSFORM"
     # title of the panel / label displayed to the user
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
@@ -188,10 +188,3 @@ def unregister():
     # Remove the operator from existing menu.
     # bpy.types.VIEW3D_MT_object.remove(menu_func)
     print("unregistered")
-
-
-# -------------------------------
-# This allows you to run the script directly from Blender's Text editor
-# to test the add-on without having to install it.
-# if __name__ == "__main__":
-#     register()
