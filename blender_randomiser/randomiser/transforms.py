@@ -84,10 +84,10 @@ class AddRandomTransform(bpy.types.Operator):  # ---check types
 # -------
 # Panel
 class PanelAddRandomTransform(bpy.types.Panel):
-    bl_idname = "VIEW3D_PT_random_transform"
-    bl_label = "Randomise TRANSFORM"
+    bl_idname = "NODE_MATERIAL_PT_random_transform"
+    bl_label = "Randomise TRANSFORM PATATA"
     # title of the panel / label displayed to the user
-    bl_space_type = "VIEW_3D"
+    bl_space_type = "NODE_EDITOR"
     bl_region_type = "UI"
     bl_category = "Randomisation"
 

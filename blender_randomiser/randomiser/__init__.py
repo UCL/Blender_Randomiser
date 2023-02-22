@@ -21,14 +21,14 @@ bl_info = {
 
 def register():
     transforms.register()
-    geometry.register()
-    material.register()
+    # material.register()
+    # geometry.register()
 
 
 def unregister():
     transforms.unregister()
-    geometry.unregister()
-    material.register()
+    # material.register()
+    # geometry.unregister()
 
 
 if __name__ == "__main__":
