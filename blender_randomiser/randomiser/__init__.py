@@ -3,9 +3,14 @@
 # /Applications/Blender.app/Contents/Resources/3.4/scripts/addons/object_scatter
 
 from . import geometry, material, transforms
+import bpy
+import importlib
+
+
+importlib.reload(material)
 
 bl_info = {
-    "name": "Add randomisations",
+    "name": "Randomisations panel",
     "blender": (
         3,
         4,
@@ -15,19 +20,19 @@ bl_info = {
     # optional
     "version": (1, 0, 0),
     "author": "Sofia Miñano",
-    "description": ("Randomise selected parameters" "of the active object"),
+    "description": ("Randomise selected parameters" "of a subset of objects"),
 }
 
 
 def register():
-    transforms.register()
-    # material.register()
+    # transforms.register()
+    material.register()
     # geometry.register()
 
 
 def unregister():
-    transforms.unregister()
-    # material.register()
+    # transforms.unregister()
+    material.unregister()
     # geometry.unregister()
 
 

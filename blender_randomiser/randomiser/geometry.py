@@ -86,9 +86,9 @@ class PanelAddRandomGeometry(bpy.types.Panel):
     bl_idname = "VIEW3D_PT_random_geometry"
     bl_label = "Randomise GEOMETRY"
     # title of the panel / label displayed to the user
-    bl_space_type = "VIEW_3D"
+    bl_space_type = "NODE_EDITOR"
     bl_region_type = "UI"
-    bl_category = "Randomisation"
+    bl_category = "Randomiser"
 
     @classmethod
     def poll(self, context):
