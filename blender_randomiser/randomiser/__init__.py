@@ -2,10 +2,9 @@
 # for reference check:
 # /Applications/Blender.app/Contents/Resources/3.4/scripts/addons/object_scatter
 
-from . import geometry, material, transforms
-import bpy
 import importlib
 
+from . import material
 
 importlib.reload(material)
 
