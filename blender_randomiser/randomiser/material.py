@@ -5,7 +5,6 @@ of the selected objects
 """
 ### Imports
 import bpy
-import numpy as np
 from bpy.app.handlers import persistent
 
 # -------------------
@@ -28,25 +27,106 @@ from bpy.app.handlers import persistent
 # - follow this?: https://blender.stackexchange.com/questions/127409/how-do-i-pass-an-argument-to-an-operator-that-is-called-inside-a-panel
 
 
-class PropertiesMaterialNodes(bpy.types.PropertyGroup):
-    node_str: bpy.props.StringProperty()  # type: ignore
-    # int_value_min_max: bpy.props.IntVectorProperty(name="Int value",
-    #   default=(0,0,0))
-    # float_value_min_max: bpy.props.FloatVectorProperty(name="Float value",
-    #   default=(0.0,0.0,0.0))
+# Python global vars
+# TODO: can I combine these?
+# TODO: use out.type=='VALUE', 'RGBA' instead? (type of the output socket)
+MAP_SOCKET2PROP_MIN = {
+    bpy.types.NodeSocketFloat: "min_float_1d",
+    bpy.types.NodeSocketColor: "min_int_4d",
+}
+MAP_SOCKET2PROP_MAX = {
+    bpy.types.NodeSocketFloat: "max_float_1d",
+    bpy.types.NodeSocketColor: "max_int_4d",
+}
 
-    min_value: bpy.props.FloatProperty(default=0)  # type: ignore
-    max_value: bpy.props.FloatProperty(default=0)  # type: ignore
+
+# Blender globarl variables (is that the right way to think about it?)
+class Socket(bpy.types.PropertyGroup):
+    """
+    Properties for a socket element
+
+    Types of properties:---I think these relate to UI buttons
+     bpy.props.
+              BoolProperty(
+              BoolVectorProperty(
+              CollectionProperty(
+              EnumProperty(
+              FloatProperty(
+              FloatVectorProperty(
+              IntProperty(
+              IntVectorProperty(
+              PointerProperty(
+              RemoveProperty(
+              StringProperty(
+
+    """
+
+    socket_id: bpy.props.StringProperty()  # type: ignore
+    # int props: defaults to 0s
+    min_int_1d: bpy.props.IntVectorProperty(size=1)  # type: ignore
+    max_int_1d: bpy.props.IntVectorProperty(size=1)  # type: ignore
+
+    min_int_4d: bpy.props.IntVectorProperty(size=4)  # type: ignore
+    max_int_4d: bpy.props.IntVectorProperty(size=4)  # type: ignore
+
+    # float props: defaults to 0s
+    min_float_1d: bpy.props.FloatVectorProperty(size=1)  # type: ignore
+    max_float_1d: bpy.props.FloatVectorProperty(size=1)  # type: ignore
+
+    min_float_3d: bpy.props.FloatVectorProperty()  # type: ignore
+    max_float_3d: bpy.props.FloatVectorProperty()  # type: ignore
+
+    # BOOL
+    bool_randomise: bpy.props.BoolProperty()  # type: ignore
 
 
-#
+# @persistent
+# - If I don't label it as 'persistent', it will get removed from the
+#   bpy.app.handlers.load_pre list after tghe fn is ran for the first time
+# - Because I add it to the bpy.app.handlers.load_pre list, it will only
+#   be executed when a new file is open (is there a bit way for this)
+# - It is as if the changes here are not being passed outside this scope...
+@persistent
+def add_properties_per_socket(dummy):  # not sure why I need dummy here?
+    print("here")
+    print(len(bpy.context.scene.sockets2randomise))
+
+    list_input_nodes = [
+        nd
+        for nd in bpy.data.materials["Material"].node_tree.nodes
+        if len(nd.inputs) == 0 and nd.name.lower().startswith("random")
+    ]
+
+    # add elements to the collection--one per socket
+    for nd in list_input_nodes:
+        print(nd.name)
+        for out in nd.outputs:
+            # add a socket to the collection
+            sckt = (
+                bpy.context.scene.sockets2randomise.add()
+            )  # = (1,2,4) # ((1,2,4), (2,3,1), (4,5,6))
+            sckt.socket_id = nd.name + "_" + out.name
+            sckt.bool_randomise = True
+
+            print(nd.name + "_" + out.name)
+            print(sckt)
+            print(len(bpy.context.scene.sockets2randomise))
+            # ---------------------------------
+            if type(out) == bpy.types.NodeSocketFloat:  # out.type=='VALUE':
+                sckt.min_float_1d = (1,)  # -------getattr?
+                sckt.max_float_1d = (10,)
+            elif type(out) == bpy.types.NodeSocketColor:  # out.type=='RGBA':
+                sckt.min_int_4d = (1, 2, 333, 4)
+                sckt.max_int_4d = (10, 20, 3000, 40)
+            # ---------------------------------
+    return
 
 
 # -------------------------------
 ## Operators
 class RandomiseMaterialNodes(bpy.types.Operator):  # ---check types
     # docstring shows as a tooltip for menu items and buttons.
-    """Add a random cube within a predefined volume"""
+    """Randomise 'RandomMetallic' default value"""
 
     # operator metadata
     bl_idname = "node.randomise_socket"  # appended to bpy.ops.
@@ -61,14 +141,13 @@ class RandomiseMaterialNodes(bpy.types.Operator):  # ---check types
 
     # -------------------------------
     ### Execute fn
-    # takes list of nodes, min and max from properties and
-    # changes default value
     def execute(self, context):
-        rng = np.random.default_rng()
-        node_tree = bpy.data.materials["Material"].node_tree
-        node_tree.nodes["RandomMetallic"].outputs[0].default_value = (
-            100 * rng.random()
-        )
+        pass
+        # rng = np.random.default_rng()
+        # node_tree = bpy.data.materials["Material"].node_tree
+        # node_tree.nodes["RandomMetallic"].outputs[0].default_value = (
+        #     100 * rng.random()
+        # )
 
         return {"FINISHED"}
 
@@ -86,24 +165,26 @@ class PanelRandomMaterialNodes(bpy.types.Panel):
     @classmethod
     def poll(self, context):
         return context.object is not None
+        # TODO: is the object context what I need to check?
 
     def draw(self, context):
+        # list of input nodes that start with 'random'
+        # input nodes are those that have no input sockets
         list_input_nodes = [
             no
-            for no in bpy.data.materials[
-                "Material"
-            ].node_tree.nodes  # ----bpy.data cannot be accessed here
+            for no in bpy.data.materials["Material"].node_tree.nodes
             if len(no.inputs) == 0 and no.name.lower().startswith("random")
         ]
 
+        # for every input node and every output socket
+        co = 0  # TODO: improve this counter approach---get sockets by name?
         layout = self.layout
-        # co=0 # TODO: improve this counter approach
         for i_n, nd in enumerate(list_input_nodes):
-            # node
             row = layout.row()
 
+            # if first node: add labels for name, min, max and
+            # randomise toggle
             if i_n == 0:
-                # row.label(text=nd.name)
                 row_split = row.split()
                 col1 = row_split.column(align=True)
                 col2 = row_split.column(align=True)
@@ -113,16 +194,19 @@ class PanelRandomMaterialNodes(bpy.types.Panel):
 
                 col1.label(text=nd.name)
                 col3.alignment = "CENTER"
-                # ‘EXPAND’, ‘LEFT’, ‘CENTER’, ‘RIGHT’ (I dont find differences
+                # ‘EXPAND’, ‘LEFT’, ‘CENTER’, ‘RIGHT’ (I dont see differences
                 # btw the first 3)
                 col3.label(text="min")
                 col4.alignment = "CENTER"
                 col4.label(text="max")
+
+            # else, add just node name
             else:
                 row.label(text=nd.name)
 
-            # node output sockets
+            # add sockets for this node in the subseq rows
             for i_o, out in enumerate(nd.outputs):
+                # split row in 5 columns
                 row = layout.row()
                 row_split = row.split()
                 col1 = row_split.column(align=True)
@@ -131,37 +215,50 @@ class PanelRandomMaterialNodes(bpy.types.Panel):
                 col4 = row_split.column(align=True)
                 col5 = row_split.column(align=True)
 
+                # socket name
                 col1.alignment = "RIGHT"
                 col1.label(text=out.name)
 
-                # prop = out.bl_rna.properties['default_value']
+                # socket value
                 col2.prop(
-                    out, "default_value", icon_only=True
-                )  # col2.prop(prop,'default',icon_only=True)
+                    out,
+                    "default_value",
+                    icon_only=True,
+                )
+                col2.enabled = False
+
+                # min
                 col3.prop(
-                    context.scene.material_custom_params[i_o],
-                    "min_value",
+                    context.scene.sockets2randomise[co],
+                    context.scene.socket2prop_type_min[type(out)],
                     icon_only=True,
                 )
+
+                # max
                 col4.prop(
-                    context.scene.material_custom_params[i_o],
-                    "max_value",
+                    context.scene.sockets2randomise[co],
+                    context.scene.socket2prop_type_max[type(out)],  # getattr?
                     icon_only=True,
                 )
 
-                col5.operator("node.randomise_socket", text="Randomize")
+                # toggle
+                col5.prop(
+                    context.scene.sockets2randomise[co],
+                    "bool_randomise",
+                    icon_only=True,
+                )
 
-                # co += 1
+                co += 1
 
-                # https://blender.stackexchange.com/questions/165056/how-to-get-the-max-and-min-value-of-a-certain-nodesockets-slider
-                #  bpy.data.materials['Material'].node_tree.nodes[2].outputs[0].bl_rna.properties['default_value'].type
-                # 'FLOAT'
-                #  bpy.data.materials['Material'].node_tree.nodes[2].outputs[0].bl_rna.properties['default_value'].unit
-
-                # if out.type == 'VALUE': # maybe check type(out) instead?
-                #     col2.prop(out,'default_value',icon_only=True)
-                #     col3.prop(context.scene,f'{nd.name}_{out.name}_max')
-                #     col4.prop(context.scene,f'{nd.name}_{out.name}_min')
+        row = layout.row(align=True)
+        row_split = row.split()
+        col1 = row_split.column(align=True)
+        col2 = row_split.column(align=True)
+        col3 = row_split.column(align=True)
+        col4 = row_split.column(align=True)
+        col5 = row_split.column(align=True)
+        col5.alignment = "LEFT"
+        col5.operator("node.randomise_socket", text="Randomise")
 
 
 # --------------------------------------------------
@@ -169,53 +266,32 @@ class PanelRandomMaterialNodes(bpy.types.Panel):
 list_classes_to_register = [
     PanelRandomMaterialNodes,
     RandomiseMaterialNodes,
-    PropertiesMaterialNodes,
+    Socket,
 ]
 
 
-@persistent
-def add_properties_per_node_output(scene):
-    print("PATATA")
-
-    list_input_nodes_str = [
-        nd
-        for nd in bpy.data.materials[
-            "Material"
-        ].node_tree.nodes  # ----bpy.data cannot be accessed here
-        if len(nd.inputs) == 0 and nd.name.lower().startswith("random")
-    ]
-
-    # add elements of the collection--one per output
-    for nd in list_input_nodes_str:
-        for out in nd.outputs:
-            p = (
-                bpy.context.scene.material_custom_params.add()
-            )  # add an element to the collection
-            p.node_str = out.name
-            p.min_value = out.default_value * 10
-            p.max_value = out.default_value / 10
-
-
 def register():
-    """This is run when the add-on is enabled"""
+    """
+    This is run when the add-on is enabled
+    """
 
     for cls in list_classes_to_register:
         bpy.utils.register_class(cls)
-        if cls == PropertiesMaterialNodes:
-            # ---do I need to make it a pointer?
-            # bpy.types.Scene.material_custom_params =
-            # bpy.props.PointerProperty(
-            #     type=PropertiesMaterialNodes
-            # )
-            # ---do I need to make it a pointer?
-            typ_scene = bpy.types.Scene
-            typ_scene.material_custom_params = bpy.props.CollectionProperty(
-                type=PropertiesMaterialNodes  # elements of the collection
-            )
-            # bpy.context.scene.collection_node_outputs ---> will be a
-            # collection of properties
 
-    bpy.app.handlers.load_post.append(add_properties_per_node_output)
+        # for the property class: add it to bpy.context.scene
+        # TODO: do I need to make it a pointer?
+        if cls == Socket:
+            bpy.types.Scene.sockets2randomise = bpy.props.CollectionProperty(
+                type=Socket  # elements of the collection
+            )
+
+    # global Python var
+    setattr(bpy.types.Scene, "socket2prop_type_min", MAP_SOCKET2PROP_MIN)
+    setattr(bpy.types.Scene, "socket2prop_type_max", MAP_SOCKET2PROP_MAX)
+    # setattr(bpy.types.Scene, 'type2min', MAP_TYPE2MAX)
+
+    bpy.app.handlers.load_post.append(add_properties_per_socket)
+    # TODO: is there a better way? is load_post better?
 
     print("registered")
 
@@ -227,11 +303,41 @@ def unregister():
     for cls in list_classes_to_register:
         bpy.utils.unregister_class(cls)
 
+    # global Python vars?
+    delattr(bpy.types.Scene, "socket2prop_type_min")
+    delattr(bpy.types.Scene, "socket2prop_type_max")
+
+    # remove aux fn from handlers
+    bpy.app.handlers.load_post.remove(add_properties_per_socket)
+
     # delete the custom property pointer
     # NOTE: this is different from its accessor, as that is a read/write only
     # to delete this we have to delete its pointer, just like how we added it
-    del bpy.types.Scene.material_custom_params  # ------How?
-
-    bpy.app.handlers.load_post.remove(add_properties_per_node_output)
+    del bpy.types.Scene.sockets2randomise  # ------How?
+    bpy.ops.wm.properties_remove(
+        data_path="scene", property_name="sockets2randomise"
+    )
+    # if hasattr(bpy.context.scene, 'sockets2randomise'):
+    #     bpy.ops.wm.properties_remove(
+    #             data_path='scene',
+    #             property_name='sockets2randomise'
+    #         )
+    # else:
+    #     print(
+    #         "The requested property 'sockets2randomise'",
+    #         "could not be found for bpy.context.scene",
+    #         "after 'del', skipping removal...")
+    #
+    # try:
+    #     bpy.ops.wm.properties_remove(
+    #         data_path='scene',
+    #         property_name='sockets2randomise'
+    #     )
+    # except (ValueError, RuntimeError) as e:
+    # # TODO: review, this except is not working
+    #     print(
+    #         "The requested property 'sockets2randomise'",
+    #         "could not be removed for data_path='scene'",
+    #         ", skipping...")
 
     print("unregistered")
