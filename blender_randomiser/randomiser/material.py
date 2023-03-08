@@ -4,6 +4,9 @@ of the selected objects
 
 """
 ### Imports
+import re
+import typing
+
 import bpy
 import numpy as np
 from bpy.app.handlers import persistent
@@ -35,44 +38,17 @@ from bpy.app.handlers import persistent
 # TODO: rethink this mapping....
 # https://docs.blender.org/api/current/bpy.types.NodeSocket.html#bpy.types.NodeSocket.type
 # the idea is to map nodesocket types to property types I can use in the UI
-# Types of properties:
-#  bpy.props.
-#           BoolProperty(
-#           BoolVectorProperty(
-#           CollectionProperty(
-#           EnumProperty(
-#           FloatProperty(
-#           FloatVectorProperty(
-#           IntProperty(
-#           IntVectorProperty(
-#           PointerProperty(
-#           RemoveProperty(
-#           StringProperty(
 
-MAP_SOCKET_TYPE_TO_BPY_PROP = {
-    bpy.types.NodeSocketFloat: "float_1d",
-    bpy.types.NodeSocketColor: "int_4d",
+MAP_SOCKET_TYPE_TO_ATTR = {
+    bpy.types.NodeSocketFloat: "float_1d",  # --> FloatProperty
+    bpy.types.NodeSocketVector: "float_3d",  # --> FloatVectorProperty?
+    bpy.types.NodeSocketColor: "float_4d",  # --> or IntVectorProperty?
 }
-
-
-# NodeSocket types:
-# https://docs.blender.org/api/current/bpy.types.html
-# - bool
-# - collection
-# - color
-# - float
-# - float angle (why not simply float?)
-# - float distance (why not simply float?)
-# - float/int factor
-# - float/int percentage
-# - float time
-# - float unsigned
-# - int
 
 
 # -----------------------
 # Blender global variables (is that the right way to think about it?)
-class Socket(bpy.types.PropertyGroup):
+class SocketProperties(bpy.types.PropertyGroup):
     """
     Properties for a socket element
 
@@ -94,12 +70,16 @@ class Socket(bpy.types.PropertyGroup):
 
     name: bpy.props.StringProperty()  # type: ignore
 
-    # int props: defaults to 0s
-    min_int_1d: bpy.props.IntVectorProperty(size=1)  # type: ignore
-    max_int_1d: bpy.props.IntVectorProperty(size=1)  # type: ignore
+    min: typing.Any
 
-    min_int_4d: bpy.props.IntVectorProperty(size=4)  # type: ignore
-    max_int_4d: bpy.props.IntVectorProperty(size=4)  # type: ignore
+    max: typing.Any
+
+    # # int props: defaults to 0s
+    # min_int_1d: bpy.props.IntVectorProperty(size=1)  # type: ignore
+    # max_int_1d: bpy.props.IntVectorProperty(size=1)  # type: ignore
+
+    # min_int_4d: bpy.props.IntVectorProperty(size=4)  # type: ignore
+    # max_int_4d: bpy.props.IntVectorProperty(size=4)  # type: ignore
 
     # float props: defaults to 0s
     min_float_1d: bpy.props.FloatVectorProperty(size=1)  # type: ignore
@@ -107,6 +87,9 @@ class Socket(bpy.types.PropertyGroup):
 
     min_float_3d: bpy.props.FloatVectorProperty()  # type: ignore
     max_float_3d: bpy.props.FloatVectorProperty()  # type: ignore
+
+    min_float_4d: bpy.props.FloatVectorProperty(size=4)  # type: ignore
+    max_float_4d: bpy.props.FloatVectorProperty(size=4)  # type: ignore
 
     # BOOL
     bool_randomise: bpy.props.BoolProperty()  # type: ignore
@@ -170,7 +153,7 @@ class PanelRandomMaterialNodes(bpy.types.Panel):
         co = 0  # TODO: improve this counter approach---get sockets by name?
         layout = self.layout
         # get collection of sockets' properties
-        sockets_props_collection = context.scene.sockets2randomise
+        sockets_props_collection = context.scene.sockets2randomise_props
         for i_n, nd in enumerate(list_input_nodes):
             row = layout.row()
 
@@ -231,7 +214,7 @@ class PanelRandomMaterialNodes(bpy.types.Panel):
                         ],
                         m
                         + "_"
-                        + context.scene.socket2prop_type[
+                        + context.scene.socket_type_to_attr[
                             type(out)
                         ],  # property
                         icon_only=True,
@@ -264,7 +247,7 @@ class PanelRandomMaterialNodes(bpy.types.Panel):
 list_classes_to_register = [
     PanelRandomMaterialNodes,
     RandomiseMaterialNodes,
-    Socket,
+    SocketProperties,
 ]
 
 
@@ -277,9 +260,9 @@ list_classes_to_register = [
 #   be executed when a new file is open (is there a better way for this?)
 @persistent
 def add_properties_per_socket(dummy):  # not sure why I need dummy here?
-    sockets_props_collection = bpy.context.scene.sockets2randomise
-    print("here")
-    print(len(sockets_props_collection))
+    sockets_props_collection = bpy.context.scene.sockets2randomise_props
+    # print("here")
+    # print(len(sockets_props_collection))
 
     # get list of input nodes
     list_input_nodes = [
@@ -298,14 +281,20 @@ def add_properties_per_socket(dummy):  # not sure why I need dummy here?
             sckt.name = nd.name + "_" + out.name
             sckt.bool_randomise = True
 
-            # ---------------------------------
-            if type(out) == bpy.types.NodeSocketFloat:  # out.type=='VALUE':
-                sckt.min_float_1d = (-np.inf,)  # -------setattr?
-                sckt.max_float_1d = (np.inf,)
-            elif type(out) == bpy.types.NodeSocketColor:  # out.type=='RGBA':
-                sckt.min_int_4d = (1, 2, 333, 4)
-                sckt.max_int_4d = (10, 20, 3000, 40)
-            # ---------------------------------
+            # assign min/max initial values
+            # TODO: eventually from config file?
+            socket_attrib_str = bpy.context.scene.socket_type_to_attr[
+                type(out)
+            ]
+            # extract last number between '_' and 'd/D' in the attribute name
+            n_dim = int(re.findall(r"_(\d+)(?:d|D)", socket_attrib_str)[-1])
+            for m, m_val in zip(["min", "max"], [-np.inf, np.inf]):
+                setattr(
+                    sckt,
+                    m + "_" + socket_attrib_str,
+                    (m_val,) * n_dim,
+                )
+
     print(len(sockets_props_collection))
 
     return
@@ -321,13 +310,14 @@ def register():
 
         # for the property class: add it to bpy.context.scene
         # TODO: do I need to make it a pointer?
-        if cls == Socket:
-            bpy.types.Scene.sockets2randomise = bpy.props.CollectionProperty(
-                type=Socket  # specify type of the elements in the collection
+        if cls == SocketProperties:
+            bp = bpy.props
+            bpy.types.Scene.sockets2randomise_props = bp.CollectionProperty(
+                type=SocketProperties  # type of the elements in the collection
             )
 
     # global Python var
-    setattr(bpy.types.Scene, "socket2prop_type", MAP_SOCKET_TYPE_TO_BPY_PROP)
+    setattr(bpy.types.Scene, "socket_type_to_attr", MAP_SOCKET_TYPE_TO_ATTR)
 
     # add fn w/ list of sockets creation to load_post
     # TODO: is there a better way? is load_pre better?
@@ -345,7 +335,7 @@ def unregister():
         bpy.utils.unregister_class(cls)
 
     # global Python vars?
-    delattr(bpy.types.Scene, "socket2prop_type")
+    delattr(bpy.types.Scene, "socket_type_to_attr")
 
     # remove aux fn from handlers
     bpy.app.handlers.load_post.remove(add_properties_per_socket)
@@ -353,9 +343,9 @@ def unregister():
     # delete the custom property pointer
     # NOTE: this is different from its accessor, as that is a read/write only
     # to delete this we have to delete its pointer, just like how we added it
-    del bpy.types.Scene.sockets2randomise  # ------How?
+    del bpy.types.Scene.sockets2randomise_props  # ------How?
     bpy.ops.wm.properties_remove(
-        data_path="scene", property_name="sockets2randomise"
+        data_path="scene", property_name="sockets2randomise_props"
     )
 
     print("unregistered")
