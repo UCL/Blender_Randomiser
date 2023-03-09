@@ -1,0 +1,107 @@
+[project]
+name = "blender-randomiser"
+authors = [{name = "Sofia Minano", email= "s.minano@ucl.ac.uk"},
+                {name="Ruaridh Gollifer", email="ruaridh.gollifer.15@ucl.ac.uk"},
+                {name="Tom Dowrick", email="t.dowrick@ucl.ac.uk"}]
+description = "A Blender add-on to randomise selected features"
+readme = "README.md"
+requires-python = ">=3.10.8"
+dynamic = ["version"]
+
+license = {text = "BSD-3-Clause"}
+
+dependencies = [
+    "fake-bpy-module-3.4",
+    "numpy",
+]
+
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.10",
+    "Operating System :: OS Independent",
+    "License :: OSI Approved :: BSD License",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest",
+  "pytest-cov",
+  "coverage",
+  "tox",
+  "black",
+  "mypy",
+  "pre-commit",
+  "ruff",
+  "setuptools_scm",
+]
+
+[build-system]
+requires = [
+    "setuptools>=65",
+    "wheel",
+    "setuptools_scm[toml]>=6.2",
+]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["blender_randomiser*"]
+exclude = ["tests*"]
+
+[tool.pytest.ini_options]
+addopts = "--cov=blender_randomiser"
+
+[tool.black]
+target-version = ['py310']
+skip-string-normalization = false
+line-length = 79
+exclude = '''
+(
+  /(
+      \.eggs
+    | \.git
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+    | examples
+  )/
+)
+'''
+
+[tool.setuptools_scm]
+
+[tool.check-manifest]
+ignore = [
+  "*.yaml",
+  ".bumpversion.cfg",
+  "tox.ini",
+  "tests/*",
+  "tests/test_unit/*",
+  "tests/test_integration/*",
+]
+
+[tool.ruff]
+line-length = 79
+exclude = ["__init__.py","build",".eggs"]
+select = ["I", "E", "F"]
+fix = true
+
+[tool.cibuildwheel]
+build = "cp310-*"
+
+[tool.cibuildwheel.macos]
+archs = ["x86_64", "arm64"]
+
+[[tool.mypy.overrides]]
+module = [
+    "addon_utils",
+]
+ignore_missing_imports = true
