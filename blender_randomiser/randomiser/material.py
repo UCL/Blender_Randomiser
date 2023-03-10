@@ -108,28 +108,51 @@ class RandomiseMaterialNodes(bpy.types.Operator):
     def poll(cls, context):
         return context.object is not None
 
+    # -----
+    def invoke(self, context, event):
+        # get list of nodes
+        self.list_input_nodes = [
+            no
+            for no in bpy.data.materials["Material"].node_tree.nodes
+            if len(no.inputs) == 0 and no.name.lower().startswith("random")
+        ]
+
+        # get list of socket properties
+        self.sockets_props_collection = context.scene.sockets2randomise_props
+
+        # if socket unlinked and toggle is true: set toggle to false
+        for nd in self.list_input_nodes:
+            for out in nd.outputs:
+                sckt_id = nd.name + "_" + out.name
+                if (not out.is_linked) and (
+                    self.sockets_props_collection[sckt_id].bool_randomise
+                ):
+                    setattr(
+                        self.sockets_props_collection[sckt_id],
+                        "bool_randomise",
+                        False,
+                    )
+
+        return self.execute(context)
+
     # -------------------------------
     ### Execute fn
     def execute(self, context):
         # set the first output socket of the RandomMetallic
         # node to a random value
         rng = np.random.default_rng()
-        list_input_nodes = [
-            no
-            for no in bpy.data.materials["Material"].node_tree.nodes
-            if len(no.inputs) == 0 and no.name.lower().startswith("random")
-        ]
-
-        sockets_props_collection = context.scene.sockets2randomise_props
 
         # loop thru nodes and get random uniform value btw min and max
-        for nd in list_input_nodes:
+        for nd in self.list_input_nodes:
             list_sockets_to_randomise = [
                 sck
                 for sck in nd.outputs
-                if sockets_props_collection[
-                    nd.name + "_" + sck.name
-                ].bool_randomise
+                if (
+                    self.sockets_props_collection[
+                        nd.name + "_" + sck.name
+                    ].bool_randomise
+                )
+                # and (sck.is_linked)
             ]
 
             for out in list_sockets_to_randomise:
@@ -138,14 +161,14 @@ class RandomiseMaterialNodes(bpy.types.Operator):
 
                 # min value for this socket
                 min_val = getattr(
-                    sockets_props_collection[socket_id],
+                    self.sockets_props_collection[socket_id],
                     "min_" + context.scene.socket_type_to_attr[type(out)],
                 )
                 print(list(min_val))
 
                 # max value for this socket
                 max_val = getattr(
-                    sockets_props_collection[socket_id],
+                    self.sockets_props_collection[socket_id],
                     "max_" + context.scene.socket_type_to_attr[type(out)],
                 )
                 print(list(max_val))
