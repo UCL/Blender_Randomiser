@@ -22,6 +22,32 @@ MAP_SOCKET_TYPE_TO_ATTR = {
     bpy.types.NodeSocketColor: "float_4d",
 }
 
+# #-----------------------------------------
+# # Bounds to input values
+# # TODO: right now, I check all of them everytime one is changed....
+# not ideal right?
+# def constrain_min(self, context):
+#     for m in MAP_SOCKET_TYPE_TO_ATTR.values():
+#         if any(getattr(self,'min_' + m) >= getattr(self,'max_' + m)):
+#             setattr(self, 'min_' + m,
+#                     np.where(
+#                         np.array(getattr(self,'min_' + m)) >= np.array(
+# getattr(self,'max_' + m)),
+#                         np.array(getattr(self,'max_' + m)) - 1,
+#                         np.array(getattr(self,'min_' + m))
+#                     )
+#             )
+#     return
+#     # for m in MAP_SOCKET_TYPE_TO_ATTR.values():
+#     #     if getattr(self,'min_' + m) >= getattr(self,'max_' + m) :
+#     #         setattr(self,'min_' + m, getattr(self,'max_' + m) - 1)
+
+
+# def constrain_max(self, context):
+#     if self.my_prop_range_max <= self.my_prop_range_min:
+#         self.my_prop_range_max = self.my_prop_range_min + 1
+# #-----------------------------------------------------
+
 
 # -----------------------
 # Blender global variables
@@ -50,6 +76,9 @@ class SocketProperties(bpy.types.PropertyGroup):
 
     # float props: defaults to 0s
     min_float_1d: bpy.props.FloatVectorProperty(size=1)  # type: ignore
+    # TODO: setting attributes dynamically..
+    # I can change the default value but not size??
+    # , update=constrain_min, )
     max_float_1d: bpy.props.FloatVectorProperty(size=1)  # type: ignore
 
     min_float_3d: bpy.props.FloatVectorProperty()  # type: ignore
@@ -85,10 +114,48 @@ class RandomiseMaterialNodes(bpy.types.Operator):
         # set the first output socket of the RandomMetallic
         # node to a random value
         rng = np.random.default_rng()
-        node_tree = bpy.data.materials["Material"].node_tree
-        node_tree.nodes["RandomMetallic"].outputs[0].default_value = (
-            100 * rng.random()
-        )
+        list_input_nodes = [
+            no
+            for no in bpy.data.materials["Material"].node_tree.nodes
+            if len(no.inputs) == 0 and no.name.lower().startswith("random")
+        ]
+
+        sockets_props_collection = context.scene.sockets2randomise_props
+
+        # loop thru nodes and get random uniform value btw min and max
+        for nd in list_input_nodes:
+            list_sockets_to_randomise = [
+                sck
+                for sck in nd.outputs
+                if sockets_props_collection[
+                    nd.name + "_" + sck.name
+                ].bool_randomise
+            ]
+
+            for out in list_sockets_to_randomise:
+                socket_id = nd.name + "_" + out.name
+                print(socket_id)
+
+                # min value for this socket
+                min_val = getattr(
+                    sockets_props_collection[socket_id],
+                    "min_" + context.scene.socket_type_to_attr[type(out)],
+                )
+                print(list(min_val))
+
+                # max value for this socket
+                max_val = getattr(
+                    sockets_props_collection[socket_id],
+                    "max_" + context.scene.socket_type_to_attr[type(out)],
+                )
+                print(list(max_val))
+
+                # set socket value
+                out.default_value = rng.uniform(low=min_val, high=max_val)
+                try:
+                    print(list(out.default_value))
+                except TypeError:
+                    print(out.default_value)
 
         return {"FINISHED"}
 
@@ -253,7 +320,10 @@ def add_properties_per_socket(dummy):
             # for the shape of the array:
             # extract last number between '_' and 'd/D' in the attribute name
             n_dim = int(re.findall(r"_(\d+)(?:d|D)", socket_attrib_str)[-1])
-            for m, m_val in zip(["min", "max"], [-np.inf, np.inf]):
+            for m, m_val in zip(
+                ["min", "max"],
+                [0, 100],  # [-np.inf, np.inf]
+            ):
                 setattr(
                     sckt,
                     m + "_" + socket_attrib_str,
