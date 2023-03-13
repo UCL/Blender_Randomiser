@@ -22,36 +22,53 @@ MAP_SOCKET_TYPE_TO_ATTR = {
     bpy.types.NodeSocketColor: "float_4d",
 }
 
-# #-----------------------------------------
-# # Bounds to input values
-# # TODO: right now, I check all of them everytime one is changed....
-# not ideal right?
-# def constrain_min(self, context):
-#     for m in MAP_SOCKET_TYPE_TO_ATTR.values():
-#         if any(getattr(self,'min_' + m) >= getattr(self,'max_' + m)):
-#             setattr(self, 'min_' + m,
-#                     np.where(
-#                         np.array(getattr(self,'min_' + m)) >= np.array(
-# getattr(self,'max_' + m)),
-#                         np.array(getattr(self,'max_' + m)) - 1,
-#                         np.array(getattr(self,'min_' + m))
-#                     )
-#             )
-#     return
-#     # for m in MAP_SOCKET_TYPE_TO_ATTR.values():
-#     #     if getattr(self,'min_' + m) >= getattr(self,'max_' + m) :
-#     #         setattr(self,'min_' + m, getattr(self,'max_' + m) - 1)
+# TODO: eventually add option to read
+# initial, min and max values from config file?
+INITIAL_MIN_MAX = [-np.inf, np.inf]  # should be float
 
 
-# def constrain_max(self, context):
-#     if self.my_prop_range_max <= self.my_prop_range_min:
-#         self.my_prop_range_max = self.my_prop_range_min + 1
-# #-----------------------------------------------------
+# -----------------------------------------
+# Bounds to input values
+def constrain_min(self, context, m_str):
+    # self is a 'SocketProperties' object
+    # if min > max --> min is reset to max value
+    # (i.e., no randomisation)
+    min_array = np.array(getattr(self, "min_" + m_str))
+    max_array = np.array(getattr(self, "max_" + m_str))
+    if any(min_array > max_array):
+        setattr(
+            self,
+            "min_" + m_str,
+            np.where(min_array > max_array, max_array, min_array),
+        )
+    return
+
+
+def constrain_max(self, context, m_str):
+    # self is a 'SocketProperties' object
+    # if max < min --> max is reset to min value
+    # (i.e., no randomisation)
+    min_array = np.array(getattr(self, "min_" + m_str))
+    max_array = np.array(getattr(self, "max_" + m_str))
+    if any(max_array < min_array):
+        setattr(
+            self,
+            "max_" + m_str,
+            np.where(max_array < min_array, min_array, max_array),
+        )
+    return
+
+
+def constrain_min_closure(m_str):
+    return lambda slf, ctx: constrain_min(slf, ctx, m_str)
+
+
+def constrain_max_closure(m_str):
+    return lambda slf, ctx: constrain_max(slf, ctx, m_str)
 
 
 # -----------------------
-# Blender global variables
-# (is that the right way to think about it?)
+# Blender SocketProperties object
 class SocketProperties(bpy.types.PropertyGroup):
     """
     Properties for a socket element
@@ -74,27 +91,51 @@ class SocketProperties(bpy.types.PropertyGroup):
 
     name: bpy.props.StringProperty()  # type: ignore
 
-    # float props: defaults to 0s
-    min_float_1d: bpy.props.FloatVectorProperty(size=1)  # type: ignore
+    # float properties: they default to 0s
+    # ---------------------
+    ### float 1d
+    float_1d_str = "float_1d"
+    min_float_1d: bpy.props.FloatVectorProperty(  # type: ignore
+        size=1, update=constrain_min_closure(float_1d_str)
+    )
+    # Q for review: is this better for the update fn?
+    # (more prone to error?)
+    # update = lambda slf, ctx: constrain_max(slf, ctx, 'float_1d')?
     # TODO: setting attributes dynamically..
-    # I can change the default value but not size??
-    # , update=constrain_min, )
-    max_float_1d: bpy.props.FloatVectorProperty(size=1)  # type: ignore
+    max_float_1d: bpy.props.FloatVectorProperty(  # type: ignore
+        size=1, update=constrain_max_closure(float_1d_str)
+    )
 
-    min_float_3d: bpy.props.FloatVectorProperty()  # type: ignore
-    max_float_3d: bpy.props.FloatVectorProperty()  # type: ignore
+    # ---------------------
+    ### float 3d
+    float_3d_str = "float_3d"
+    min_float_3d: bpy.props.FloatVectorProperty(  # type: ignore
+        update=constrain_min_closure(float_3d_str)
+    )
+    max_float_3d: bpy.props.FloatVectorProperty(  # type: ignore
+        update=constrain_max_closure(float_3d_str)
+    )
 
-    min_float_4d: bpy.props.FloatVectorProperty(size=4)  # type: ignore
-    max_float_4d: bpy.props.FloatVectorProperty(size=4)  # type: ignore
+    # ---------------------
+    ### float 4d
+    float_4d_str = "float_4d"
+    min_float_4d: bpy.props.FloatVectorProperty(  # type: ignore
+        size=4,
+        update=constrain_min_closure(float_4d_str),
+    )
+    max_float_4d: bpy.props.FloatVectorProperty(  # type: ignore
+        size=4, update=constrain_max_closure(float_4d_str)
+    )
 
-    # BOOL
+    # ---------------------
+    ### bool
     bool_randomise: bpy.props.BoolProperty()  # type: ignore
 
 
 # -------------------------------
 ## Operators --dummy operator for now
 class RandomiseMaterialNodes(bpy.types.Operator):
-    # docstring shows as a tooltip for menu items and buttons.
+    # docstring will show as a tooltip for menu items and buttons.
     """Randomise 'RandomMetallic' default value"""
 
     # operator metadata
@@ -108,7 +149,10 @@ class RandomiseMaterialNodes(bpy.types.Operator):
     def poll(cls, context):
         return context.object is not None
 
-    # -----
+    # ------------------------------
+    ### Invoke: runs before execute
+    # - add list of input nodes and list of socket props to self
+    # - unselect output sockets in input nodes if they are unlinked
     def invoke(self, context, event):
         # get list of nodes
         self.list_input_nodes = [
@@ -138,11 +182,15 @@ class RandomiseMaterialNodes(bpy.types.Operator):
     # -------------------------------
     ### Execute fn
     def execute(self, context):
-        # set the first output socket of the RandomMetallic
-        # node to a random value
+        # set the output sockets with checkbox=True
+        # to a random value
+
+        # construct a generator
         rng = np.random.default_rng()
 
-        # loop thru nodes and get random uniform value btw min and max
+        # loop thru input nodes and
+        # selected output sockets
+        # to assign uniformly sampled value btw min and max
         for nd in self.list_input_nodes:
             list_sockets_to_randomise = [
                 sck
@@ -152,33 +200,25 @@ class RandomiseMaterialNodes(bpy.types.Operator):
                         nd.name + "_" + sck.name
                     ].bool_randomise
                 )
-                # and (sck.is_linked)
             ]
 
             for out in list_sockets_to_randomise:
                 socket_id = nd.name + "_" + out.name
-                print(socket_id)
 
                 # min value for this socket
                 min_val = getattr(
                     self.sockets_props_collection[socket_id],
                     "min_" + context.scene.socket_type_to_attr[type(out)],
                 )
-                print(list(min_val))
 
                 # max value for this socket
                 max_val = getattr(
                     self.sockets_props_collection[socket_id],
                     "max_" + context.scene.socket_type_to_attr[type(out)],
                 )
-                print(list(max_val))
 
                 # set socket value
                 out.default_value = rng.uniform(low=min_val, high=max_val)
-                try:
-                    print(list(out.default_value))
-                except TypeError:
-                    print(out.default_value)
 
         return {"FINISHED"}
 
@@ -312,11 +352,12 @@ list_classes_to_register = [
 # - If I don't label it as 'persistent', it will get removed from the
 #   bpy.app.handlers.load_pre list after the fn is run for the first time
 # - Because I add it to the bpy.app.handlers.load_pre list, it will only
-#   be executed when a new file is open (is there a better way for this?)
+#   be executed when a new file is open
+# I need to run this before the draw() function of the panel!
+# TODO: is there another way to do this without relying on handlers?
 @persistent
 def add_properties_per_socket(dummy):
     # not sure why I need dummy here?
-    sockets_props_collection = bpy.context.scene.sockets2randomise_props
 
     # get list of input nodes
     list_input_nodes = [
@@ -327,6 +368,7 @@ def add_properties_per_socket(dummy):
 
     # add elements to the collection of socket properties
     # (one per output socket)
+    sockets_props_collection = bpy.context.scene.sockets2randomise_props
     for nd in list_input_nodes:
         for out in nd.outputs:
             # add a socket to the collection
@@ -336,7 +378,7 @@ def add_properties_per_socket(dummy):
 
             # assign min/max initial values
             # TODO: eventually add option to read
-            # initial values from config file?
+            # initial, min and max values from config file?
             socket_attrib_str = bpy.context.scene.socket_type_to_attr[
                 type(out)
             ]
@@ -345,7 +387,7 @@ def add_properties_per_socket(dummy):
             n_dim = int(re.findall(r"_(\d+)(?:d|D)", socket_attrib_str)[-1])
             for m, m_val in zip(
                 ["min", "max"],
-                [0, 100],  # [-np.inf, np.inf]
+                INITIAL_MIN_MAX,
             ):
                 setattr(
                     sckt,
@@ -379,6 +421,7 @@ def register():
     # TODO: is there a better way? is load_pre better?
     # can I define a custom handler?
     # TODO: an alternative may be to use invoke() or check() functions
+    # in a dummy operator?
     bpy.app.handlers.load_post.append(add_properties_per_socket)
 
     print("registered")
@@ -398,8 +441,6 @@ def unregister():
     bpy.app.handlers.load_post.remove(add_properties_per_socket)
 
     # delete the custom property
-    # NOTE: this is different from its accessor, as that is a read/write only
-    # to delete this we have to delete its pointer, just like how we added it
     del bpy.types.Scene.sockets2randomise_props
     bpy.ops.wm.properties_remove(
         data_path="scene", property_name="sockets2randomise_props"
