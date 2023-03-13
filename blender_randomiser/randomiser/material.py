@@ -19,13 +19,14 @@ from bpy.app.handlers import persistent
 MAP_SOCKET_TYPE_TO_ATTR = {
     bpy.types.NodeSocketFloat: "float_1d",
     bpy.types.NodeSocketVector: "float_3d",
-    bpy.types.NodeSocketColor: "float_4d",
+    bpy.types.NodeSocketColor: "rgba_4d",  # "float_4d",
 }
 
 # TODO: eventually add option to read
 # initial, min and max values from config file?
 INITIAL_MIN_MAX_FLOAT = [-np.inf, np.inf]  # should be float
-INITIAL_MIN_MAX_RGBA = [0.0, 1.0]  # also float
+INITIAL_MIN_MAX_RGBA = [1.0, 1.0]
+# for color, rather than min/max these are maybe extremes in a colormap?
 
 
 # -----------------------------------------
@@ -60,12 +61,30 @@ def constrain_max(self, context, m_str):
     return
 
 
+def constrain_rgba(self, context, min_or_max_full_str):
+    # self is a 'SocketProperties' object
+    # if min > max --> min is reset to max value
+    # (i.e., no randomisation)
+    min_or_max_array = np.array(getattr(self, min_or_max_full_str))
+    if any(min_or_max_array > 1.0) or any(min_or_max_array < 0.0):
+        setattr(
+            self,
+            min_or_max_full_str,
+            np.clip(min_or_max_array, 0.0, 1.0),
+        )
+    return
+
+
 def constrain_min_closure(m_str):
     return lambda slf, ctx: constrain_min(slf, ctx, m_str)
 
 
 def constrain_max_closure(m_str):
     return lambda slf, ctx: constrain_max(slf, ctx, m_str)
+
+
+def constrain_rgba_closure(m_str):
+    return lambda slf, ctx: constrain_rgba(slf, ctx, m_str)
 
 
 # -----------------------
@@ -102,6 +121,7 @@ class SocketProperties(bpy.types.PropertyGroup):
     # Q for review: is this better for the update fn?
     # (more prone to error?)
     # update = lambda slf, ctx: constrain_max(slf, ctx, 'float_1d')?
+    # I need to check this min/max agreement before numpy
     # TODO: setting attributes dynamically..
     max_float_1d: bpy.props.FloatVectorProperty(  # type: ignore
         size=1, update=constrain_max_closure(float_1d_str)
@@ -126,6 +146,21 @@ class SocketProperties(bpy.types.PropertyGroup):
     )
     max_float_4d: bpy.props.FloatVectorProperty(  # type: ignore
         size=4, update=constrain_max_closure(float_4d_str)
+    )
+
+    # ---------------------
+    ### rgba
+    # TODO: can this (rgba_4d_str...) be a bit more failsafe?
+    # the update fn in this case clamps values between 0 and 1
+    # (but this potentially limits range of values bc of single
+    # float precision?)
+    rgba_4d_str = "rgba_4d"
+    min_rgba_4d: bpy.props.FloatVectorProperty(  # type: ignore
+        size=4,
+        update=constrain_rgba_closure("min_" + rgba_4d_str),  # noqa
+    )
+    max_rgba_4d: bpy.props.FloatVectorProperty(  # type: ignore
+        size=4, update=constrain_rgba_closure("max_" + rgba_4d_str)  # noqa
     )
 
     # ---------------------
@@ -207,16 +242,37 @@ class RandomiseMaterialNodes(bpy.types.Operator):
                 socket_id = nd.name + "_" + out.name
 
                 # min value for this socket
-                min_val = getattr(
-                    self.sockets_props_collection[socket_id],
-                    "min_" + context.scene.socket_type_to_attr[type(out)],
+                min_val = np.array(
+                    getattr(
+                        self.sockets_props_collection[socket_id],
+                        "min_" + context.scene.socket_type_to_attr[type(out)],
+                    )
                 )
 
                 # max value for this socket
-                max_val = getattr(
-                    self.sockets_props_collection[socket_id],
-                    "max_" + context.scene.socket_type_to_attr[type(out)],
+                max_val = np.array(
+                    getattr(
+                        self.sockets_props_collection[socket_id],
+                        "max_" + context.scene.socket_type_to_attr[type(out)],
+                    )
                 )
+
+                # if type of the socket is color, and max_val < min_val:
+                # switch them
+                # Note that color sockets do not have an 'update' fn
+                # but numpy does not accept max_val < min_val
+                if (type(out) == bpy.types.NodeSocketColor) and any(
+                    max_val < min_val
+                ):
+                    max_val_new = np.where(
+                        max_val >= min_val, max_val, min_val
+                    )
+                    min_val_new = np.where(min_val < max_val, min_val, max_val)
+
+                    # TODO: is there a more elegant way?
+                    # feels a bit clunky....
+                    max_val = max_val_new
+                    min_val = min_val_new
 
                 # set socket value
                 out.default_value = rng.uniform(low=min_val, high=max_val)
@@ -305,16 +361,48 @@ class PanelRandomMaterialNodes(bpy.types.Panel):
                 col2.enabled = False  # (not editable)
 
                 # socket min and max columns
-                for m, col in zip(["min", "max"], [col3, col4]):
-                    col.prop(
-                        sockets_props_collection[socket_id],
-                        m
-                        + "_"
-                        + context.scene.socket_type_to_attr[
-                            type(out)
-                        ],  # property
-                        icon_only=True,
-                    )
+                # if color, format as a color wheel
+                if type(out) == bpy.types.NodeSocketColor:
+                    for m, col in zip(["min", "max"], [col3, col4]):
+                        # color picker
+                        # ATT! It doesn't include alpha!
+                        col.template_color_picker(
+                            sockets_props_collection[socket_id],
+                            m
+                            + "_"
+                            + context.scene.socket_type_to_attr[
+                                type(out)
+                            ],  # property
+                        )
+                        # color as an array too (including alpha)
+                        # TODO: maybe only alpha?
+                        # the max value allowed is not v intuitive...
+                        for j, cl in enumerate(["R", "G", "B", "alpha"]):
+                            col.prop(
+                                sockets_props_collection[socket_id],
+                                m
+                                + "_"
+                                + context.scene.socket_type_to_attr[
+                                    type(out)
+                                ],  # property
+                                icon_only=False,
+                                text=cl,
+                                index=j,
+                                # ATT! if I pass -1 it will use all
+                                # elements of the array (rather than
+                                # the last one)
+                            )
+                else:
+                    for m, col in zip(["min", "max"], [col3, col4]):
+                        col.prop(
+                            sockets_props_collection[socket_id],
+                            m
+                            + "_"
+                            + context.scene.socket_type_to_attr[
+                                type(out)
+                            ],  # property
+                            icon_only=True,
+                        )
 
                 # randomisation toggle
                 col5.prop(
