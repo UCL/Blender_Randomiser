@@ -24,7 +24,8 @@ MAP_SOCKET_TYPE_TO_ATTR = {
 
 # TODO: eventually add option to read
 # initial, min and max values from config file?
-INITIAL_MIN_MAX = [-np.inf, np.inf]  # should be float
+INITIAL_MIN_MAX_FLOAT = [-np.inf, np.inf]  # should be float
+INITIAL_MIN_MAX_RGBA = [0.0, 1.0]  # also float
 
 
 # -----------------------------------------
@@ -266,10 +267,11 @@ class PanelRandomMaterialNodes(bpy.types.Panel):
                 col5 = row_split.column(align=True)
 
                 col1.label(text=nd.name)
+                col1.alignment = "CENTER"
+
                 col3.alignment = "CENTER"
-                # ‘EXPAND’, ‘LEFT’, ‘CENTER’, ‘RIGHT’
-                # (I dont see differences btw the first 3?)
                 col3.label(text="min")
+
                 col4.alignment = "CENTER"
                 col4.label(text="max")
 
@@ -385,15 +387,27 @@ def add_properties_per_socket(dummy):
             # for the shape of the array:
             # extract last number between '_' and 'd/D' in the attribute name
             n_dim = int(re.findall(r"_(\d+)(?:d|D)", socket_attrib_str)[-1])
-            for m, m_val in zip(
-                ["min", "max"],
-                INITIAL_MIN_MAX,
-            ):
-                setattr(
-                    sckt,
-                    m + "_" + socket_attrib_str,
-                    (m_val,) * n_dim,
-                )
+            if type(out) == bpy.types.NodeSocketColor:
+                for m, m_val in zip(
+                    ["min", "max"],
+                    INITIAL_MIN_MAX_RGBA,
+                ):
+                    setattr(
+                        sckt,
+                        m + "_" + socket_attrib_str,
+                        (m_val,) * n_dim,
+                    )
+
+            else:
+                for m, m_val in zip(
+                    ["min", "max"],
+                    INITIAL_MIN_MAX_FLOAT,
+                ):
+                    setattr(
+                        sckt,
+                        m + "_" + socket_attrib_str,
+                        (m_val,) * n_dim,
+                    )
 
     return
 
