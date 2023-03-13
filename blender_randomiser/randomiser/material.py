@@ -305,12 +305,9 @@ class PanelRandomMaterialNodes(bpy.types.Panel):
                 col2.enabled = False  # (not editable)
 
                 # socket min and max columns
-                # TODO: is out.type better as a key to the dict?
                 for m, col in zip(["min", "max"], [col3, col4]):
                     col.prop(
-                        sockets_props_collection[
-                            sockets_props_collection.find(socket_id)
-                        ],
+                        sockets_props_collection[socket_id],
                         m
                         + "_"
                         + context.scene.socket_type_to_attr[
@@ -321,9 +318,7 @@ class PanelRandomMaterialNodes(bpy.types.Panel):
 
                 # randomisation toggle
                 col5.prop(
-                    sockets_props_collection[
-                        sockets_props_collection.find(socket_id)
-                    ],
+                    sockets_props_collection[socket_id],
                     "bool_randomise",
                     icon_only=True,
                 )
@@ -387,6 +382,7 @@ def add_properties_per_socket(dummy):
             # for the shape of the array:
             # extract last number between '_' and 'd/D' in the attribute name
             n_dim = int(re.findall(r"_(\d+)(?:d|D)", socket_attrib_str)[-1])
+            # TODO: is this too hacky?
             if type(out) == bpy.types.NodeSocketColor:
                 for m, m_val in zip(
                     ["min", "max"],
@@ -396,7 +392,7 @@ def add_properties_per_socket(dummy):
                         sckt,
                         m + "_" + socket_attrib_str,
                         (m_val,) * n_dim,
-                    )
+                    )  # if I use this for color wheel it's still fine
 
             else:
                 for m, m_val in zip(
