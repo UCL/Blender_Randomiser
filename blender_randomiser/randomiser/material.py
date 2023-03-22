@@ -8,7 +8,6 @@ import re
 
 import bpy
 import numpy as np
-from bpy.app.handlers import persistent
 
 from . import utils
 
@@ -230,7 +229,9 @@ class RandomiseMaterialNodes(bpy.types.Operator):
         self.list_input_nodes = utils.get_material_input_nodes_to_randomise()
 
         # add list of socket properties to operator self
-        # OJO I think the collection is populated once, with load_post!
+        # TODO: do I need to update it here?
+        # (I think I dont because it is updated when drawing the panel,
+        # which happens before this)
         # --------------
         self.sockets_props_collection = context.scene.sockets2randomise_props
 
@@ -353,6 +354,7 @@ class PanelRandomMaterialNodes(bpy.types.Panel):
         list_input_nodes = utils.get_material_input_nodes_to_randomise()
 
         # get collection of sockets' properties
+        print(context.scene.update_collection_socket_props)  # = True # ok??
         sockets_props_collection = context.scene.sockets2randomise_props
 
         # define UI fields for every socket property
@@ -467,50 +469,60 @@ class PanelRandomMaterialNodes(bpy.types.Panel):
         col3 = row_split.column(align=True)
         col4 = row_split.column(align=True)
         col5 = row_split.column(align=True)
-        col5.alignment = "LEFT"
         col5.operator("node.randomise_socket", text="Randomise")
 
 
-# --------------------------------------------------
-# Register and unregister functions:
-list_classes_to_register = [
-    PanelRandomMaterialNodes,
-    RandomiseMaterialNodes,
-    SocketProperties,
-]
+# ------------------------------------
+def get_candidate_sockets(self):
+    # list input nodes
+    list_input_nodes = [
+        nd
+        for nd in bpy.data.materials["Material"].node_tree.nodes
+        if len(nd.inputs) == 0 and nd.name.lower().startswith("random".lower())
+    ]
+    # list of sockets (eventually if linked?)
+    list_sockets = [out for nd in list_input_nodes for out in nd.outputs]
+    return list_sockets
 
 
-# -------------------------------------
-# Add elements to the collection of socket properties
-# About the @persistent decorator
-# - If I don't label it as 'persistent', it will get removed from the
-#   bpy.app.handlers.load_pre list after the fn is run for the first time
-# - Because I add it to the bpy.app.handlers.load_pre list, it will only
-#   be executed when a new file is open
-# I need to run this before the draw() function of the panel!
-# TODO: is there another way to do this without relying on handlers?
-@persistent
-def initialise_collection_of_socket_properties(dummy):
-    # not sure why I need dummy here?
+def get_update_collection(self):
+    # Get fn for update_collection' property
+    # It will run when the property value is 'get' and
+    # it will update the *collection of socket properties* if required
 
-    # get list of input nodes
-    list_input_nodes = utils.get_material_input_nodes_to_randomise()
+    # set of sockets in collection
+    set_of_sockets_in_collection_of_props = set(
+        sck_p.name for sck_p in self.sockets2randomise_props
+    )
 
-    # instantiate collection
-    sockets_props_collection = bpy.context.scene.sockets2randomise_props
+    # set of sockets in graph
+    set_of_sockets_in_graph = set(
+        sck.node.name + "_" + sck.name for sck in self.candidate_sockets
+    )
+    collection_needs_update = (
+        set_of_sockets_in_collection_of_props.symmetric_difference(
+            set_of_sockets_in_graph
+        )
+    )
 
-    # add elements to the collection of socket properties
-    # (one per output socket)
-    for nd in list_input_nodes:
-        for out in nd.outputs:
-            # add a socket to the collection
-            sckt = sockets_props_collection.add()
+    # if there is a diff: overwrite the collection of sockets
+    if collection_needs_update:
+        set_update_collection(self, True)
+        return True  # ?
+    else:
+        return False
 
-            # add socket name
-            sckt.name = nd.name + "_" + out.name
 
-            # add randomising checkbox
-            sckt.bool_randomise = True
+def set_update_collection(self, value):
+    # Set fn for the update_collection scene property
+    # It will run when the property value is 'set'
+    # It will overwrite the collection of socket properties
+    if value:
+        self.sockets2randomise_props.clear()  # ---ideally just update!
+        for sckt in self.candidate_sockets:
+            sckt_prop = self.sockets2randomise_props.add()
+            sckt_prop.name = sckt.node.name + "_" + sckt.name
+            sckt_prop.bool_randomise = True
 
             # ---------------------------
             # add min/max values
@@ -518,7 +530,7 @@ def initialise_collection_of_socket_properties(dummy):
             # for this socket type, get the name of the attribute
             # holding the min/max properties
             socket_attrib_str = bpy.context.scene.socket_type_to_attr[
-                type(out)
+                type(sckt)
             ]
             # for the shape of the array from the attribute name:
             # extract last number between '_' and 'd/D' in the attribute name
@@ -527,18 +539,28 @@ def initialise_collection_of_socket_properties(dummy):
 
             # get dict with initial min/max values for this socket type
             ini_min_max_values = bpy.context.scene.socket_type_to_ini_min_max[
-                type(out)
+                type(sckt)
             ]
 
             # assign
             for m_str in ["min", "max"]:
                 setattr(
-                    sckt,
+                    sckt_prop,
                     m_str + "_" + socket_attrib_str,
                     (ini_min_max_values[m_str],) * n_dim,
                 )
+        # return True
 
-    return
+
+# ------------------------------------
+
+# --------------------------------------------------
+# Register and unregister functions:
+list_classes_to_register = [
+    SocketProperties,
+    RandomiseMaterialNodes,
+    PanelRandomMaterialNodes,
+]
 
 
 def register():
@@ -557,7 +579,7 @@ def register():
                 type=SocketProperties  # type of the elements in the collection
             )
 
-    # global Python variables
+    # link global Python variables to scene
     setattr(bpy.types.Scene, "socket_type_to_attr", MAP_SOCKET_TYPE_TO_ATTR)
     setattr(
         bpy.types.Scene,
@@ -565,14 +587,29 @@ def register():
         MAP_SOCKET_TYPE_TO_INI_MIN_MAX,
     )
 
-    # add fn w/ list of sockets creation to load_post
-    # TODO: is there a better way? is load_pre better?
-    # can I define a custom handler?
-    # TODO: an alternative may be to use invoke() or check() functions
-    # in a dummy operator?
-    bpy.app.handlers.load_post.append(
-        initialise_collection_of_socket_properties
+    # -----------
+    bpy.types.Scene.candidate_sockets = property(
+        fget=get_candidate_sockets
+    )  # fget
+    # bpy.context.scene.candidate_sockets will provide an updated list of
+    # candidate sockets
+    # What is a managed property?
+
+    bpy.types.Scene.update_collection_socket_props = bpy.props.BoolProperty(
+        get=get_update_collection,  # get_update_materials;
+        # this fn is called when
+        # bpy.context.scene.update_collection_socket_props
+        set=set_update_collection,  # set_update_materials;
+        # this fn is called when
+        # bpy.context.scene.update_collection_socket_props = 'patata'
+        name="Update collection of socket properties",
     )
+    # if I 'get' this property: it will update if required
+    #   > bpy.context.scene.update_collection_socket_props
+    # if I set this property to True: it will force an update
+    #   >  bpy.context.scene.update_collection_socket_props = True
+
+    # -----------
 
     print("registered")
 
@@ -588,15 +625,20 @@ def unregister():
     delattr(bpy.types.Scene, "socket_type_to_attr")
     delattr(bpy.types.Scene, "socket_type_to_ini_min_max")
 
-    # remove aux fn from handlers
-    bpy.app.handlers.load_post.remove(
-        initialise_collection_of_socket_properties
-    )
-
-    # delete the custom property
+    # delete the custom properties
     del bpy.types.Scene.sockets2randomise_props
     bpy.ops.wm.properties_remove(
         data_path="scene", property_name="sockets2randomise_props"
+    )
+
+    del bpy.types.Scene.candidate_sockets
+    bpy.ops.wm.properties_remove(
+        data_path="scene", property_name="candidate_sockets"
+    )
+
+    del bpy.types.Scene.update_collection_socket_props
+    bpy.ops.wm.properties_remove(
+        data_path="scene", property_name="update_collection_socket_props"
     )
 
     print("unregistered")
