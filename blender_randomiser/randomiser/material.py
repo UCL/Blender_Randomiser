@@ -24,11 +24,18 @@ MAP_SOCKET_TYPE_TO_ATTR = {
     bpy.types.NodeSocketColor: "rgba_4d",  # "float_4d",
 }
 
+# NOTE: if the property is a float vector of size (1,3)
+# the min/max values apply to all dimensions
+# (these min/max values will be 'broadcasted' to the dimension specified in the
+# attribute name)
+MAP_SOCKET_TYPE_TO_INI_MIN_MAX = {
+    bpy.types.NodeSocketFloat: {"min": -np.inf, "max": np.inf},
+    bpy.types.NodeSocketVector: {"min": -np.inf, "max": np.inf},
+    bpy.types.NodeSocketColor: {"min": 0.0, "max": 1.0},
+}
+
 # TODO: eventually add option to read
 # initial, min and max values from config file?
-INITIAL_MIN_MAX_FLOAT = [-np.inf, np.inf]  # should be float
-INITIAL_MIN_MAX_RGBA = [0.0, 1.0]
-# for color, rather than min/max these are maybe extremes in a colormap?
 
 
 # -----------------------------------------
@@ -381,8 +388,6 @@ class PanelRandomMaterialNodes(bpy.types.Panel):
 
             # add sockets for this node in the subseq rows
             for i_o, out in enumerate(nd.outputs):
-                socket_id = nd.name + "_" + out.name
-
                 # split row in 5 columns
                 row = layout.row()
                 row_split = row.split()
@@ -405,26 +410,25 @@ class PanelRandomMaterialNodes(bpy.types.Panel):
                 col2.enabled = False  # (not editable)
 
                 # socket min and max columns
-                # if color, format as a color wheel
-                if type(out) == bpy.types.NodeSocketColor:
-                    for m, col in zip(["min", "max"], [col3, col4]):
-                        # color picker
+                socket_id = nd.name + "_" + out.name
+                for m_str, col in zip(["min", "max"], [col3, col4]):
+                    # if color socket: format as a color wheel
+                    if type(out) == bpy.types.NodeSocketColor:
+                        # show color property via color picker
                         # ATT! It doesn't include alpha!
                         col.template_color_picker(
                             sockets_props_collection[socket_id],
-                            m
+                            m_str
                             + "_"
                             + context.scene.socket_type_to_attr[
                                 type(out)
                             ],  # property
                         )
-                        # color as an array too (including alpha)
-                        # TODO: maybe only alpha?
-                        # the max value allowed is not v intuitive...
+                        # show color property as an array too (including alpha)
                         for j, cl in enumerate(["R", "G", "B", "alpha"]):
                             col.prop(
                                 sockets_props_collection[socket_id],
-                                m
+                                m_str
                                 + "_"
                                 + context.scene.socket_type_to_attr[
                                     type(out)
@@ -436,11 +440,11 @@ class PanelRandomMaterialNodes(bpy.types.Panel):
                                 # elements of the array (rather than
                                 # the last one)
                             )
-                else:
-                    for m, col in zip(["min", "max"], [col3, col4]):
+                    # if not color socket: format as a regular prop
+                    else:
                         col.prop(
                             sockets_props_collection[socket_id],
-                            m
+                            m_str
                             + "_"
                             + context.scene.socket_type_to_attr[
                                 type(out)
@@ -455,6 +459,7 @@ class PanelRandomMaterialNodes(bpy.types.Panel):
                     icon_only=True,
                 )
 
+        # add Randomise button
         row = layout.row(align=True)
         row_split = row.split()
         col1 = row_split.column(align=True)
@@ -485,57 +490,53 @@ list_classes_to_register = [
 # I need to run this before the draw() function of the panel!
 # TODO: is there another way to do this without relying on handlers?
 @persistent
-def add_properties_per_socket(dummy):
+def initialise_collection_of_socket_properties(dummy):
     # not sure why I need dummy here?
 
     # get list of input nodes
-    list_input_nodes = [
-        nd
-        for nd in bpy.data.materials["Material"].node_tree.nodes
-        if len(nd.inputs) == 0 and nd.name.lower().startswith("random")
-    ]
+    list_input_nodes = utils.get_material_input_nodes_to_randomise()
+
+    # instantiate collection
+    sockets_props_collection = bpy.context.scene.sockets2randomise_props
 
     # add elements to the collection of socket properties
     # (one per output socket)
-    sockets_props_collection = bpy.context.scene.sockets2randomise_props
     for nd in list_input_nodes:
         for out in nd.outputs:
             # add a socket to the collection
             sckt = sockets_props_collection.add()
+
+            # add socket name
             sckt.name = nd.name + "_" + out.name
+
+            # add randomising checkbox
             sckt.bool_randomise = True
 
-            # assign min/max initial values
-            # TODO: eventually add option to read
-            # initial, min and max values from config file?
+            # ---------------------------
+            # add min/max values
+            # TODO: review - is this too hacky?
+            # for this socket type, get the name of the attribute
+            # holding the min/max properties
             socket_attrib_str = bpy.context.scene.socket_type_to_attr[
                 type(out)
             ]
-            # for the shape of the array:
+            # for the shape of the array from the attribute name:
             # extract last number between '_' and 'd/D' in the attribute name
             n_dim = int(re.findall(r"_(\d+)(?:d|D)", socket_attrib_str)[-1])
-            # TODO: is this too hacky?
-            if type(out) == bpy.types.NodeSocketColor:
-                for m, m_val in zip(
-                    ["min", "max"],
-                    INITIAL_MIN_MAX_RGBA,
-                ):
-                    setattr(
-                        sckt,
-                        m + "_" + socket_attrib_str,
-                        (m_val,) * n_dim,
-                    )  # if I use this for color wheel it's still fine
+            # ---------------------------
 
-            else:
-                for m, m_val in zip(
-                    ["min", "max"],
-                    INITIAL_MIN_MAX_FLOAT,
-                ):
-                    setattr(
-                        sckt,
-                        m + "_" + socket_attrib_str,
-                        (m_val,) * n_dim,
-                    )
+            # get dict with initial min/max values for this socket type
+            ini_min_max_values = bpy.context.scene.socket_type_to_ini_min_max[
+                type(out)
+            ]
+
+            # assign
+            for m_str in ["min", "max"]:
+                setattr(
+                    sckt,
+                    m_str + "_" + socket_attrib_str,
+                    (ini_min_max_values[m_str],) * n_dim,
+                )
 
     return
 
@@ -558,13 +559,20 @@ def register():
 
     # global Python variables
     setattr(bpy.types.Scene, "socket_type_to_attr", MAP_SOCKET_TYPE_TO_ATTR)
+    setattr(
+        bpy.types.Scene,
+        "socket_type_to_ini_min_max",
+        MAP_SOCKET_TYPE_TO_INI_MIN_MAX,
+    )
 
     # add fn w/ list of sockets creation to load_post
     # TODO: is there a better way? is load_pre better?
     # can I define a custom handler?
     # TODO: an alternative may be to use invoke() or check() functions
     # in a dummy operator?
-    bpy.app.handlers.load_post.append(add_properties_per_socket)
+    bpy.app.handlers.load_post.append(
+        initialise_collection_of_socket_properties
+    )
 
     print("registered")
 
@@ -578,9 +586,12 @@ def unregister():
 
     # delete global Python vars
     delattr(bpy.types.Scene, "socket_type_to_attr")
+    delattr(bpy.types.Scene, "socket_type_to_ini_min_max")
 
     # remove aux fn from handlers
-    bpy.app.handlers.load_post.remove(add_properties_per_socket)
+    bpy.app.handlers.load_post.remove(
+        initialise_collection_of_socket_properties
+    )
 
     # delete the custom property
     del bpy.types.Scene.sockets2randomise_props
