@@ -10,6 +10,8 @@ import bpy
 import numpy as np
 from bpy.app.handlers import persistent
 
+from . import utils
+
 # ---------------------
 # Python global vars
 # TODO: use out.type=='VALUE', 'RGBA' instead? (type of the output socket)
@@ -105,6 +107,10 @@ class SocketProperties(bpy.types.PropertyGroup):
 
     """
 
+    # TODO: how to set attributes dynamically?
+    # TODO: I don't get why this type def is also assignment
+
+    # name (we can use it to access sockets in collection by name)
     name: bpy.props.StringProperty()  # type: ignore
 
     # float properties: they default to 0s
@@ -114,11 +120,7 @@ class SocketProperties(bpy.types.PropertyGroup):
     min_float_1d: bpy.props.FloatVectorProperty(  # type: ignore
         size=1, update=constrain_min_closure(float_1d_str)
     )
-    # Q for review: is this better for the update fn?
-    # (more prone to error?)
-    # update = lambda slf, ctx: constrain_max(slf, ctx, 'float_1d')?
-    # I need to check this min/max agreement before numpy
-    # TODO: setting attributes dynamically..
+
     max_float_1d: bpy.props.FloatVectorProperty(  # type: ignore
         size=1, update=constrain_max_closure(float_1d_str)
     )
@@ -165,36 +167,70 @@ class SocketProperties(bpy.types.PropertyGroup):
 
 
 # -------------------------------
-## Operators --dummy operator for now
+## Operators
 class RandomiseMaterialNodes(bpy.types.Operator):
-    # docstring will show as a tooltip for menu items and buttons.
-    """Randomise 'RandomMetallic' default value"""
+    # docstring shows as a tooltip for menu items and buttons.
+    """Randomise the selected output sockets
+
+    Parameters
+    ----------
+    bpy : _type_
+        _description_
+
+    Returns
+    -------
+    _type_
+        _description_
+    """
 
     # operator metadata
     bl_idname = "node.randomise_socket"  # this is appended to bpy.ops.
-    bl_label = "Randomise input node's output socket"
+    bl_label = "Randomise selected sockets from input material nodes"
     bl_options = {"REGISTER", "UNDO"}
 
     # check if the operator can be executed/invoked
-    # in the current context
+    # in the current (object) context
+    # NOTE: but it actually checks if there is an object in this context right?
     @classmethod
     def poll(cls, context):
         return context.object is not None
 
     # ------------------------------
-    ### Invoke: runs before execute
-    # - add list of input nodes and list of socket props to self
-    # - unselect output sockets in input nodes if they are unlinked
-    def invoke(self, context, event):
-        # get list of nodes
-        self.list_input_nodes = [
-            no
-            for no in bpy.data.materials["Material"].node_tree.nodes
-            if len(no.inputs) == 0 and no.name.lower().startswith("random")
-        ]
 
-        # get list of socket properties
+    def invoke(self, context, event):
+        """Initialise parmeters before executing
+
+        The invoke() function runs before executing the operator.
+        Here, we
+        - add the list of input nodes and collection of socket propertiess to
+          the operator self,
+        - unselect the randomisation toggle of the sockets of input nodes if
+          they are not linked to any other node
+
+        Parameters
+        ----------
+        context : bpy_types.Context
+            the context from which the operator is executed
+        event : _type_
+            _description_
+
+        Returns
+        -------
+        _type_
+            _description_
+        """
+        # add list of input nodes to operator self
+        self.list_input_nodes = utils.get_material_input_nodes_to_randomise()
+
+        # add list of socket properties to operator self
+        # OJO I think the collection is populated once, with load_post!
+        # --------------
         self.sockets_props_collection = context.scene.sockets2randomise_props
+
+        # -----------
+        # can I add elements to the collection here?
+        # ....
+        # -----------
 
         # if socket unlinked and toggle is true: set toggle to false
         for nd in self.list_input_nodes:
@@ -214,16 +250,29 @@ class RandomiseMaterialNodes(bpy.types.Operator):
     # -------------------------------
     ### Execute fn
     def execute(self, context):
-        # set the output sockets with checkbox=True
-        # to a random value
+        """Execute the randomiser operator
 
-        # construct a generator
+        Randomise the selected output sockets between
+        the min/max values provided
+
+        Parameters
+        ----------
+        context : _type_
+            _description_
+
+        Returns
+        -------
+        _type_
+            _description_
+        """
+
+        # Construct a numpy random number generator
         rng = np.random.default_rng()
 
-        # loop thru input nodes and
-        # selected output sockets
-        # to assign uniformly sampled value btw min and max
+        # Loop thru input nodes and their selected output sockets
+        # to assign to each a uniformly sampled value btw min and max
         for nd in self.list_input_nodes:
+            # get list of selected sockets for this node
             list_sockets_to_randomise = [
                 sck
                 for sck in nd.outputs
@@ -234,6 +283,7 @@ class RandomiseMaterialNodes(bpy.types.Operator):
                 )
             ]
 
+            # randomise their value
             for out in list_sockets_to_randomise:
                 socket_id = nd.name + "_" + out.name
 
@@ -254,9 +304,9 @@ class RandomiseMaterialNodes(bpy.types.Operator):
                 )
 
                 # if type of the socket is color, and max_val < min_val:
-                # switch them
-                # Note that color sockets do not have an 'update' fn
-                # but numpy does not accept max_val < min_val
+                # switch them before randomising
+                # NOTE: these are not switched in the display panel
+                # (this is intended)
                 if (type(out) == bpy.types.NodeSocketColor) and any(
                     max_val < min_val
                 ):
@@ -270,7 +320,7 @@ class RandomiseMaterialNodes(bpy.types.Operator):
                     max_val = max_val_new
                     min_val = min_val_new
 
-                # set socket value
+                # assign randomised socket value between min and max
                 out.default_value = rng.uniform(low=min_val, high=max_val)
 
         return {"FINISHED"}
@@ -280,7 +330,7 @@ class RandomiseMaterialNodes(bpy.types.Operator):
 # Panel
 class PanelRandomMaterialNodes(bpy.types.Panel):
     bl_idname = "NODE_MATERIAL_PT_random"
-    bl_label = "Randomise MATERIAL"
+    bl_label = "Randomise material nodes"
     # title of the panel / label displayed to the user
     bl_space_type = "NODE_EDITOR"
     bl_region_type = "UI"
@@ -292,19 +342,14 @@ class PanelRandomMaterialNodes(bpy.types.Panel):
         return context.object is not None
 
     def draw(self, context):
-        # Get list of input nodes that start with 'random'
-        # input nodes are those that have no input sockets
-        # (i.e., only output sockets)
-        list_input_nodes = [
-            no
-            for no in bpy.data.materials["Material"].node_tree.nodes
-            if len(no.inputs) == 0 and no.name.lower().startswith("random")
-        ]
+        # Get list of input nodes to randomise
+        list_input_nodes = utils.get_material_input_nodes_to_randomise()
 
-        # for every input node and every output socket
-        layout = self.layout
         # get collection of sockets' properties
         sockets_props_collection = context.scene.sockets2randomise_props
+
+        # define UI fields for every socket property
+        layout = self.layout
         for i_n, nd in enumerate(list_input_nodes):
             row = layout.row()
 
@@ -318,12 +363,15 @@ class PanelRandomMaterialNodes(bpy.types.Panel):
                 col4 = row_split.column(align=True)
                 col5 = row_split.column(align=True)
 
+                # input node name
                 col1.label(text=nd.name)
                 col1.alignment = "CENTER"
 
+                # min label
                 col3.alignment = "CENTER"
                 col3.label(text="min")
 
+                # max label
                 col4.alignment = "CENTER"
                 col4.label(text="max")
 
