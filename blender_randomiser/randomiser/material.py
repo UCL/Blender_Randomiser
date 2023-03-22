@@ -25,65 +25,61 @@ MAP_SOCKET_TYPE_TO_ATTR = {
 # TODO: eventually add option to read
 # initial, min and max values from config file?
 INITIAL_MIN_MAX_FLOAT = [-np.inf, np.inf]  # should be float
-INITIAL_MIN_MAX_RGBA = [1.0, 1.0]
+INITIAL_MIN_MAX_RGBA = [0.0, 1.0]
 # for color, rather than min/max these are maybe extremes in a colormap?
 
 
 # -----------------------------------------
 # Bounds to input values
-def constrain_min(self, context, m_str):
-    # self is a 'SocketProperties' object
-    # if min > max --> min is reset to max value
-    # (i.e., no randomisation)
-    min_array = np.array(getattr(self, "min_" + m_str))
-    max_array = np.array(getattr(self, "max_" + m_str))
-    if any(min_array > max_array):
-        setattr(
-            self,
-            "min_" + m_str,
-            np.where(min_array > max_array, max_array, min_array),
-        )
-    return
-
-
-def constrain_max(self, context, m_str):
-    # self is a 'SocketProperties' object
-    # if max < min --> max is reset to min value
-    # (i.e., no randomisation)
-    min_array = np.array(getattr(self, "min_" + m_str))
-    max_array = np.array(getattr(self, "max_" + m_str))
-    if any(max_array < min_array):
-        setattr(
-            self,
-            "max_" + m_str,
-            np.where(max_array < min_array, min_array, max_array),
-        )
-    return
-
-
-def constrain_rgba(self, context, min_or_max_full_str):
-    # self is a 'SocketProperties' object
-    # if min > max --> min is reset to max value
-    # (i.e., no randomisation)
-    min_or_max_array = np.array(getattr(self, min_or_max_full_str))
-    if any(min_or_max_array > 1.0) or any(min_or_max_array < 0.0):
-        setattr(
-            self,
-            min_or_max_full_str,
-            np.clip(min_or_max_array, 0.0, 1.0),
-        )
-    return
-
-
 def constrain_min_closure(m_str):
+    def constrain_min(self, context, m_str):
+        # self is a 'SocketProperties' object
+        # if min > max --> min is reset to max value
+        # (i.e., no randomisation)
+        min_array = np.array(getattr(self, "min_" + m_str))
+        max_array = np.array(getattr(self, "max_" + m_str))
+        if any(min_array > max_array):
+            setattr(
+                self,
+                "min_" + m_str,
+                np.where(min_array > max_array, max_array, min_array),
+            )
+        return
+
     return lambda slf, ctx: constrain_min(slf, ctx, m_str)
 
 
 def constrain_max_closure(m_str):
+    def constrain_max(self, context, m_str):
+        # self is a 'SocketProperties' object
+        # if max < min --> max is reset to min value
+        # (i.e., no randomisation)
+        min_array = np.array(getattr(self, "min_" + m_str))
+        max_array = np.array(getattr(self, "max_" + m_str))
+        if any(max_array < min_array):
+            setattr(
+                self,
+                "max_" + m_str,
+                np.where(max_array < min_array, min_array, max_array),
+            )
+        return
+
     return lambda slf, ctx: constrain_max(slf, ctx, m_str)
 
 
 def constrain_rgba_closure(m_str):
+    def constrain_rgba(self, context, min_or_max_full_str):
+        # self is a 'SocketProperties' object
+        # if RGBA socket: constrain values to be between 0 and 1
+        min_or_max_array = np.array(getattr(self, min_or_max_full_str))
+        if any(min_or_max_array > 1.0) or any(min_or_max_array < 0.0):
+            setattr(
+                self,
+                min_or_max_full_str,
+                np.clip(min_or_max_array, 0.0, 1.0),
+            )
+        return
+
     return lambda slf, ctx: constrain_rgba(slf, ctx, m_str)
 
 
