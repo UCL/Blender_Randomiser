@@ -1,6 +1,13 @@
 """
+MWE 1
 Based on example described at
 https://blender.stackexchange.com/questions/141179/how-to-populate-uilist-with-all-material-slot-in-scene-2-8/141207#141207
+
+The idea is that we define a Blender bool prop linked to bpy.context.scene
+with custom get and set fns. When we get its value, it checks if the collection
+of sockets property needs an update (because new nodes have been added to the
+graph) and if so it updates it.
+
 """
 
 import bpy
