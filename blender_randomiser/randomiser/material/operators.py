@@ -5,7 +5,6 @@ import numpy as np
 # -------------------------------
 ## Operators
 class RandomiseMaterialNodes(bpy.types.Operator):
-    # docstring shows as a tooltip for menu items and buttons.
     """Randomise the selected output sockets
 
     Parameters
@@ -19,19 +18,18 @@ class RandomiseMaterialNodes(bpy.types.Operator):
         _description_
     """
 
-    # operator metadata
+    # docstring shows as a tooltip for menu items and buttons.
+
+    # metadata
     bl_idname = "node.randomise_socket"  # this is appended to bpy.ops.
     bl_label = "Randomise selected sockets from input material nodes"
     bl_options = {"REGISTER", "UNDO"}
 
-    # check if the operator can be executed/invoked
-    # in the current (object) context
-    # NOTE: but it actually checks if there is an object in this context right?
+    # check if there is an object in this context
+    # TODO: do I need to check this?
     @classmethod
     def poll(cls, context):
         return context.object is not None
-
-    # ------------------------------
 
     def invoke(self, context, event):
         """Initialise parmeters before executing
@@ -56,13 +54,11 @@ class RandomiseMaterialNodes(bpy.types.Operator):
             _description_
         """
         # add list of socket properties to operator self
-        # TODO: do I need to update it here?
-        # (I think I dont because it is updated when drawing the panel,
-        # which happens before this)
         cs = context.scene
         self.sockets_props_collection = cs.sockets2randomise_props.collection
 
-        # if socket unlinked and toggle is true: set toggle to false
+        # if socket unlinked and randomisation toggle is True:
+        # set toggle to False
         for sckt in cs.candidate_sockets:
             sckt_id = sckt.node.name + "_" + sckt.name
             if (not sckt.is_linked) and (
@@ -89,13 +85,11 @@ class RandomiseMaterialNodes(bpy.types.Operator):
 
         return self.execute(context)
 
-    # -------------------------------
-    ### Execute fn
     def execute(self, context):
         """Execute the randomiser operator
 
         Randomise the selected output sockets between
-        the min/max values provided
+        their min and max values.
 
         Parameters
         ----------
@@ -111,7 +105,7 @@ class RandomiseMaterialNodes(bpy.types.Operator):
         # Construct a numpy random number generator
         rng = np.random.default_rng()
 
-        # Loop thru sockets to randomise
+        # Loop through the sockets to randomise
         for sckt in self.list_sockets_to_randomise:
             socket_id = sckt.node.name + "_" + sckt.name
 
@@ -131,7 +125,7 @@ class RandomiseMaterialNodes(bpy.types.Operator):
                 )
             )
 
-            # if type of the socket is color, and max_val < min_val:
+            # if type of the socket is NodeSocketColor, and max_val < min_val:
             # switch them before randomising
             # NOTE: these are not switched in the display panel
             # (this is intended)
@@ -141,12 +135,11 @@ class RandomiseMaterialNodes(bpy.types.Operator):
                 max_val_new = np.where(max_val >= min_val, max_val, min_val)
                 min_val_new = np.where(min_val < max_val, min_val, max_val)
 
-                # TODO: is there a more elegant way?
-                # feels a bit clunky....
+                # TODO: is there a more elegant way? feels a bit clunky....
                 max_val = max_val_new
                 min_val = min_val_new
 
-            # assign randomised socket value between min and max
+            # assign randomised socket value
             sckt.default_value = rng.uniform(low=min_val, high=max_val)
 
         return {"FINISHED"}
@@ -167,9 +160,6 @@ def register():
 
 
 def unregister():
-    """
-    This is run when the add-on is disabled / Blender closes
-    """
     for cls in list_classes_to_register:
         bpy.utils.unregister_class(cls)
     print("material operators unregistered")

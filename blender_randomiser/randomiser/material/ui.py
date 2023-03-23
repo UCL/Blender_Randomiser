@@ -3,15 +3,19 @@ import bpy
 from .. import utils
 
 
-# -------
 # Panel
 class PanelRandomMaterialNodes(bpy.types.Panel):
+    """Class defining the panel for randomising
+    material node properties
+
+    """
+
+    # TODO: are these docstrings shown in the UI as tooltips somewhere?
+
+    # metadata
     bl_idname = "NODE_MATERIAL_PT_random"
-    bl_label = "Randomise material nodes"
-    # title of the panel / label displayed to the user
-    bl_space_type = (
-        "NODE_EDITOR"  # "VIEW_3D" instead? "PROPERTIES" and "WINDOW" instead?
-    )
+    bl_label = "Randomise MATERIAL"  # title of the panel displayed to the user
+    bl_space_type = "NODE_EDITOR"
     bl_region_type = "UI"
     bl_category = "Randomiser"
 
@@ -24,10 +28,12 @@ class PanelRandomMaterialNodes(bpy.types.Panel):
         # Get list of input nodes to randomise
         list_input_nodes = utils.get_material_input_nodes_to_randomise()
 
-        # get collection of sockets' properties
-        # the expression 'context.scene.update_collection_socket_props'
-        # triggers the get fn that checks if an update is req and if so,
-        # updates the collection of sockets and returns TRUE
+        # Get collection of sockets' properties
+        # 'context.scene.sockets2randomise_props.update_collection'
+        # triggers the get function that checks if an update is
+        # required. If it is, the collection of sockets is updated
+        # and 'context.scene.sockets2randomise_props.update_collection'
+        # returns TRUE
         cs = context.scene
         if cs.sockets2randomise_props.update_collection:
             print("Collection of sockets updated")
@@ -87,44 +93,35 @@ class PanelRandomMaterialNodes(bpy.types.Panel):
                     "default_value",
                     icon_only=True,
                 )
-                col2.enabled = False  # (not editable)
+                col2.enabled = False  # current value is not editable
 
                 # socket min and max columns
                 socket_id = nd.name + "_" + sckt.name
                 for m_str, col in zip(["min", "max"], [col3, col4]):
-                    # if color socket: format as a color wheel
+                    # if socket is a color: format min/max as a color picker
+                    # and an array (color picker doesn't include alpha value)
                     if type(sckt) == bpy.types.NodeSocketColor:
-                        # show color property via color picker
-                        # ATT! It doesn't include alpha!
+                        # color picker
                         col.template_color_picker(
                             sockets_props_collection[socket_id],
-                            m_str
-                            + "_"
-                            + cs.socket_type_to_attr[type(sckt)],  # property
+                            m_str + "_" + cs.socket_type_to_attr[type(sckt)],
                         )
-                        # show color property as an array too (including alpha)
+                        # array
                         for j, cl in enumerate(["R", "G", "B", "alpha"]):
                             col.prop(
                                 sockets_props_collection[socket_id],
                                 m_str
                                 + "_"
-                                + cs.socket_type_to_attr[
-                                    type(sckt)
-                                ],  # property
+                                + cs.socket_type_to_attr[type(sckt)],
                                 icon_only=False,
                                 text=cl,
                                 index=j,
-                                # ATT! if I pass -1 it will use all
-                                # elements of the array (rather than
-                                # the last one)
                             )
-                    # if not color socket: format as a regular prop
+                    # if socket is not color type: format as a regular property
                     else:
                         col.prop(
                             sockets_props_collection[socket_id],
-                            m_str
-                            + "_"
-                            + cs.socket_type_to_attr[type(sckt)],  # property
+                            m_str + "_" + cs.socket_type_to_attr[type(sckt)],
                             icon_only=True,
                         )
 
@@ -135,7 +132,7 @@ class PanelRandomMaterialNodes(bpy.types.Panel):
                     icon_only=True,
                 )
 
-        # add Randomise button
+        # add randomise button for operator
         row = layout.row(align=True)
         row_split = row.split()
         col1 = row_split.column(align=True)
@@ -160,9 +157,6 @@ def register():
 
 
 def unregister():
-    """
-    This is run when the add-on is disabled / Blender closes
-    """
     for cls in list_classes_to_register:
         bpy.utils.unregister_class(cls)
     print("material UI unregistered")
