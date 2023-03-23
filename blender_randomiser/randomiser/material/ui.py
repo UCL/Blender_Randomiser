@@ -59,6 +59,8 @@ class PanelRandomMaterialNodes(bpy.types.Panel):
 
             # if not first node: add just node name
             else:
+                row.separator(factor=1.0)  # add empty row before each node
+                row = layout.row()
                 row.label(text=nd.name)
 
             # add sockets for this node in the subseq rows

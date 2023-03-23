@@ -181,4 +181,4 @@ def unregister():
     """
     for cls in list_classes_to_register:
         bpy.utils.unregister_class(cls)
-    print("material opertors unregistered")
+    print("material operators unregistered")
