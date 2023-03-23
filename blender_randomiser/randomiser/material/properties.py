@@ -309,21 +309,14 @@ def unregister():
     for cls in list_classes_to_register:
         bpy.utils.unregister_class(cls)
 
-    # delete global Python vars
-    delattr(bpy.types.Scene, "socket_type_to_attr")
-    delattr(bpy.types.Scene, "socket_type_to_ini_min_max")
-
-    # delete the custom properties
-    # TODO check if property exists?
+    # delete the custom properties linked to bpy.context.scene
     list_attr = [
-        "sockets2randomise_props",
+        "socket_type_to_attr",
+        "socket_type_to_ini_min_max" "sockets2randomise_props",
         "candidate_sockets",
         "update_collection_socket_props",
     ]
     for attr in list_attr:
         if hasattr(bpy.types.Scene, attr):
             delattr(bpy.types.Scene, attr)
-            # bpy.ops.wm.properties_remove(
-            #     data_path="scene", property_name=attr
-            # )
     print("material properties unregistered")
