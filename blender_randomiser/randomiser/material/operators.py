@@ -1,8 +1,6 @@
 import bpy
 import numpy as np
 
-from .. import utils
-
 
 # -------------------------------
 ## Operators
@@ -57,29 +55,37 @@ class RandomiseMaterialNodes(bpy.types.Operator):
         _type_
             _description_
         """
-        # add list of input nodes to operator self
-        self.list_input_nodes = utils.get_material_input_nodes_to_randomise()
-
         # add list of socket properties to operator self
         # TODO: do I need to update it here?
         # (I think I dont because it is updated when drawing the panel,
         # which happens before this)
-        # --------------
         cs = context.scene
         self.sockets_props_collection = cs.sockets2randomise_props.collection
 
         # if socket unlinked and toggle is true: set toggle to false
-        for nd in self.list_input_nodes:
-            for out in nd.outputs:
-                sckt_id = nd.name + "_" + out.name
-                if (not out.is_linked) and (
-                    self.sockets_props_collection[sckt_id].bool_randomise
-                ):
-                    setattr(
-                        self.sockets_props_collection[sckt_id],
-                        "bool_randomise",
-                        False,
-                    )
+        for sckt in cs.candidate_sockets:
+            sckt_id = sckt.node.name + "_" + sckt.name
+            if (not sckt.is_linked) and (
+                self.sockets_props_collection[sckt_id].bool_randomise
+            ):
+                setattr(
+                    self.sockets_props_collection[sckt_id],
+                    "bool_randomise",
+                    False,
+                )
+                print(
+                    f"Socket {sckt_id} unlinked:",
+                    "randomisation toggle set to False",
+                )
+
+        # add list sockets to randomise to self.
+        self.list_sockets_to_randomise = [
+            sckt
+            for sckt in cs.candidate_sockets
+            if self.sockets_props_collection[
+                sckt.node.name + "_" + sckt.name
+            ].bool_randomise
+        ]
 
         return self.execute(context)
 
@@ -105,59 +111,43 @@ class RandomiseMaterialNodes(bpy.types.Operator):
         # Construct a numpy random number generator
         rng = np.random.default_rng()
 
-        # Loop thru input nodes and their selected output sockets
-        # to assign to each a uniformly sampled value btw min and max
-        for nd in self.list_input_nodes:
-            # get list of selected sockets for this node
-            list_sockets_to_randomise = [
-                sck
-                for sck in nd.outputs
-                if (
-                    self.sockets_props_collection[
-                        nd.name + "_" + sck.name
-                    ].bool_randomise
+        # Loop thru sockets to randomise
+        for sckt in self.list_sockets_to_randomise:
+            socket_id = sckt.node.name + "_" + sckt.name
+
+            # min value for this socket
+            min_val = np.array(
+                getattr(
+                    self.sockets_props_collection[socket_id],
+                    "min_" + context.scene.socket_type_to_attr[type(sckt)],
                 )
-            ]
+            )
 
-            # randomise their value
-            for out in list_sockets_to_randomise:
-                socket_id = nd.name + "_" + out.name
-
-                # min value for this socket
-                min_val = np.array(
-                    getattr(
-                        self.sockets_props_collection[socket_id],
-                        "min_" + context.scene.socket_type_to_attr[type(out)],
-                    )
+            # max value for this socket
+            max_val = np.array(
+                getattr(
+                    self.sockets_props_collection[socket_id],
+                    "max_" + context.scene.socket_type_to_attr[type(sckt)],
                 )
+            )
 
-                # max value for this socket
-                max_val = np.array(
-                    getattr(
-                        self.sockets_props_collection[socket_id],
-                        "max_" + context.scene.socket_type_to_attr[type(out)],
-                    )
-                )
+            # if type of the socket is color, and max_val < min_val:
+            # switch them before randomising
+            # NOTE: these are not switched in the display panel
+            # (this is intended)
+            if (type(sckt) == bpy.types.NodeSocketColor) and any(
+                max_val < min_val
+            ):
+                max_val_new = np.where(max_val >= min_val, max_val, min_val)
+                min_val_new = np.where(min_val < max_val, min_val, max_val)
 
-                # if type of the socket is color, and max_val < min_val:
-                # switch them before randomising
-                # NOTE: these are not switched in the display panel
-                # (this is intended)
-                if (type(out) == bpy.types.NodeSocketColor) and any(
-                    max_val < min_val
-                ):
-                    max_val_new = np.where(
-                        max_val >= min_val, max_val, min_val
-                    )
-                    min_val_new = np.where(min_val < max_val, min_val, max_val)
+                # TODO: is there a more elegant way?
+                # feels a bit clunky....
+                max_val = max_val_new
+                min_val = min_val_new
 
-                    # TODO: is there a more elegant way?
-                    # feels a bit clunky....
-                    max_val = max_val_new
-                    min_val = min_val_new
-
-                # assign randomised socket value between min and max
-                out.default_value = rng.uniform(low=min_val, high=max_val)
+            # assign randomised socket value between min and max
+            sckt.default_value = rng.uniform(low=min_val, high=max_val)
 
         return {"FINISHED"}
 

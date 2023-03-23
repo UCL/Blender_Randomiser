@@ -67,7 +67,7 @@ class PanelRandomMaterialNodes(bpy.types.Panel):
                 row.label(text=nd.name)
 
             # add sockets for this node in the subseq rows
-            for i_o, out in enumerate(nd.outputs):
+            for sckt in nd.outputs:
                 # split row in 5 columns
                 row = layout.row()
                 row_split = row.split()
@@ -79,28 +79,28 @@ class PanelRandomMaterialNodes(bpy.types.Panel):
 
                 # socket name
                 col1.alignment = "RIGHT"
-                col1.label(text=out.name)
+                col1.label(text=sckt.name)
 
                 # socket current value
                 col2.prop(
-                    out,
+                    sckt,
                     "default_value",
                     icon_only=True,
                 )
                 col2.enabled = False  # (not editable)
 
                 # socket min and max columns
-                socket_id = nd.name + "_" + out.name
+                socket_id = nd.name + "_" + sckt.name
                 for m_str, col in zip(["min", "max"], [col3, col4]):
                     # if color socket: format as a color wheel
-                    if type(out) == bpy.types.NodeSocketColor:
+                    if type(sckt) == bpy.types.NodeSocketColor:
                         # show color property via color picker
                         # ATT! It doesn't include alpha!
                         col.template_color_picker(
                             sockets_props_collection[socket_id],
                             m_str
                             + "_"
-                            + cs.socket_type_to_attr[type(out)],  # property
+                            + cs.socket_type_to_attr[type(sckt)],  # property
                         )
                         # show color property as an array too (including alpha)
                         for j, cl in enumerate(["R", "G", "B", "alpha"]):
@@ -109,7 +109,7 @@ class PanelRandomMaterialNodes(bpy.types.Panel):
                                 m_str
                                 + "_"
                                 + cs.socket_type_to_attr[
-                                    type(out)
+                                    type(sckt)
                                 ],  # property
                                 icon_only=False,
                                 text=cl,
@@ -124,7 +124,7 @@ class PanelRandomMaterialNodes(bpy.types.Panel):
                             sockets_props_collection[socket_id],
                             m_str
                             + "_"
-                            + cs.socket_type_to_attr[type(out)],  # property
+                            + cs.socket_type_to_attr[type(sckt)],  # property
                             icon_only=True,
                         )
 

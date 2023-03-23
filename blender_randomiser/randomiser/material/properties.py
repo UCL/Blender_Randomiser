@@ -9,6 +9,8 @@ import re
 import bpy
 import numpy as np
 
+from .. import utils
+
 # ---------------------
 # Python global vars
 # TODO: use out.type=='VALUE', 'RGBA' instead? (type of the output socket)
@@ -94,21 +96,8 @@ def constrain_rgba_closure(m_str):
 # ---------------------
 class SocketProperties(bpy.types.PropertyGroup):
     """
-    Properties for a socket element
-
-    Types of properties:---these relate to UI buttons
-     bpy.props.
-              BoolProperty(
-              BoolVectorProperty(
-              CollectionProperty(
-              EnumProperty(
-              FloatProperty(
-              FloatVectorProperty(
-              IntProperty(
-              IntVectorProperty(
-              PointerProperty(
-              RemoveProperty(
-              StringProperty(
+    Properties of a socket element:
+    name, min/max values and boolean for randomisation
 
     """
 
@@ -117,6 +106,8 @@ class SocketProperties(bpy.types.PropertyGroup):
 
     # name (we can use it to access sockets in collection by name)
     name: bpy.props.StringProperty()  # type: ignore
+
+    # socket: PointerProperty(type=bpy.types.NodeSocketStandard?)
 
     # float properties: they default to 0s
     # ---------------------
@@ -189,13 +180,16 @@ def get_update_collection(self):
         sck.node.name + "_" + sck.name
         for sck in bpy.context.scene.candidate_sockets
     )
+
+    # set of sockets that are just in one of the two groups
     collection_needs_update = (
         set_of_sockets_in_collection_of_props.symmetric_difference(
             set_of_sockets_in_graph
         )
     )
 
-    # if there is a diff: overwrite the collection of sockets
+    # if there is a diff: update the collection of sockets
+    # (not really an update, we overwrite it)
     if collection_needs_update:
         set_update_collection(self, True)
         return True  # if returns True, it has been updated
@@ -209,7 +203,8 @@ def set_update_collection(self, value):
     # It will overwrite the collection of socket properties
     if value:
         self.collection.clear()
-        # ideally just update() rather than clear()? or remove()?, but
+        # TODO: use remove() rather than clear()?
+        # Cannot use update directly:
         # "All properties define update functions except for
         # CollectionProperty."
         # https://docs.blender.org/api/current/bpy.props.html#update-example
@@ -267,11 +262,8 @@ class ColSocketProperties(bpy.types.PropertyGroup):
 # ------------------------------------
 def get_candidate_sockets(self):
     # list input nodes
-    list_input_nodes = [
-        nd
-        for nd in bpy.data.materials["Material"].node_tree.nodes
-        if len(nd.inputs) == 0 and nd.name.lower().startswith("random".lower())
-    ]
+    list_input_nodes = utils.get_material_input_nodes_to_randomise()
+
     # list of sockets (eventually if linked?)
     list_sockets = [out for nd in list_input_nodes for out in nd.outputs]
     return list_sockets
