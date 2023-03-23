@@ -120,7 +120,6 @@ def register():
             bp = bpy.props
             bpy.types.Scene.sockets2randomise_props = bp.PointerProperty(
                 type=ColSocketProperties
-                # type of the elements in the collection
             )
 
     bpy.types.Scene.candidate_sockets = property(fget=get_candidate_sockets)
@@ -136,44 +135,3 @@ def unregister():
 
 if __name__ == "__main__":
     register()
-
-
-###
-# def update_collection_if_req(self,value):
-#     # This fn is eval when
-#     # bpy.context.scene.sockets2randomise_props.update_collection value
-#     # is updated
-
-#     if value:
-#         # First check if update to collection is required
-#         # set of sockets in graph
-#         set_of_sockets_in_graph = set(
-#             sck.node.name + "_" + sck.name
-#             for sck in bpy.context.scene.candidate_sockets
-#         )
-
-#         # set of sockets in collection
-#         set_of_sockets_in_collection_of_props = set(
-#             sck_p.name for sck_p in self.collection
-#         )
-
-#         # set of nodes in one or other group only
-#         collection_needs_update = (
-#             set_of_sockets_in_collection_of_props.symmetric_difference(
-#                 set_of_sockets_in_graph
-#             )
-#         )
-
-#         # if that set of nodes is not empty: update collection
-#         if collection_needs_update:
-#             self.collection.clear()
-#             for sckt in bpy.context.scene.candidate_sockets:
-#                 sckt_prop = self.collection.add()
-#                 sckt_prop.name = sckt.node.name + "_" + sckt.name
-#                 sckt_prop.bool_randomise = True
-
-#             print('collection updated')
-#         else:
-#             print('collection not updated')
-
-#     return None
