@@ -314,19 +314,16 @@ def unregister():
     delattr(bpy.types.Scene, "socket_type_to_ini_min_max")
 
     # delete the custom properties
-    del bpy.types.Scene.sockets2randomise_props
-    bpy.ops.wm.properties_remove(
-        data_path="scene", property_name="sockets2randomise_props"
-    )
-
-    del bpy.types.Scene.candidate_sockets
-    bpy.ops.wm.properties_remove(
-        data_path="scene", property_name="candidate_sockets"
-    )
-
-    del bpy.types.Scene.update_collection_socket_props
-    bpy.ops.wm.properties_remove(
-        data_path="scene", property_name="update_collection_socket_props"
-    )
-
+    # TODO check if property exists?
+    list_attr = [
+        "sockets2randomise_props",
+        "candidate_sockets",
+        "update_collection_socket_props",
+    ]
+    for attr in list_attr:
+        if hasattr(bpy.types.Scene, attr):
+            delattr(bpy.types.Scene, attr)
+            # bpy.ops.wm.properties_remove(
+            #     data_path="scene", property_name=attr
+            # )
     print("material properties unregistered")
