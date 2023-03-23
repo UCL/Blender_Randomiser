@@ -269,12 +269,12 @@ def register():
             )
 
     # link global Python variables to context.scene
-    setattr(bpy.types.Scene, "socket_type_to_attr", MAP_SOCKET_TYPE_TO_ATTR)
-    setattr(
-        bpy.types.Scene,
-        "socket_type_to_ini_min_max",
-        MAP_SOCKET_TYPE_TO_INI_MIN_MAX,
-    )
+    # if I use setattr: attribute must exist first right?
+    for attr, attr_val in zip(
+        ["socket_type_to_attr", "socket_type_to_ini_min_max"],
+        [MAP_SOCKET_TYPE_TO_ATTR, MAP_SOCKET_TYPE_TO_INI_MIN_MAX],
+    ):
+        setattr(bpy.types.Scene, attr, attr_val)
 
     # Define candidate sockets as a Python managed property
     # 'bpy.context.scene.candidate_sockets' will provide an updated list of
@@ -319,4 +319,5 @@ def unregister():
     for attr in list_attr:
         if hasattr(bpy.types.Scene, attr):
             delattr(bpy.types.Scene, attr)
+
     print("material properties unregistered")
