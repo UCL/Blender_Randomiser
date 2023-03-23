@@ -9,7 +9,9 @@ class PanelRandomMaterialNodes(bpy.types.Panel):
     bl_idname = "NODE_MATERIAL_PT_random"
     bl_label = "Randomise material nodes"
     # title of the panel / label displayed to the user
-    bl_space_type = "NODE_EDITOR"
+    bl_space_type = (
+        "NODE_EDITOR"  # "VIEW_3D" instead? "PROPERTIES" and "WINDOW" instead?
+    )
     bl_region_type = "UI"
     bl_category = "Randomiser"
 
@@ -26,9 +28,10 @@ class PanelRandomMaterialNodes(bpy.types.Panel):
         # the expression 'context.scene.update_collection_socket_props'
         # triggers the get fn that checks if an update is req and if so,
         # updates the collection of sockets and returns TRUE
-        if context.scene.update_collection_socket_props:
+        cs = context.scene
+        if cs.sockets2randomise_props.update_collection:
             print("Collection of sockets updated")
-        sockets_props_collection = context.scene.sockets2randomise_props
+        sockets_props_collection = cs.sockets2randomise_props.collection
 
         # define UI fields for every socket property
         layout = self.layout
@@ -97,9 +100,7 @@ class PanelRandomMaterialNodes(bpy.types.Panel):
                             sockets_props_collection[socket_id],
                             m_str
                             + "_"
-                            + context.scene.socket_type_to_attr[
-                                type(out)
-                            ],  # property
+                            + cs.socket_type_to_attr[type(out)],  # property
                         )
                         # show color property as an array too (including alpha)
                         for j, cl in enumerate(["R", "G", "B", "alpha"]):
@@ -107,7 +108,7 @@ class PanelRandomMaterialNodes(bpy.types.Panel):
                                 sockets_props_collection[socket_id],
                                 m_str
                                 + "_"
-                                + context.scene.socket_type_to_attr[
+                                + cs.socket_type_to_attr[
                                     type(out)
                                 ],  # property
                                 icon_only=False,
@@ -123,9 +124,7 @@ class PanelRandomMaterialNodes(bpy.types.Panel):
                             sockets_props_collection[socket_id],
                             m_str
                             + "_"
-                            + context.scene.socket_type_to_attr[
-                                type(out)
-                            ],  # property
+                            + cs.socket_type_to_attr[type(out)],  # property
                             icon_only=True,
                         )
 

@@ -14,7 +14,6 @@ import numpy as np
 # TODO: use out.type=='VALUE', 'RGBA' instead? (type of the output socket)
 # TODO: rethink this mapping....
 # the idea is to map nodesocket types to property types I can use in the UI
-
 MAP_SOCKET_TYPE_TO_ATTR = {
     bpy.types.NodeSocketFloat: "float_1d",
     bpy.types.NodeSocketVector: "float_3d",
@@ -36,7 +35,8 @@ MAP_SOCKET_TYPE_TO_INI_MIN_MAX = {
 
 
 # -----------------------------------------
-# Bounds to Socket properties
+# Bounds to SocketProperties
+# -----------------------------------------
 def constrain_min_closure(m_str):
     def constrain_min(self, context, m_str):
         # self is a 'SocketProperties' object
@@ -90,7 +90,8 @@ def constrain_rgba_closure(m_str):
 
 
 # -----------------------
-# Blender SocketProperties object
+# SocketProperties
+# ---------------------
 class SocketProperties(bpy.types.PropertyGroup):
     """
     Properties for a socket element
@@ -171,18 +172,8 @@ class SocketProperties(bpy.types.PropertyGroup):
 
 
 # ------------------------------------
-def get_candidate_sockets(self):
-    # list input nodes
-    list_input_nodes = [
-        nd
-        for nd in bpy.data.materials["Material"].node_tree.nodes
-        if len(nd.inputs) == 0 and nd.name.lower().startswith("random".lower())
-    ]
-    # list of sockets (eventually if linked?)
-    list_sockets = [out for nd in list_input_nodes for out in nd.outputs]
-    return list_sockets
-
-
+# ColSocketProperties prop
+# ------------------------------------
 def get_update_collection(self):
     # Get fn for update_collection' property
     # It will run when the property value is 'get' and
@@ -190,12 +181,13 @@ def get_update_collection(self):
 
     # set of sockets in collection
     set_of_sockets_in_collection_of_props = set(
-        sck_p.name for sck_p in self.sockets2randomise_props
+        sck_p.name for sck_p in self.collection
     )
 
     # set of sockets in graph
     set_of_sockets_in_graph = set(
-        sck.node.name + "_" + sck.name for sck in self.candidate_sockets
+        sck.node.name + "_" + sck.name
+        for sck in bpy.context.scene.candidate_sockets
     )
     collection_needs_update = (
         set_of_sockets_in_collection_of_props.symmetric_difference(
@@ -216,9 +208,13 @@ def set_update_collection(self, value):
     # It will run when the property value is 'set'
     # It will overwrite the collection of socket properties
     if value:
-        self.sockets2randomise_props.clear()  # ---ideally just update!
-        for sckt in self.candidate_sockets:
-            sckt_prop = self.sockets2randomise_props.add()
+        self.collection.clear()
+        # ideally just update() rather than clear()? or remove()?, but
+        # "All properties define update functions except for
+        # CollectionProperty."
+        # https://docs.blender.org/api/current/bpy.props.html#update-example
+        for sckt in bpy.context.scene.candidate_sockets:
+            sckt_prop = self.collection.add()
             sckt_prop.name = sckt.node.name + "_" + sckt.name
             sckt_prop.bool_randomise = True
 
@@ -247,25 +243,59 @@ def set_update_collection(self, value):
                     m_str + "_" + socket_attrib_str,
                     (ini_min_max_values[m_str],) * n_dim,
                 )
-        # return True
 
 
-# -----
+class ColSocketProperties(bpy.types.PropertyGroup):
+    collection: bpy.props.CollectionProperty(  # type: ignore
+        type=SocketProperties
+    )
+
+    # 'dummy' attribute to update collection
+    update_collection: bpy.props.BoolProperty(  # type: ignore
+        default=False,  # initial value
+        get=get_update_collection,
+        # this fn is called when
+        # bpy.context.scene.update_collection_socket_props
+        set=set_update_collection,
+        # this fn is called when
+        # bpy.context.scene.sockets2_randomise_props.update_collection = True
+    )
+
+
+# ------------------------------------
+# candidate_sockets prop
+# ------------------------------------
+def get_candidate_sockets(self):
+    # list input nodes
+    list_input_nodes = [
+        nd
+        for nd in bpy.data.materials["Material"].node_tree.nodes
+        if len(nd.inputs) == 0 and nd.name.lower().startswith("random".lower())
+    ]
+    # list of sockets (eventually if linked?)
+    list_sockets = [out for nd in list_input_nodes for out in nd.outputs]
+    return list_sockets
+
+
+# ------------------------------------
+# Register / unregister classes
+# ------------------------------------
 list_classes_to_register = [
     SocketProperties,
+    ColSocketProperties,
 ]
 
 
 def register():
     for cls in list_classes_to_register:
-        bpy.utils.register_class(SocketProperties)
+        bpy.utils.register_class(cls)
 
         # add the collection of socket properties
         # to bpy.context.scene
-        if cls == SocketProperties:
+        if cls == ColSocketProperties:
             bp = bpy.props
-            bpy.types.Scene.sockets2randomise_props = bp.CollectionProperty(
-                type=SocketProperties  # type of the elements in the collection
+            bpy.types.Scene.sockets2randomise_props = bp.PointerProperty(
+                type=ColSocketProperties
             )
 
     # link global Python variables to context.scene
@@ -281,24 +311,6 @@ def register():
     # candidate sockets
     bpy.types.Scene.candidate_sockets = property(fget=get_candidate_sockets)
 
-    # Define 'update_collection_socket_props' as a boolean Blender prop
-    # we define custom get() and set() functions that trigger updates in the
-    # collection of socket properties
-    bpy.types.Scene.update_collection_socket_props = bpy.props.BoolProperty(
-        default=False,  # initial value
-        get=get_update_collection,  # get_update_materials;
-        # this fn is called when
-        # bpy.context.scene.update_collection_socket_props
-        set=set_update_collection,  # set_update_materials;
-        # this fn is called when
-        # bpy.context.scene.update_collection_socket_props = 'patata'
-        name="Update collection of socket properties",
-    )
-    # if I 'get' this property: it will update if required
-    #   > bpy.context.scene.update_collection_socket_props
-    # if I set this property to True: it will force an update
-    #   >  bpy.context.scene.update_collection_socket_props = True
-
     print("material properties registered")
 
 
@@ -312,9 +324,9 @@ def unregister():
     # delete the custom properties linked to bpy.context.scene
     list_attr = [
         "socket_type_to_attr",
-        "socket_type_to_ini_min_max" "sockets2randomise_props",
+        "socket_type_to_ini_min_max",
+        "sockets2randomise_props",
         "candidate_sockets",
-        "update_collection_socket_props",
     ]
     for attr in list_attr:
         if hasattr(bpy.types.Scene, attr):

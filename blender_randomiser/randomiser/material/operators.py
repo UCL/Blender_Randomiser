@@ -65,7 +65,8 @@ class RandomiseMaterialNodes(bpy.types.Operator):
         # (I think I dont because it is updated when drawing the panel,
         # which happens before this)
         # --------------
-        self.sockets_props_collection = context.scene.sockets2randomise_props
+        cs = context.scene
+        self.sockets_props_collection = cs.sockets2randomise_props.collection
 
         # if socket unlinked and toggle is true: set toggle to false
         for nd in self.list_input_nodes:
