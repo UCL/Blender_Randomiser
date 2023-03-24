@@ -21,14 +21,15 @@ class PanelRandomMaterialNodes(bpy.types.Panel):
 
     @classmethod
     def poll(self, context):
-        # TODO: is the object context what I need to check?
-        return context.object is not None
+        # draw the panel only if there is an active material
+        # for the selected object
+        return context.object.active_material is not None
 
     def draw(self, context):
         # Get list of input nodes to randomise
         # for currently active material
         list_input_nodes = utils.get_material_input_nodes_to_randomise(
-            bpy.context.object.active_material.name
+            context.object.active_material.name
         )
 
         # Get collection of sockets' properties
