@@ -26,7 +26,10 @@ class PanelRandomMaterialNodes(bpy.types.Panel):
 
     def draw(self, context):
         # Get list of input nodes to randomise
-        list_input_nodes = utils.get_material_input_nodes_to_randomise()
+        # for currently active material
+        list_input_nodes = utils.get_material_input_nodes_to_randomise(
+            bpy.context.object.active_material.name
+        )
 
         # Get collection of sockets' properties
         # 'context.scene.sockets2randomise_props.update_collection'

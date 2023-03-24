@@ -54,6 +54,7 @@ class RandomiseMaterialNodes(bpy.types.Operator):
             _description_
         """
         # add list of socket properties to operator self
+        # (this list should have been updated already, when drawing the panel)
         cs = context.scene
         self.sockets_props_collection = cs.sockets2randomise_props.collection
 

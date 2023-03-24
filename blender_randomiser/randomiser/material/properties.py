@@ -365,9 +365,10 @@ class ColSocketProperties(bpy.types.PropertyGroup):
 def get_candidate_sockets(self):
     """Get function for the candidate_sockets property
 
-    We define candidate sockets as the full set of output sockets
-    in input nodes in the current graph. Input nodes are those with
-    no input sockets.
+    We define candidate sockets as the set of output sockets
+    in input nodes, in the graph for the currently active
+    material. Input nodes are nodes with only output sockets
+    (i.e., no input sockets).
 
     It returns a list of sockets that are candidates for
     the randomisation.
@@ -378,8 +379,10 @@ def get_candidate_sockets(self):
     list
         list of sockets in the input nodes in the graph
     """
-    # list input nodes
-    list_input_nodes = utils.get_material_input_nodes_to_randomise()
+    # list input nodes for current active material
+    list_input_nodes = utils.get_material_input_nodes_to_randomise(
+        bpy.context.object.active_material.name
+    )
 
     # list of sockets
     # TODO: should we exclude unlinked ones here instead?
