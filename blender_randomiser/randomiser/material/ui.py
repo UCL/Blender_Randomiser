@@ -44,8 +44,13 @@ class PanelRandomMaterialNodes(bpy.types.Panel):
         sockets_props_collection = cs.sockets2randomise_props.collection
 
         # define UI fields for every socket property
+        # NOTE: if I don't sort the input nodes, everytime one of the nodes is
+        # selected in the graph it moves to the bottom of the panel (?).
+        # TODO: sort by date of creation? ---I didn't find an easy way to do it
         layout = self.layout
-        for i_n, nd in enumerate(list_input_nodes):
+        for i_n, nd in enumerate(
+            sorted(list_input_nodes, key=lambda x: x.name)
+        ):
             row = layout.row()
 
             # if first node: add labels for
