@@ -41,7 +41,9 @@ class PanelRandomMaterialNodes(bpy.types.Panel):
 
         # define UI fields for every socket property
         layout = self.layout
-        for i_n, nd in enumerate(list_input_nodes):
+        for i_n, nd in enumerate(
+            sorted(list_input_nodes, key=lambda nd: nd.name)
+        ):
             row = layout.row()
 
             # if first node: add labels for
