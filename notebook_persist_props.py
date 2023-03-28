@@ -246,12 +246,8 @@ class ColSocketProperties(bpy.types.PropertyGroup):
     )
 
     # --------------------------------
-    # can I use decorator?
+    # TODO : can I use decorator instead?
     def get_candidate_sockets(self):
-        # list input nodes for current active material
-        #    list_input_nodes = utils.get_material_input_nodes_to_randomise(
-        #        self.name
-        #    )
         list_input_nodes = [
             nd
             for nd in bpy.data.materials[self.name].node_tree.nodes
@@ -266,6 +262,14 @@ class ColSocketProperties(bpy.types.PropertyGroup):
 
     candidate_sockets = property(fget=get_candidate_sockets)
     # ---------------
+
+
+# class ColMaterials(bpy.types.PropertyGroup):
+#     collection: bpy.props.CollectionProperty(  # type: ignore
+#         type=ColSocketProperties
+#     )
+
+#     update_collection
 
 
 # ------------------------------------
