@@ -19,7 +19,7 @@ class PropertiesAddRandomTransform(
         soft_min=0.0,
         soft_max=10.0,
         step=50,
-    )  # OJO in step: the actual value is the value set here divided by 100
+    )  # NOTE in step: the actual value is the value set here divided by 100
     vol_size: vol_size_prop  # type: ignore
 
     seed_toggle_prop = bpy.props.BoolProperty(
