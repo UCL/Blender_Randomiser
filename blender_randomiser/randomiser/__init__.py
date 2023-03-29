@@ -1,4 +1,5 @@
 from . import material
+from . import transform
 
 
 bl_info = {
@@ -17,14 +18,14 @@ bl_info = {
 
 
 def register():
-    # transforms.register()
-    material.register()
+    transform.register()
+    #material.register()
     # geometry.register()
 
 
 def unregister():
-    # transforms.unregister()
-    material.unregister()
+    transform.unregister()
+    #material.unregister()
     # geometry.unregister()
 
 
