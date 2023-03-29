@@ -1,7 +1,6 @@
 import bpy
 import numpy as np
 import pdb
-from mathutils import Vector
 
 
 # ---------------------------
@@ -89,50 +88,3 @@ def unregister():
     print("unregistered")
 
 
-def randomize_selected(context, #seed, delta,
-                       loc, rot, randomise_on):
-
-    import random
-    from random import uniform
-
-    # random.seed(seed)
-
-    def rand_vec(vec_range):
-        return Vector(uniform(-val, val) for val in vec_range)
-    
-    
-
-    for obj in context.selected_objects:
-
-        if loc:
-            obj.location += rand_vec(loc)
-            #pdb.set_trace()
-            # if delta:
-            #     obj.delta_location += rand_vec(loc)
-            # else:
-            #     obj.location += rand_vec(loc)
-        else:  # otherwise the values change under us
-            uniform(0.0, 0.0), uniform(0.0, 0.0), uniform(0.0, 0.0)
-
-        if rot:
-            vec = rand_vec(rot)
-
-            rotation_mode = obj.rotation_mode
-            if rotation_mode in {'QUATERNION', 'AXIS_ANGLE'}:
-                obj.rotation_mode = 'XYZ'
-
-            obj.rotation_euler[0] += vec[0]
-            obj.rotation_euler[1] += vec[1]
-            obj.rotation_euler[2] += vec[2]
-
-            # if delta:
-            #     obj.delta_rotation_euler[0] += vec[0]
-            #     obj.delta_rotation_euler[1] += vec[1]
-            #     obj.delta_rotation_euler[2] += vec[2]
-            # else:
-            #     obj.rotation_euler[0] += vec[0]
-            #     obj.rotation_euler[1] += vec[1]
-            #     obj.rotation_euler[2] += vec[2]
-            obj.rotation_mode = rotation_mode
-        else:
-            uniform(0.0, 0.0), uniform(0.0, 0.0), uniform(0.0, 0.0)
