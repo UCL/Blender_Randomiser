@@ -117,15 +117,24 @@ def randomize_selected(context, #seed, delta,
             uniform(0.0, 0.0), uniform(0.0, 0.0), uniform(0.0, 0.0)
 
         if rot:
-            vec = rand_vec(rot)
+            vec = rand_vec(rot) #assume input is degrees
+            deg2rad=np.pi/180
+
+            pdb.set_trace()
+
+            vec=vec*deg2rad #convert degrees to radians
+
+            pdb.set_trace()
 
             rotation_mode = obj.rotation_mode
             if rotation_mode in {'QUATERNION', 'AXIS_ANGLE'}:
                 obj.rotation_mode = 'XYZ'
 
-            obj.rotation_euler[0] += vec[0]
+            obj.rotation_euler[0] += vec[0] #in radians
             obj.rotation_euler[1] += vec[1]
             obj.rotation_euler[2] += vec[2]
+
+            pdb.set_trace()
 
             # if delta:
             #     obj.delta_rotation_euler[0] += vec[0]
