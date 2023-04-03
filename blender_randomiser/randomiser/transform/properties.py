@@ -28,6 +28,21 @@ class PropertiesApplyRandomTransform(
     # camera_rot: camera_rot_prop  # type: ignore
     camera_pos: bpy.props.FloatVectorProperty(size=3,step=100,)  # type: ignore
     camera_rot: bpy.props.FloatVectorProperty(size=3,step=100,)  # type: ignore
+    camera_pos_x_min: bpy.props.FloatVectorProperty(size=1, step=100,)  # type: ignore
+    camera_pos_x_max: bpy.props.FloatVectorProperty(size=1, step=100,)  # type: ignore
+    camera_pos_y_min: bpy.props.FloatVectorProperty(size=1, step=100,)  # type: ignore
+    camera_pos_y_max: bpy.props.FloatVectorProperty(size=1, step=100,)  # type: ignore
+    camera_pos_z_min: bpy.props.FloatVectorProperty(size=1, step=100,)  # type: ignore
+    camera_pos_z_max: bpy.props.FloatVectorProperty(size=1, step=100,)  # type: ignore
+    
+
+    camera_rot_x_min: bpy.props.FloatVectorProperty(size=1, step=100,)  # type: ignore
+    camera_rot_x_max: bpy.props.FloatVectorProperty(size=1, step=100,)  # type: ignore
+    camera_rot_y_min: bpy.props.FloatVectorProperty(size=1, step=100,)  # type: ignore
+    camera_rot_y_max: bpy.props.FloatVectorProperty(size=1, step=100,)  # type: ignore
+    camera_rot_z_min: bpy.props.FloatVectorProperty(size=1, step=100,)  # type: ignore
+    camera_rot_z_max: bpy.props.FloatVectorProperty(size=1, step=100,)  # type: ignore
+    
 
     # min_float_3d: bpy.props.FloatVectorProperty()  # type: ignore
     # max_float_3d: bpy.props.FloatVectorProperty()  # type: ignore

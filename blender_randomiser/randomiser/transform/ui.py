@@ -41,53 +41,65 @@ class PanelAddRandomTransform(bpy.types.Panel):
         # Randomize_transform updates automatically every time you change the random seed
 
         layout = self.layout
-
         scene = context.scene
+
         # Create a simple row.
-        # self.layout(text=" Simple Row:")
-
-        row = layout.row()
-        row.prop(scene, "frame_start")
-        row.prop(scene, "frame_end")
-
         # Create an row where the buttons are aligned to each other.
-        layout.label(text=" Aligned Row:")
 
-        row = layout.row(align=True)
-        row.prop(scene, "frame_start")
-        row.prop(scene, "frame_end")
+        layout.label(text=" Randomise position:")
+        row = layout.row() #row = layout.row(align=True)
+        row.prop(context.scene.randomise_camera_props, 'camera_pos_x_min',)
+        row.prop(context.scene.randomise_camera_props, 'camera_pos_x_max',)
+
+        #layout.label(text=" Randomise position y:")
+        row = layout.row()
+        row.prop(context.scene.randomise_camera_props, 'camera_pos_y_min',)
+        row.prop(context.scene.randomise_camera_props, 'camera_pos_y_max',)
+
+        #layout.label(text=" Randomise position z:")
+        row = layout.row()
+        row.prop(context.scene.randomise_camera_props, 'camera_pos_z_min',)
+        row.prop(context.scene.randomise_camera_props, 'camera_pos_z_max',)
+
+
 
         # Create two columns, by using a split layout.
         split = layout.split()
 
         # First column
         col = split.column()
-        col.label(text="Column One:")
-        col.prop(scene, "frame_end")
-        col.prop(scene, "frame_start")
+        col.label(text="Rotation x:")
+        col.prop(context.scene.randomise_camera_props, 'camera_rot_x_min',)
+        col.prop(context.scene.randomise_camera_props, 'camera_rot_x_max',)
 
         # Second column, aligned
         col = split.column(align=True)
-        col.label(text="Column Two:")
-        col.prop(scene, "frame_start")
-        col.prop(scene, "frame_end")
+        col.label(text="Rotation y:")
+        col.prop(context.scene.randomise_camera_props, 'camera_rot_y_min',)
+        col.prop(context.scene.randomise_camera_props, 'camera_rot_y_max',)
 
-        # Big render button
-        layout.label(text="Big Button:")
-        row = layout.row()
-        row.scale_y = 3.0
-        row.operator("render.render")
+        # Third column, aligned
+        col = split.column(align=True)
+        col.label(text="Rotation z:")
+        col.prop(context.scene.randomise_camera_props, 'camera_rot_z_min',)
+        col.prop(context.scene.randomise_camera_props, 'camera_rot_z_max',)
+        
+        # # Big render button
+        # layout.label(text="Big Button:")
+        # row = layout.row()
+        # row.scale_y = 3.0
+        # row.operator("render.render")
 
-        # Different sizes in a row
-        layout.label(text="Different button sizes:")
-        row = layout.row(align=True)
-        row.operator("render.render")
+        # # Different sizes in a row
+        # layout.label(text="Different button sizes:")
+        # row = layout.row(align=True)
+        # row.operator("render.render")
 
-        sub = row.row()
-        sub.scale_x = 2.0
-        sub.operator("render.render")
+        # sub = row.row()
+        # sub.scale_x = 2.0
+        # sub.operator("render.render")
 
-        row.operator("render.render")
+        # row.operator("render.render")
 
 # PROPS = [
 #     # ('random_seed', bpy.props.IntProperty(name='Random Seed', default=0)),
