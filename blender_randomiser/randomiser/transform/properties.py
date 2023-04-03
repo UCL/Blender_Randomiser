@@ -51,7 +51,7 @@ class PropertiesApplyRandomTransform(
     # max_float_4d: bpy.props.FloatVectorProperty(size=4)  # type: ignore
 
     # BOOL
-    bool_randomise: bpy.props.BoolProperty()  # type: ignore
+    bool_delta: bpy.props.BoolProperty()  # type: ignore
 
 
 # --------------------------------------------------

@@ -57,37 +57,11 @@ class ApplyRandomTransform(bpy.types.Operator):  # ---check types
         rot_z_min = context.scene.randomise_camera_props.camera_rot_z_min[0]
         rot_z_max = context.scene.randomise_camera_props.camera_rot_z_max[0]
         rot_z_range = [rot_z_min, rot_z_max]
-        randomise_on=True
+        delta_on=context.scene.randomise_camera_props.bool_delta
 
-        #randomize_selected(context, loc, rot, randomise_on, loc_x_min, loc_x_max)
+        #randomize_selected(context, loc, rot, delta_on, loc_x_min, loc_x_max)
         randomize_selected(context, loc, loc_x_range, loc_y_range, loc_z_range,
-                           rot, rot_x_range, rot_y_range, rot_z_range, randomise_on)
-
-        
-        # # for obj in bpy.context.selected_objects:
-        # #     rename_object(obj, params)
-
-
-
-        # # add a cube primitive and link it to the scene collection        
-        # bpy.ops.mesh.primitive_uv_sphere_add()  # returns {'FINISHED'} if successful
-        # cube_object = context.object
-
-        # # get inputs
-        # # seed: If None, fresh unpredictable entropy will be pulled from the OS
-        # scene = context.scene
-        # seed = (
-        #     scene.random_cube_props.seed
-        #     if scene.random_cube_props.seed_toggle
-        #     else None
-        # )
-        # vol_size = scene.random_cube_props.vol_size
-
-        # # set location randomly within predifined volume
-        # rng = np.random.default_rng(
-        #     seed
-        # )  # recommended constructor for the random number class Generator
-        # cube_object.location = vol_size * rng.random((3,)) - 0.5 * vol_size
+                           rot, rot_x_range, rot_y_range, rot_z_range, delta_on)
 
         return {"FINISHED"}
 
@@ -120,7 +94,7 @@ def unregister():
 def randomize_selected(context, #seed, delta,
                        loc, loc_x_range, loc_y_range, loc_z_range,
                        rot, rot_x_range, rot_y_range, rot_z_range,
-                       randomise_on):
+                       delta_on):
 
     import random
     from random import uniform
@@ -144,12 +118,16 @@ def randomize_selected(context, #seed, delta,
             rand_z= rand_num(loc_z_range[0], loc_z_range[1])
             
             # obj.location += rand_vec(loc)
-            obj.location += Vector([rand_x, rand_y, rand_z])
-            pdb.set_trace()
-            # if delta:
-            #     obj.delta_location += rand_vec(loc)
-            # else:
-            #     obj.location += rand_vec(loc)
+            
+            
+
+            if delta_on:
+                # pdb.set_trace()
+                obj.delta_location += Vector([rand_x, rand_y, rand_z])
+            else:
+                obj.location += Vector([rand_x, rand_y, rand_z])
+
+
         else:  # otherwise the values change under us
             uniform(0.0, 0.0), uniform(0.0, 0.0), uniform(0.0, 0.0)
 
@@ -177,14 +155,14 @@ def randomize_selected(context, #seed, delta,
 
             #pdb.set_trace()
 
-            # if delta:
-            #     obj.delta_rotation_euler[0] += vec[0]
-            #     obj.delta_rotation_euler[1] += vec[1]
-            #     obj.delta_rotation_euler[2] += vec[2]
-            # else:
-            #     obj.rotation_euler[0] += vec[0]
-            #     obj.rotation_euler[1] += vec[1]
-            #     obj.rotation_euler[2] += vec[2]
+            if delta_on:
+                obj.delta_rotation_euler[0] += vec[0]
+                obj.delta_rotation_euler[1] += vec[1]
+                obj.delta_rotation_euler[2] += vec[2]
+            else:
+                obj.rotation_euler[0] += vec[0]
+                obj.rotation_euler[1] += vec[1]
+                obj.rotation_euler[2] += vec[2]
             obj.rotation_mode = rotation_mode
         else:
             uniform(0.0, 0.0), uniform(0.0, 0.0), uniform(0.0, 0.0)

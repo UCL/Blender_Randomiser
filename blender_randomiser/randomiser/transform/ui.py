@@ -25,7 +25,7 @@ class PanelAddRandomTransform(bpy.types.Panel):
         row = col.row()
         row.prop(context.scene.randomise_camera_props, 'camera_rot',)
         row = col.row()
-        row.prop(context.scene.randomise_camera_props, 'bool_randomise',)
+        row.prop(context.scene.randomise_camera_props, 'bool_delta',)
         # for (prop_name, _) in PROPS:
         #     row = col.row()
         #     # if prop_name == 'camera_pos':
