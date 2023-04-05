@@ -1,6 +1,4 @@
 import bpy
-import numpy as np
-import pdb
 
 
 # ---------------------------
@@ -26,23 +24,63 @@ class PropertiesApplyRandomTransform(
 
     # float props: defaults to 0s
     # camera_rot: camera_rot_prop  # type: ignore
-    camera_pos: bpy.props.FloatVectorProperty(size=3,step=100,)  # type: ignore
-    camera_rot: bpy.props.FloatVectorProperty(size=3,step=100,)  # type: ignore
-    camera_pos_x_min: bpy.props.FloatVectorProperty(size=1, step=100,)  # type: ignore
-    camera_pos_x_max: bpy.props.FloatVectorProperty(size=1, step=100,)  # type: ignore
-    camera_pos_y_min: bpy.props.FloatVectorProperty(size=1, step=100,)  # type: ignore
-    camera_pos_y_max: bpy.props.FloatVectorProperty(size=1, step=100,)  # type: ignore
-    camera_pos_z_min: bpy.props.FloatVectorProperty(size=1, step=100,)  # type: ignore
-    camera_pos_z_max: bpy.props.FloatVectorProperty(size=1, step=100,)  # type: ignore
-    
+    camera_pos: bpy.props.FloatVectorProperty(  # type: ignore
+        size=3,
+        step=100,
+    )  # type: ignore
+    camera_rot: bpy.props.FloatVectorProperty(  # type: ignore
+        size=3,
+        step=100,
+    )  # type: ignore
+    camera_pos_x_min: bpy.props.FloatVectorProperty(  # type: ignore
+        size=1,
+        step=100,
+    )  # type: ignore
+    camera_pos_x_max: bpy.props.FloatVectorProperty(  # type: ignore
+        size=1,
+        step=100,
+    )  # type: ignore
+    camera_pos_y_min: bpy.props.FloatVectorProperty(  # type: ignore
+        size=1,
+        step=100,
+    )  # type: ignore
+    camera_pos_y_max: bpy.props.FloatVectorProperty(  # type: ignore
+        size=1,
+        step=100,
+    )  # type: ignore
+    camera_pos_z_min: bpy.props.FloatVectorProperty(  # type: ignore
+        size=1,
+        step=100,
+    )  # type: ignore
+    camera_pos_z_max: bpy.props.FloatVectorProperty(  # type: ignore
+        size=1,
+        step=100,
+    )  # type: ignore
 
-    camera_rot_x_min: bpy.props.FloatVectorProperty(size=1, step=100,)  # type: ignore
-    camera_rot_x_max: bpy.props.FloatVectorProperty(size=1, step=100,)  # type: ignore
-    camera_rot_y_min: bpy.props.FloatVectorProperty(size=1, step=100,)  # type: ignore
-    camera_rot_y_max: bpy.props.FloatVectorProperty(size=1, step=100,)  # type: ignore
-    camera_rot_z_min: bpy.props.FloatVectorProperty(size=1, step=100,)  # type: ignore
-    camera_rot_z_max: bpy.props.FloatVectorProperty(size=1, step=100,)  # type: ignore
-    
+    camera_rot_x_min: bpy.props.FloatVectorProperty(  # type: ignore
+        size=1,
+        step=100,
+    )  # type: ignore
+    camera_rot_x_max: bpy.props.FloatVectorProperty(  # type: ignore
+        size=1,
+        step=100,
+    )  # type: ignore
+    camera_rot_y_min: bpy.props.FloatVectorProperty(  # type: ignore
+        size=1,
+        step=100,
+    )  # type: ignore
+    camera_rot_y_max: bpy.props.FloatVectorProperty(  # type: ignore
+        size=1,
+        step=100,
+    )  # type: ignore
+    camera_rot_z_min: bpy.props.FloatVectorProperty(  # type: ignore
+        size=1,
+        step=100,
+    )  # type: ignore
+    camera_rot_z_max: bpy.props.FloatVectorProperty(  # type: ignore
+        size=1,
+        step=100,
+    )  # type: ignore
 
     # min_float_3d: bpy.props.FloatVectorProperty()  # type: ignore
     # max_float_3d: bpy.props.FloatVectorProperty()  # type: ignore
@@ -68,10 +106,8 @@ def register():
         bpy.utils.register_class(cls)
         # add custom props to the scene! before registering the rest?
         if cls == PropertiesApplyRandomTransform:
-            bpy.types.Scene.randomise_camera_props = (
-                bpy.props.PointerProperty(
-                    type=PropertiesApplyRandomTransform
-                )
+            bpy.types.Scene.randomise_camera_props = bpy.props.PointerProperty(
+                type=PropertiesApplyRandomTransform
             )
             # alternative: setattr(bpy.types.Scene, prop_name, prop_value)?
 
@@ -101,5 +137,3 @@ def unregister():
     # Remove the operator from existing menu.
     # bpy.types.VIEW3D_MT_object.remove(menu_func)
     print("unregistered")
-
-

@@ -1,7 +1,7 @@
 import bpy
 import numpy as np
-import pdb
 from mathutils import Vector
+
 
 # -------------------------------
 ## Operators
@@ -30,7 +30,6 @@ class ApplyRandomTransform(bpy.types.Operator):  # ---check types
     # -------------------------------
     ### Execute fn
     def execute(self, context):
-
         loc = context.scene.randomise_camera_props.camera_pos
         rot = context.scene.randomise_camera_props.camera_rot
 
@@ -57,11 +56,21 @@ class ApplyRandomTransform(bpy.types.Operator):  # ---check types
         rot_z_min = context.scene.randomise_camera_props.camera_rot_z_min[0]
         rot_z_max = context.scene.randomise_camera_props.camera_rot_z_max[0]
         rot_z_range = [rot_z_min, rot_z_max]
-        delta_on=context.scene.randomise_camera_props.bool_delta
+        delta_on = context.scene.randomise_camera_props.bool_delta
 
-        #randomize_selected(context, loc, rot, delta_on, loc_x_min, loc_x_max)
-        randomize_selected(context, loc, loc_x_range, loc_y_range, loc_z_range,
-                           rot, rot_x_range, rot_y_range, rot_z_range, delta_on)
+        # randomize_selected(context, loc, rot, delta_on, loc_x_min, loc_x_max)
+        randomize_selected(
+            context,
+            loc,
+            loc_x_range,
+            loc_y_range,
+            loc_z_range,
+            rot,
+            rot_x_range,
+            rot_y_range,
+            rot_z_range,
+            delta_on,
+        )
 
         return {"FINISHED"}
 
@@ -91,12 +100,19 @@ def unregister():
 
     print("unregistered")
 
-def randomize_selected(context, #seed, delta,
-                       loc, loc_x_range, loc_y_range, loc_z_range,
-                       rot, rot_x_range, rot_y_range, rot_z_range,
-                       delta_on):
 
-    import random
+def randomize_selected(
+    context,  # seed, delta,
+    loc,
+    loc_x_range,
+    loc_y_range,
+    loc_z_range,
+    rot,
+    rot_x_range,
+    rot_y_range,
+    rot_z_range,
+    delta_on,
+):
     from random import uniform
 
     # random.seed(seed)
@@ -105,21 +121,16 @@ def randomize_selected(context, #seed, delta,
         return Vector(uniform(-val, val) for val in vec_range)
         # return Vector(uniform(-val, val) for val in vec_range)
 
-    def rand_num(min,max):
-        return uniform(min,max)
-    
-    
+    def rand_num(min, max):
+        return uniform(min, max)
 
     for obj in context.selected_objects:
-
         if loc:
-            rand_x= rand_num(loc_x_range[0], loc_x_range[1])
-            rand_y= rand_num(loc_y_range[0], loc_y_range[1])
-            rand_z= rand_num(loc_z_range[0], loc_z_range[1])
-            
+            rand_x = rand_num(loc_x_range[0], loc_x_range[1])
+            rand_y = rand_num(loc_y_range[0], loc_y_range[1])
+            rand_z = rand_num(loc_z_range[0], loc_z_range[1])
+
             # obj.location += rand_vec(loc)
-            
-            
 
             if delta_on:
                 # pdb.set_trace()
@@ -127,33 +138,32 @@ def randomize_selected(context, #seed, delta,
             else:
                 obj.location += Vector([rand_x, rand_y, rand_z])
 
-
         else:  # otherwise the values change under us
             uniform(0.0, 0.0), uniform(0.0, 0.0), uniform(0.0, 0.0)
 
         if rot:
-            rand_x= rand_num(rot_x_range[0], rot_x_range[1])
-            rand_y= rand_num(rot_y_range[0], rot_y_range[1])
-            rand_z= rand_num(rot_z_range[0], rot_z_range[1])
+            rand_x = rand_num(rot_x_range[0], rot_x_range[1])
+            rand_y = rand_num(rot_y_range[0], rot_y_range[1])
+            rand_z = rand_num(rot_z_range[0], rot_z_range[1])
             vec = Vector([rand_x, rand_y, rand_z])
             # vec = rand_vec(rot) #assume input is degrees
-            deg2rad=np.pi/180
+            deg2rad = np.pi / 180
 
-            #pdb.set_trace()
+            # pdb.set_trace()
 
-            vec=vec*deg2rad #convert degrees to radians
+            vec = vec * deg2rad  # convert degrees to radians
 
-            #pdb.set_trace()
+            # pdb.set_trace()
 
             rotation_mode = obj.rotation_mode
-            if rotation_mode in {'QUATERNION', 'AXIS_ANGLE'}:
-                obj.rotation_mode = 'XYZ'
+            if rotation_mode in {"QUATERNION", "AXIS_ANGLE"}:
+                obj.rotation_mode = "XYZ"
 
-            obj.rotation_euler[0] += vec[0] #in radians
+            obj.rotation_euler[0] += vec[0]  # in radians
             obj.rotation_euler[1] += vec[1]
             obj.rotation_euler[2] += vec[2]
 
-            #pdb.set_trace()
+            # pdb.set_trace()
 
             if delta_on:
                 obj.delta_rotation_euler[0] += vec[0]

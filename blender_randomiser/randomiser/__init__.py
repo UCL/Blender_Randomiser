@@ -19,13 +19,13 @@ bl_info = {
 
 def register():
     transform.register()
-    #material.register()
+    # material.register()
     # geometry.register()
 
 
 def unregister():
     transform.unregister()
-    #material.unregister()
+    # material.unregister()
     # geometry.unregister()
 
 

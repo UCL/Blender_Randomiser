@@ -1,7 +1,4 @@
 import bpy
-import numpy as np
-import pdb
-
 
 
 # -------
@@ -21,11 +18,20 @@ class PanelAddRandomTransform(bpy.types.Panel):
     def draw(self, context):
         col = self.layout.column()
         row = col.row()
-        row.prop(context.scene.randomise_camera_props, 'camera_pos',)
+        row.prop(
+            context.scene.randomise_camera_props,
+            "camera_pos",
+        )
         row = col.row()
-        row.prop(context.scene.randomise_camera_props, 'camera_rot',)
+        row.prop(
+            context.scene.randomise_camera_props,
+            "camera_rot",
+        )
         row = col.row()
-        row.prop(context.scene.randomise_camera_props, 'bool_delta',)
+        row.prop(
+            context.scene.randomise_camera_props,
+            "bool_delta",
+        )
         # for (prop_name, _) in PROPS:
         #     row = col.row()
         #     # if prop_name == 'camera_pos':
@@ -36,32 +42,48 @@ class PanelAddRandomTransform(bpy.types.Panel):
         #     #     row.enabled = context.scene.randomise_rotation
         #     row.prop(context.scene, prop_name)
 
-        col.operator('opr.apply_random_transform', text='Randomize')
+        col.operator("opr.apply_random_transform", text="Randomize")
         ##### do we need this to randomise or to apply transform?????
-        # Randomize_transform updates automatically every time you change the random seed
+        # Randomize_transform updates automatically
+        # every time you change the random seed
 
         layout = self.layout
-        scene = context.scene
 
         # Create a simple row.
         # Create an row where the buttons are aligned to each other.
 
         layout.label(text=" Randomise position:")
-        row = layout.row() #row = layout.row(align=True)
-        row.prop(context.scene.randomise_camera_props, 'camera_pos_x_min',)
-        row.prop(context.scene.randomise_camera_props, 'camera_pos_x_max',)
+        row = layout.row()  # row = layout.row(align=True)
+        row.prop(
+            context.scene.randomise_camera_props,
+            "camera_pos_x_min",
+        )
+        row.prop(
+            context.scene.randomise_camera_props,
+            "camera_pos_x_max",
+        )
 
-        #layout.label(text=" Randomise position y:")
+        # layout.label(text=" Randomise position y:")
         row = layout.row()
-        row.prop(context.scene.randomise_camera_props, 'camera_pos_y_min',)
-        row.prop(context.scene.randomise_camera_props, 'camera_pos_y_max',)
+        row.prop(
+            context.scene.randomise_camera_props,
+            "camera_pos_y_min",
+        )
+        row.prop(
+            context.scene.randomise_camera_props,
+            "camera_pos_y_max",
+        )
 
-        #layout.label(text=" Randomise position z:")
+        # layout.label(text=" Randomise position z:")
         row = layout.row()
-        row.prop(context.scene.randomise_camera_props, 'camera_pos_z_min',)
-        row.prop(context.scene.randomise_camera_props, 'camera_pos_z_max',)
-
-
+        row.prop(
+            context.scene.randomise_camera_props,
+            "camera_pos_z_min",
+        )
+        row.prop(
+            context.scene.randomise_camera_props,
+            "camera_pos_z_max",
+        )
 
         # Create two columns, by using a split layout.
         split = layout.split()
@@ -69,21 +91,39 @@ class PanelAddRandomTransform(bpy.types.Panel):
         # First column
         col = split.column()
         col.label(text="Rotation x:")
-        col.prop(context.scene.randomise_camera_props, 'camera_rot_x_min',)
-        col.prop(context.scene.randomise_camera_props, 'camera_rot_x_max',)
+        col.prop(
+            context.scene.randomise_camera_props,
+            "camera_rot_x_min",
+        )
+        col.prop(
+            context.scene.randomise_camera_props,
+            "camera_rot_x_max",
+        )
 
         # Second column, aligned
         col = split.column(align=True)
         col.label(text="Rotation y:")
-        col.prop(context.scene.randomise_camera_props, 'camera_rot_y_min',)
-        col.prop(context.scene.randomise_camera_props, 'camera_rot_y_max',)
+        col.prop(
+            context.scene.randomise_camera_props,
+            "camera_rot_y_min",
+        )
+        col.prop(
+            context.scene.randomise_camera_props,
+            "camera_rot_y_max",
+        )
 
         # Third column, aligned
         col = split.column(align=True)
         col.label(text="Rotation z:")
-        col.prop(context.scene.randomise_camera_props, 'camera_rot_z_min',)
-        col.prop(context.scene.randomise_camera_props, 'camera_rot_z_max',)
-        
+        col.prop(
+            context.scene.randomise_camera_props,
+            "camera_rot_z_min",
+        )
+        col.prop(
+            context.scene.randomise_camera_props,
+            "camera_rot_z_max",
+        )
+
         # # Big render button
         # layout.label(text="Big Button:")
         # row = layout.row()
@@ -101,12 +141,17 @@ class PanelAddRandomTransform(bpy.types.Panel):
 
         # row.operator("render.render")
 
+
 # PROPS = [
 #     # ('random_seed', bpy.props.IntProperty(name='Random Seed', default=0)),
-#     #('randomise_camera_pos', bpy.props.BoolProperty(name='Randomize camera_pos', default=False))
-#     ('camera_pos', bpy.props.FloatProperty(name='Camera camera_pos', default=[0,0,0])),
-#     #('randomise_rotation', bpy.props.BoolProperty(name='Randomize Rotation', default=False))
-#     ('rotation', bpy.props.FloatProperty(name='Camera Rotation', default=[0,0,0])),
+#     #('randomise_camera_pos',
+# bpy.props.BoolProperty(name='Randomize camera_pos', default=False))
+#     ('camera_pos',
+# bpy.props.FloatProperty(name='Camera camera_pos', default=[0,0,0])),
+#     #('randomise_rotation',
+# bpy.props.BoolProperty(name='Randomize Rotation', default=False))
+#     ('rotation',
+# bpy.props.FloatProperty(name='Camera Rotation', default=[0,0,0])),
 # ]
 
 
