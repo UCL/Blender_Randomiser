@@ -1,5 +1,6 @@
-source ~/.bash_profile
 #!/usr/bin/env bash
+source ~/.bash_profile
+
 # zip randomiser, launch blender and install+enable
 cd blender_randomiser
 zip -r randomiser.zip randomiser/
