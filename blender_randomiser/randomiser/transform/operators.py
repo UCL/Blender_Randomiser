@@ -124,55 +124,59 @@ def randomize_selected(
     def rand_num(min, max):
         return uniform(min, max)
 
-    for obj in context.selected_objects:
-        if loc:
-            rand_x = rand_num(loc_x_range[0], loc_x_range[1])
-            rand_y = rand_num(loc_y_range[0], loc_y_range[1])
-            rand_z = rand_num(loc_z_range[0], loc_z_range[1])
+    # for obj in context.selected_objects:
+    if loc:
+        rand_x = rand_num(loc_x_range[0], loc_x_range[1])
+        rand_y = rand_num(loc_y_range[0], loc_y_range[1])
+        rand_z = rand_num(loc_z_range[0], loc_z_range[1])
 
-            # obj.location += rand_vec(loc)
+        # obj.location += rand_vec(loc)
 
-            if delta_on:
-                # pdb.set_trace()
-                obj.delta_location += Vector([rand_x, rand_y, rand_z])
-            else:
-                obj.location += Vector([rand_x, rand_y, rand_z])
-
-        else:  # otherwise the values change under us
-            uniform(0.0, 0.0), uniform(0.0, 0.0), uniform(0.0, 0.0)
-
-        if rot:
-            rand_x = rand_num(rot_x_range[0], rot_x_range[1])
-            rand_y = rand_num(rot_y_range[0], rot_y_range[1])
-            rand_z = rand_num(rot_z_range[0], rot_z_range[1])
-            vec = Vector([rand_x, rand_y, rand_z])
-            # vec = rand_vec(rot) #assume input is degrees
-            deg2rad = np.pi / 180
-
+        if delta_on:
             # pdb.set_trace()
-
-            vec = vec * deg2rad  # convert degrees to radians
-
-            # pdb.set_trace()
-
-            rotation_mode = obj.rotation_mode
-            if rotation_mode in {"QUATERNION", "AXIS_ANGLE"}:
-                obj.rotation_mode = "XYZ"
-
-            obj.rotation_euler[0] += vec[0]  # in radians
-            obj.rotation_euler[1] += vec[1]
-            obj.rotation_euler[2] += vec[2]
-
-            # pdb.set_trace()
-
-            if delta_on:
-                obj.delta_rotation_euler[0] += vec[0]
-                obj.delta_rotation_euler[1] += vec[1]
-                obj.delta_rotation_euler[2] += vec[2]
-            else:
-                obj.rotation_euler[0] += vec[0]
-                obj.rotation_euler[1] += vec[1]
-                obj.rotation_euler[2] += vec[2]
-            obj.rotation_mode = rotation_mode
+            bpy.data.objects["Camera"].delta_location = Vector(
+                [rand_x, rand_y, rand_z]
+            )
         else:
-            uniform(0.0, 0.0), uniform(0.0, 0.0), uniform(0.0, 0.0)
+            bpy.data.objects["Camera"].location = Vector(
+                [rand_x, rand_y, rand_z]
+            )
+
+    else:  # otherwise the values change under us
+        uniform(0.0, 0.0), uniform(0.0, 0.0), uniform(0.0, 0.0)
+
+    if rot:
+        rand_x = rand_num(rot_x_range[0], rot_x_range[1])
+        rand_y = rand_num(rot_y_range[0], rot_y_range[1])
+        rand_z = rand_num(rot_z_range[0], rot_z_range[1])
+        vec = Vector([rand_x, rand_y, rand_z])
+        # vec = rand_vec(rot) #assume input is degrees
+        deg2rad = np.pi / 180
+
+        # pdb.set_trace()
+
+        vec = vec * deg2rad  # convert degrees to radians
+
+        # pdb.set_trace()
+
+        rotation_mode = bpy.data.objects["Camera"].rotation_mode
+        if rotation_mode in {"QUATERNION", "AXIS_ANGLE"}:
+            bpy.data.objects["Camera"].rotation_mode = "XYZ"
+
+        bpy.data.objects["Camera"].rotation_euler[0] = vec[0]  # in radians
+        bpy.data.objects["Camera"].rotation_euler[1] = vec[1]
+        bpy.data.objects["Camera"].rotation_euler[2] = vec[2]
+
+        # pdb.set_trace()
+
+        if delta_on:
+            bpy.data.objects["Camera"].delta_rotation_euler[0] = vec[0]
+            bpy.data.objects["Camera"].delta_rotation_euler[1] = vec[1]
+            bpy.data.objects["Camera"].delta_rotation_euler[2] = vec[2]
+        else:
+            bpy.data.objects["Camera"].rotation_euler[0] = vec[0]
+            bpy.data.objects["Camera"].rotation_euler[1] = vec[1]
+            bpy.data.objects["Camera"].rotation_euler[2] = vec[2]
+        bpy.data.objects["Camera"].rotation_mode = rotation_mode
+    else:
+        uniform(0.0, 0.0), uniform(0.0, 0.0), uniform(0.0, 0.0)

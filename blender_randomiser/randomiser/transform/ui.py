@@ -17,16 +17,16 @@ class PanelAddRandomTransform(bpy.types.Panel):
 
     def draw(self, context):
         col = self.layout.column()
-        row = col.row()
-        row.prop(
-            context.scene.randomise_camera_props,
-            "camera_pos",
-        )
-        row = col.row()
-        row.prop(
-            context.scene.randomise_camera_props,
-            "camera_rot",
-        )
+        # row = col.row()
+        # row.prop(
+        #     context.scene.randomise_camera_props,
+        #     "camera_pos",
+        # )
+        # row = col.row()
+        # row.prop(
+        #     context.scene.randomise_camera_props,
+        #     "camera_rot",
+        # )
         row = col.row()
         row.prop(
             context.scene.randomise_camera_props,
