@@ -4,41 +4,65 @@ rotation and scale of the selected objects
 
 """
 ### Imports
+
 import bpy
-import numpy as np
+from mathutils import Vector
+
+# bpy.data.objects['Camera'].location[0-2]
+# bpy.data.objects['Camera'].rotation_euler[0-2]
+# bpy.context.camera
 
 
 # ---------------------------
 # Properties
-class PropertiesAddRandomTransform(
+class PropertiesApplyRandomTransform(
     bpy.types.PropertyGroup
 ):  # ---these will be added to context.scene.<custom_prop> in registration
-    vol_size_prop = bpy.props.FloatProperty(
-        name="Target volume size",
-        default=1.0,
-        soft_min=0.0,
-        soft_max=10.0,
-        step=50,
-    )  # NOTE in step: the actual value is the value set here divided by 100
-    vol_size: vol_size_prop  # type: ignore
+    # camera_rot_prop = bpy.props.FloatProperty(
+    #     name="Camera camera_rot",
+    #     default=0.0,
+    #     soft_min=-50.0,
+    #     soft_max=50.0,
+    #     step=100,
+    # )  # OJO in step: the actual value is the value set here divided by 100
 
-    seed_toggle_prop = bpy.props.BoolProperty(
-        name="Set random seed", default=False
+    # seed_toggle_prop = bpy.props.BoolProperty(
+    #     name="Set random seed", default=False
+    # )
+    # seed_toggle: seed_toggle_prop  # type: ignore
+
+    # seed_prop = bpy.props.IntProperty(name="Seed", default=42)
+    # seed: seed_prop  # type: ignore
+
+    # float props: defaults to 0s
+    # camera_rot: camera_rot_prop  # type: ignore
+    camera_pos: bpy.props.FloatVectorProperty(  # type: ignore
+        size=3,
+        step=100,
     )
-    seed_toggle: seed_toggle_prop  # type: ignore
+    camera_rot: bpy.props.FloatVectorProperty(  # type: ignore
+        size=3,
+        step=100,
+    )
 
-    seed_prop = bpy.props.IntProperty(name="Seed", default=42)
-    seed: seed_prop  # type: ignore
+    # min_float_3d: bpy.props.FloatVectorProperty()  # type: ignore
+    # max_float_3d: bpy.props.FloatVectorProperty()  # type: ignore
+
+    # min_float_4d: bpy.props.FloatVectorProperty(size=4)  # type: ignore
+    # max_float_4d: bpy.props.FloatVectorProperty(size=4)  # type: ignore
+
+    # BOOL
+    bool_randomise: bpy.props.BoolProperty()  # type: ignore
 
 
 # -------------------------------
 ## Operators
-class AddRandomTransform(bpy.types.Operator):  # ---check types
+class ApplyRandomTransform(bpy.types.Operator):  # ---check types
     # docstring shows as a tooltip for menu items and buttons.
     """Add a random cube within a predefined volume"""
 
-    bl_idname = "object.add_random_cube"  # appended to bpy.ops.
-    bl_label = "Add random cube in volume"
+    bl_idname = "opr.apply_random_transform"  # appended to bpy.ops.
+    bl_label = "Apply random transform to object"
     bl_options = {"REGISTER", "UNDO"}
 
     # check if the operator can be executed/invoked
@@ -58,25 +82,36 @@ class AddRandomTransform(bpy.types.Operator):  # ---check types
     # -------------------------------
     ### Execute fn
     def execute(self, context):
-        # add a cube primitive and link it to the scene collection
-        bpy.ops.mesh.primitive_cube_add()  # returns {'FINISHED'} if successful
-        cube_object = context.object
+        loc = context.scene.randomise_camera_props.camera_pos
+        rot = context.scene.randomise_camera_props.camera_rot
+        randomise_on = True
 
-        # get inputs
-        # seed: If None, fresh unpredictable entropy will be pulled from the OS
-        scene = context.scene
-        seed = (
-            scene.random_cube_props.seed
-            if scene.random_cube_props.seed_toggle
-            else None
-        )
-        vol_size = scene.random_cube_props.vol_size
+        randomize_selected(context, loc, rot, randomise_on)
 
-        # set location randomly within predifined volume
-        rng = np.random.default_rng(
-            seed
-        )  # recommended constructor for the random number class Generator
-        cube_object.location = vol_size * rng.random((3,)) - 0.5 * vol_size
+        # # for obj in bpy.context.selected_objects:
+        # #     rename_object(obj, params)
+
+        # # add a cube primitive and link it to the scene collection
+        # bpy.ops.mesh.primitive_uv_sphere_add()
+        # # returns {'FINISHED'} if successful
+        # cube_object = context.object
+
+        # # get inputs
+        # # seed:
+        # If None, fresh unpredictable entropy will be pulled from the OS
+        # scene = context.scene
+        # seed = (
+        #     scene.random_cube_props.seed
+        #     if scene.random_cube_props.seed_toggle
+        #     else None
+        # )
+        # vol_size = scene.random_cube_props.vol_size
+
+        # # set location randomly within predifined volume
+        # rng = np.random.default_rng(
+        #     seed
+        # )  # recommended constructor for the random number class Generator
+        # cube_object.location = vol_size * rng.random((3,)) - 0.5 * vol_size
 
         return {"FINISHED"}
 
@@ -96,46 +131,99 @@ class PanelAddRandomTransform(bpy.types.Panel):
         return context.object is not None
 
     def draw(self, context):
-        # Target volume (align text label and field)
+        col = self.layout.column()
+        row = col.row()
+        row.prop(
+            context.scene.randomise_camera_props,
+            "camera_pos",
+        )
+        row = col.row()
+        row.prop(
+            context.scene.randomise_camera_props,
+            "camera_rot",
+        )
+        row = col.row()
+        row.prop(
+            context.scene.randomise_camera_props,
+            "bool_randomise",
+        )
+        # for (prop_name, _) in PROPS:
+        #     row = col.row()
+        #     # if prop_name == 'camera_pos':
+        #     #     row = row.row()
+        #     #     row.enabled = context.scene.randomise_camera_pos
+        #     # elif prop_name == 'rotation':
+        #     #     row = row.row()
+        #     #     row.enabled = context.scene.randomise_rotation
+        #     row.prop(context.scene, prop_name)
+
+        col.operator("opr.apply_random_transform", text="Randomize")
+        ##### do we need this to randomise or to apply transform?????
+        # Randomize_transform updates automatically
+        # every time you change the random seed
+
         layout = self.layout
+
+        scene = context.scene
+        # Create a simple row.
+        # self.layout(text=" Simple Row:")
+
         row = layout.row()
-        split = row.split()
-        left_col = split.column(align=True)
-        right_col = split.column(align=True)
+        row.prop(scene, "frame_start")
+        row.prop(scene, "frame_end")
 
-        left_col.alignment = "RIGHT"
-        left_col.label(text="Target volume size")
-        right_col.prop(
-            context.scene.random_cube_props, "vol_size", icon_only=True
-        )
-        # alternative: layout.prop(context.scene.random_cube_props, "vol_size")
+        # Create an row where the buttons are aligned to each other.
+        layout.label(text=" Aligned Row:")
 
-        # Seed
-        row = self.layout.row(align=True)
-        split = row.split()
-        left_col = split.column(align=True)
-        right_col = split.column(align=True)
+        row = layout.row(align=True)
+        row.prop(scene, "frame_start")
+        row.prop(scene, "frame_end")
 
-        # put the toggle on the left col
-        left_col_row = left_col.row(align=True)
-        left_col_row.alignment = "RIGHT"  # alignment first!
-        left_col_row.prop(
-            context.scene.random_cube_props, "seed_toggle", icon_only=True
-        )
-        left_col_row.label(text="Set random seed")
+        # Create two columns, by using a split layout.
+        split = layout.split()
 
-        # put field in right col
-        right_col.enabled = (
-            context.scene.random_cube_props.seed_toggle
-        )  # only disable the next part of the row
-        right_col.prop(context.scene.random_cube_props, "seed")
-        # alternative:
-        # row = self.layout.row(align=True)
-        # row.prop(context.scene.random_cube_props, "seed_toggle")
+        # First column
+        col = split.column()
+        col.label(text="Column One:")
+        col.prop(scene, "frame_end")
+        col.prop(scene, "frame_start")
 
-        # add a button for the operator
-        row = self.layout.row(align=True)
-        row.operator("object.add_random_cube", text="Add random cube")
+        # Second column, aligned
+        col = split.column(align=True)
+        col.label(text="Column Two:")
+        col.prop(scene, "frame_start")
+        col.prop(scene, "frame_end")
+
+        # Big render button
+        layout.label(text="Big Button:")
+        row = layout.row()
+        row.scale_y = 3.0
+        row.operator("render.render")
+
+        # Different sizes in a row
+        layout.label(text="Different button sizes:")
+        row = layout.row(align=True)
+        row.operator("render.render")
+
+        sub = row.row()
+        sub.scale_x = 2.0
+        sub.operator("render.render")
+
+        row.operator("render.render")
+
+
+# PROPS = [
+#     # ('random_seed',
+# bpy.props.IntProperty(name='Random Seed', default=0)),
+#     #('randomise_camera_pos',
+# bpy.props.BoolProperty(name='Randomize camera_pos', default=False))
+#     ('camera_pos',
+# bpy.props.FloatProperty(name='Camera camera_pos', default=[0,0,0])),
+#     #('randomise_rotation',
+# bpy.props.BoolProperty(name='Randomize Rotation', default=False))
+#     ('rotation',
+# bpy.props.FloatProperty(name='Camera Rotation', default=[0,0,0])),
+# ]
 
 
 # #-------------------------------
@@ -149,9 +237,9 @@ class PanelAddRandomTransform(bpy.types.Panel):
 # --------------------------------------------------
 # Register and unregister functions:
 list_classes_to_register = [
-    PropertiesAddRandomTransform,
+    PropertiesApplyRandomTransform,
     PanelAddRandomTransform,
-    AddRandomTransform,
+    ApplyRandomTransform,
 ]
 
 
@@ -161,9 +249,9 @@ def register():
     for cls in list_classes_to_register:
         bpy.utils.register_class(cls)
         # add custom props to the scene! before registering the rest?
-        if cls == PropertiesAddRandomTransform:
-            bpy.types.Scene.random_cube_props = bpy.props.PointerProperty(
-                type=PropertiesAddRandomTransform
+        if cls == PropertiesApplyRandomTransform:
+            bpy.types.Scene.randomise_camera_props = bpy.props.PointerProperty(
+                type=PropertiesApplyRandomTransform
             )
             # alternative: setattr(bpy.types.Scene, prop_name, prop_value)?
 
@@ -183,8 +271,56 @@ def unregister():
     # delete the custom property pointer
     # NOTE: this is different from its accessor, as that is a read/write only
     # to delete this we have to delete its pointer, just like how we added it
-    del bpy.types.Scene.random_cube_props
+    # delattr(bpy.types.Scene, 'randomise_camera_props')
+    # del bpy.types.Scene.randomise_camera_props
+    # bpy.ops.wm.properties_remove(
+    #     data_path="scene", property_name="randomise_camera_props"
+    # )
 
+    del bpy.types.Scene.randomise_camera_props
     # Remove the operator from existing menu.
     # bpy.types.VIEW3D_MT_object.remove(menu_func)
     print("unregistered")
+
+
+def randomize_selected(context, loc, rot, randomise_on):  # seed, delta,
+    from random import uniform
+
+    # random.seed(seed)
+
+    def rand_vec(vec_range):
+        return Vector(uniform(-val, val) for val in vec_range)
+
+    for obj in context.selected_objects:
+        if loc:
+            obj.location += rand_vec(loc)
+            # pdb.set_trace()
+            # if delta:
+            #     obj.delta_location += rand_vec(loc)
+            # else:
+            #     obj.location += rand_vec(loc)
+        else:  # otherwise the values change under us
+            uniform(0.0, 0.0), uniform(0.0, 0.0), uniform(0.0, 0.0)
+
+        if rot:
+            vec = rand_vec(rot)
+
+            rotation_mode = obj.rotation_mode
+            if rotation_mode in {"QUATERNION", "AXIS_ANGLE"}:
+                obj.rotation_mode = "XYZ"
+
+            obj.rotation_euler[0] += vec[0]
+            obj.rotation_euler[1] += vec[1]
+            obj.rotation_euler[2] += vec[2]
+
+            # if delta:
+            #     obj.delta_rotation_euler[0] += vec[0]
+            #     obj.delta_rotation_euler[1] += vec[1]
+            #     obj.delta_rotation_euler[2] += vec[2]
+            # else:
+            #     obj.rotation_euler[0] += vec[0]
+            #     obj.rotation_euler[1] += vec[1]
+            #     obj.rotation_euler[2] += vec[2]
+            obj.rotation_mode = rotation_mode
+        else:
+            uniform(0.0, 0.0), uniform(0.0, 0.0), uniform(0.0, 0.0)
