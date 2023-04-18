@@ -1,6 +1,4 @@
-from . import material
-from . import transform
-
+from . import material, transform
 
 bl_info = {
     "name": "Randomisations panel",
@@ -11,21 +9,21 @@ bl_info = {
     ),  # min required version; get from running bpy.app.version
     "category": "Object",
     # optional
-    "version": (1, 0, 0),
-    "author": "Sofia Miñano",
+    "version": (0, 1, 0),
+    "author": "Sofía Miñano and Ruaridh Gollifer",
     "description": ("Randomise selected parameters" "of a subset of objects"),
 }
 
 
 def register():
     transform.register()
-    # material.register()
+    material.register()
     # geometry.register()
 
 
 def unregister():
     transform.unregister()
-    # material.unregister()
+    material.unregister()
     # geometry.unregister()
 
 
