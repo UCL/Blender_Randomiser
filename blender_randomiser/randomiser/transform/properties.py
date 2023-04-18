@@ -82,12 +82,6 @@ class PropertiesApplyRandomTransform(
         step=100,
     )  # type: ignore
 
-    # min_float_3d: bpy.props.FloatVectorProperty()  # type: ignore
-    # max_float_3d: bpy.props.FloatVectorProperty()  # type: ignore
-
-    # min_float_4d: bpy.props.FloatVectorProperty(size=4)  # type: ignore
-    # max_float_4d: bpy.props.FloatVectorProperty(size=4)  # type: ignore
-
     # BOOL
     bool_delta: bpy.props.BoolProperty()  # type: ignore
 
@@ -104,15 +98,11 @@ def register():
 
     for cls in list_classes_to_register:
         bpy.utils.register_class(cls)
-        # add custom props to the scene! before registering the rest?
+
         if cls == PropertiesApplyRandomTransform:
             bpy.types.Scene.randomise_camera_props = bpy.props.PointerProperty(
                 type=PropertiesApplyRandomTransform
             )
-            # alternative: setattr(bpy.types.Scene, prop_name, prop_value)?
-
-    # Adds the new operator to an existing menu.
-    # bpy.types.VIEW3D_MT_object.append(menu_func)
 
     print("registered")
 
@@ -124,16 +114,6 @@ def unregister():
     for cls in list_classes_to_register:
         bpy.utils.unregister_class(cls)
 
-    # delete the custom property pointer
-    # NOTE: this is different from its accessor, as that is a read/write only
-    # to delete this we have to delete its pointer, just like how we added it
-    # delattr(bpy.types.Scene, 'randomise_camera_props')
-    # del bpy.types.Scene.randomise_camera_props
-    # bpy.ops.wm.properties_remove(
-    #     data_path="scene", property_name="randomise_camera_props"
-    # )
-
     del bpy.types.Scene.randomise_camera_props
-    # Remove the operator from existing menu.
-    # bpy.types.VIEW3D_MT_object.remove(menu_func)
+
     print("unregistered")
