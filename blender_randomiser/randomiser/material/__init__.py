@@ -1,4 +1,4 @@
-from . import operators, ui, properties
+from . import operators, ui
 from .properties import all_properties
 
 
