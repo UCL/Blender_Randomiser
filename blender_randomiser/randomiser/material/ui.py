@@ -39,11 +39,15 @@ class PanelRandomMaterialNodes(bpy.types.Panel):
         # and 'context.scene.sockets2randomise_props.update_collection'
         # returns TRUE
         cs = context.scene
-        if cs.sockets2randomise_props.update_collection:
+        if cs.socket_props_per_material[
+            context.object.active_material.name
+        ].update_collection:
             print("Collection of sockets updated")
-        sockets_props_collection = cs.sockets2randomise_props.collection
+        sockets_props_collection = cs.socket_props_per_material[
+            context.object.active_material.name
+        ].collection
 
-        # define UI fields for every socket property
+        # Define UI fields for every socket property
         # NOTE: if I don't sort the input nodes, everytime one of the nodes is
         # selected in the graph it moves to the bottom of the panel (?).
         # TODO: sort by date of creation? ---I didn't find an easy way to do it
