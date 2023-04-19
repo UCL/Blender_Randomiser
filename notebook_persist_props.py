@@ -1,47 +1,39 @@
-"""Persist socket properties when we switch material
-
-Until I autopopulate materials higher level collection:
->>> mat =  bpy.context.scene.socket_props_per_material.add()
->>> mat.name='Material'
->>> mat =  bpy.context.scene.socket_props_per_material.add()
->>> mat.name='Material.001'
-
+"""Persist socket properties when we switch material and autopopulate materials
 
 -----------
 To test: I created three materials with 1,2 and 3 input nodes
 'RandomValue.xxx' respectively
 
-Add materials (manually for now)
->>> mat=bpy.context.scene.socket_props_per_material.add()
->>> mat.name='Material'
->>> mat=bpy.context.scene.socket_props_per_material.add()
->>> mat.name='Material.001'
->>> mat=bpy.context.scene.socket_props_per_material.add()
->>> mat.name='Material.002'
->>> len(bpy.context.scene.socket_props_per_material)
-3
+Then load this script in Blender editor and run
 
-Check names
->>> [mat.name for mat in bpy.context.scene.socket_props_per_material]
+To autopopulate materials:
+>>> bpy.context.scene.socket_props_per_material.update_mat_collection
+
+To check names of materials
+>>> [mat.name
+    for mat in bpy.context.scene.socket_props_per_material.collection]
 ['Material', 'Material.001', 'Material.002']
 
-Check length of collection of socket properties
->>> [len(mat.collection) for mat in
-bpy.context.scene.socket_props_per_material]
-[0, 0, 0]
-
-Update collection of socket props if required
->>> [mat.update_collection for mat in
-bpy.context.scene.socket_props_per_material]
-Collection of sockets updated
-Collection of sockets updated
-Collection of sockets updated
+For every material, check length of collection of socket properties
+>>> [mat.update_collection
+    for mat in bpy.context.scene.socket_props_per_material.collection]
+    # trigger update
 [True, True, True]
+>>>  [{mat.name: [sckt.name for sckt in mat.collection]}
+        for mat in bpy.context.scene.socket_props_per_material.collection]
+        # get the names of the sockets for each material
+[{'Material.002': [
+    'RandomValue.002_Value', 'RandomValue.001_Value', 'RandomValue_Value'
+    ]},
+ {'Material.001': [
+    'RandomValue.001_Value', 'RandomValue_Value']},
+ {'Material': ['RandomValue_Value']}]
 
-Check length of socket props
->>> [len(mat.collection) for mat in
-bpy.context.scene.socket_props_per_material]
-[1, 2, 3]
+Check length of socket props for each mat
+>>> [len(mat.collection)
+        for mat in bpy.context.scene.socket_props_per_material.collection
+    ]
+[3, 2, 1]
 
 """
 
