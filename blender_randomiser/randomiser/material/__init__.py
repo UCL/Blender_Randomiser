@@ -1,14 +1,13 @@
-from . import operators, ui
-from .properties import all_properties
+from . import operators, ui, properties
 
 
 def register():
-    all_properties.register()
+    properties.register()
     ui.register()
     operators.register()
 
 
 def unregister():
-    all_properties.unregister()
+    properties.unregister()
     ui.unregister()
     operators.unregister()

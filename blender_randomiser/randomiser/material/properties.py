@@ -1,8 +1,7 @@
 import bpy
 import numpy as np
 
-from .collection_socket_properties import ColSocketProperties
-from .socket_properties import SocketProperties
+from .property_classes import collection_socket_properties, socket_properties
 
 # ---------------------
 # Python global vars
@@ -31,29 +30,17 @@ MAP_SOCKET_TYPE_TO_INI_MIN_MAX = {
 # ------------------------------------
 # Register / unregister classes
 # ------------------------------------
-list_classes_to_register = [
-    SocketProperties,
-    ColSocketProperties,
-]
+list_context_scene_attr = ["socket_type_to_attr", "socket_type_to_ini_min_max"]
 
 
 def register():
-    # register classes
-    for cls in list_classes_to_register:
-        bpy.utils.register_class(cls)
-
-        # add the collection of socket properties
-        # to bpy.context.scene
-        if cls == ColSocketProperties:
-            bp = bpy.props
-            bpy.types.Scene.socket_props_per_material = bp.CollectionProperty(
-                type=ColSocketProperties
-            )
+    socket_properties.register()
+    collection_socket_properties.register()
 
     # link global Python variables to bpy.context.scene
     # if I use setattr: attribute must exist first right?
     for attr, attr_val in zip(
-        ["socket_type_to_attr", "socket_type_to_ini_min_max"],
+        list_context_scene_attr,
         [MAP_SOCKET_TYPE_TO_ATTR, MAP_SOCKET_TYPE_TO_INI_MIN_MAX],
     ):
         setattr(bpy.types.Scene, attr, attr_val)
@@ -62,17 +49,11 @@ def register():
 
 
 def unregister():
-    # unregister classes
-    for cls in list_classes_to_register:
-        bpy.utils.unregister_class(cls)
+    socket_properties.unregister()
+    collection_socket_properties.unregister()
 
     # delete the custom properties linked to bpy.context.scene
-    list_attr = [
-        "socket_type_to_attr",
-        "socket_type_to_ini_min_max",
-        "socket_props_per_material",
-    ]
-    for attr in list_attr:
+    for attr in list_context_scene_attr:
         if hasattr(bpy.types.Scene, attr):
             delattr(bpy.types.Scene, attr)
 

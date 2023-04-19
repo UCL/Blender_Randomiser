@@ -208,3 +208,12 @@ class SocketProperties(bpy.types.PropertyGroup):
     # ---------------------
     # randomisation toggle
     bool_randomise: bpy.props.BoolProperty()  # type: ignore
+
+
+# Register / unregister
+def register():
+    bpy.utils.register_class(SocketProperties)
+
+
+def unregister():
+    bpy.utils.unregister_class(SocketProperties)

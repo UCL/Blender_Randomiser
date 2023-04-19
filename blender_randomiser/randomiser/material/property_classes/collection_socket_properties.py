@@ -190,3 +190,20 @@ class ColSocketProperties(bpy.types.PropertyGroup):
         return list_sockets
 
     # ---------------
+
+
+def register():
+    bpy.utils.register_class(ColSocketProperties)
+
+    # make available via bpy.context.scene...
+    bpy.types.Scene.socket_props_per_material = bpy.props.CollectionProperty(
+        type=ColSocketProperties
+    )
+
+
+def unregister():
+    bpy.utils.unregister_class(ColSocketProperties)
+
+    # remove from bpy.context.scene...
+    if hasattr(bpy.types.Scene, "socket_props_per_material"):
+        delattr(bpy.types.Scene, "socket_props_per_material")
