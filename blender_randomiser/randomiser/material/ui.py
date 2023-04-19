@@ -26,25 +26,34 @@ class PanelRandomMaterialNodes(bpy.types.Panel):
         return context.object.active_material is not None
 
     def draw(self, context):
+        cs = context.scene
+        cob = context.object
+
         # Get list of input nodes to randomise
         # for currently active material
         list_input_nodes = utils.get_material_input_nodes_to_randomise(
-            context.object.active_material.name
+            cob.active_material.name
         )
 
-        # Get collection of sockets' properties
-        # 'context.scene.sockets2randomise_props.update_collection'
+        # force an update on the materials collection first
+        # the '.update_collection' attribute
         # triggers the get function that checks if an update is
         # required. If it is, the collection of sockets is updated
-        # and 'context.scene.sockets2randomise_props.update_collection'
-        # returns TRUE
-        cs = context.scene
-        if cs.socket_props_per_material[
-            context.object.active_material.name
+        # and returns TRUE
+        if cs.socket_props_per_material.update_materials_collection:
+            print("Collection of materials updated")
+
+        # then force an update in the sockets per material
+        active_material_name = cob.active_material.name
+        if cs.socket_props_per_material.collection[
+            active_material_name
         ].update_sockets_collection:
             print("Collection of sockets updated")
-        sockets_props_collection = cs.socket_props_per_material[
-            context.object.active_material.name
+
+        # get (updated) collection of socket properties
+        # for the current material
+        sockets_props_collection = cs.socket_props_per_material.collection[
+            active_material_name
         ].collection
 
         # Define UI fields for every socket property

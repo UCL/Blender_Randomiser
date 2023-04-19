@@ -1,7 +1,11 @@
 import bpy
 import numpy as np
 
-from .property_classes import collection_socket_properties, socket_properties
+from .property_classes import (
+    collection_materials,
+    collection_socket_properties,
+    socket_properties,
+)
 
 # ---------------------
 # Python global vars
@@ -36,6 +40,7 @@ list_context_scene_attr = ["socket_type_to_attr", "socket_type_to_ini_min_max"]
 def register():
     socket_properties.register()
     collection_socket_properties.register()
+    collection_materials.register()
 
     # link global Python variables to bpy.context.scene
     # if I use setattr: attribute must exist first right?
@@ -51,6 +56,7 @@ def register():
 def unregister():
     socket_properties.unregister()
     collection_socket_properties.unregister()
+    collection_materials.unregister()
 
     # delete the custom properties linked to bpy.context.scene
     for attr in list_context_scene_attr:

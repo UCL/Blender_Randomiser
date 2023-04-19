@@ -5,9 +5,9 @@ import bpy
 from .socket_properties import SocketProperties
 
 
-# ----------------------------------------------------
-# Setter / getter methods for update_collection attribute
-# -----------------------------------------------------
+# -----------------------------------------------------------------
+# Setter / getter methods for update_sockets_collection attribute
+# ----------------------------------------------------------------
 def set_update_collection(self, value):
     """
     'Set' function for the update_sockets_collection attribute
@@ -195,15 +195,6 @@ class ColSocketProperties(bpy.types.PropertyGroup):
 def register():
     bpy.utils.register_class(ColSocketProperties)
 
-    # make available via bpy.context.scene...
-    bpy.types.Scene.socket_props_per_material = bpy.props.CollectionProperty(
-        type=ColSocketProperties
-    )
-
 
 def unregister():
     bpy.utils.unregister_class(ColSocketProperties)
-
-    # remove from bpy.context.scene...
-    if hasattr(bpy.types.Scene, "socket_props_per_material"):
-        delattr(bpy.types.Scene, "socket_props_per_material")

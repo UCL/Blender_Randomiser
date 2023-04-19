@@ -36,7 +36,7 @@ class RandomiseMaterialNodes(bpy.types.Operator):
 
         The invoke() function runs before executing the operator.
         Here, we
-        - add the list of input nodes and collection of socket propertiess to
+        - add the list of input nodes and collection of socket properties to
           the operator self,
         - unselect the randomisation toggle of the sockets of input nodes if
           they are not linked to any other node
@@ -56,11 +56,22 @@ class RandomiseMaterialNodes(bpy.types.Operator):
         # add list of socket properties to operator self
         # (this list should have been updated already, when drawing the panel)
         cs = context.scene
-        self.sockets_props_collection = cs.sockets2randomise_props.collection
+        cob = context.object
+        active_material_name = cob.active_material.name
+        # get collection of socket properties for the active material
+        self.sockets_props_collection = (
+            cs.socket_props_per_material.collection[
+                active_material_name
+            ].collection
+        )
+        # get candidate sockets for the active mat
+        self.candidate_sockets = cs.socket_props_per_material.collection[
+            active_material_name
+        ].candidate_sockets
 
         # if socket unlinked and randomisation toggle is True:
         # set toggle to False
-        for sckt in cs.candidate_sockets:
+        for sckt in self.candidate_sockets:
             sckt_id = sckt.node.name + "_" + sckt.name
             if (not sckt.is_linked) and (
                 self.sockets_props_collection[sckt_id].bool_randomise
@@ -78,7 +89,7 @@ class RandomiseMaterialNodes(bpy.types.Operator):
         # add list sockets to randomise to self.
         self.list_sockets_to_randomise = [
             sckt
-            for sckt in cs.candidate_sockets
+            for sckt in self.candidate_sockets
             if self.sockets_props_collection[
                 sckt.node.name + "_" + sckt.name
             ].bool_randomise
