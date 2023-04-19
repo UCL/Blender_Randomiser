@@ -41,7 +41,7 @@ class PanelRandomMaterialNodes(bpy.types.Panel):
         cs = context.scene
         if cs.socket_props_per_material[
             context.object.active_material.name
-        ].update_collection:
+        ].update_sockets_collection:
             print("Collection of sockets updated")
         sockets_props_collection = cs.socket_props_per_material[
             context.object.active_material.name
