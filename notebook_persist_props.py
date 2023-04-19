@@ -138,17 +138,12 @@ def set_update_collection(self, value):
         # - if the socket exists only in the node graph: add to collection with
         #  initial values
         # for the rest of sockets: leave untouched
-        print("Difference between collection and graph")
-        print(f"Sockets in one set only:{self.set_of_sckt_names_in_one_only}")
 
         for sckt_name in self.set_of_sckt_names_in_one_only:
             # - if the socket exists only in the collection: remove from
             # collection
             if sckt_name in self.set_sckt_names_in_collection_of_props:
-                print(f"{sckt_name} existed only in collection: removed")
-                print(f"Length collection before: {len(self.collection)}")
                 self.collection.remove(self.collection.find(sckt_name))
-                print(f"Length collection after: {len(self.collection)}")
             # - if the socket exists only in the node graph: add to collection
             # with initial values
             if sckt_name in self.set_sckt_names_in_graph:
@@ -157,7 +152,6 @@ def set_update_collection(self, value):
                 sckt_prop.bool_randomise = True
 
                 # ---------------------------
-                print([s.name for s in self.candidate_sockets])
                 # get socket object for this socket name
                 # NOTE: my definition of socket name
                 # (node.name + _ + socket.name)
@@ -205,6 +199,7 @@ def set_update_collection(self, value):
 
 
 # --------------------------
+# Socket properties
 class SocketProperties(bpy.types.PropertyGroup):
     # name (we can use it to access sockets in collection by name)
     name: bpy.props.StringProperty()  # type: ignore
@@ -225,8 +220,9 @@ class SocketProperties(bpy.types.PropertyGroup):
     bool_randomise: bpy.props.BoolProperty()  # type: ignore
 
 
+# Collection of Socket properties: one per material
 class ColSocketProperties(bpy.types.PropertyGroup):
-    # can I use this to hold the name of the material?
+    # name of the material
     name: bpy.props.StringProperty()  # type: ignore
 
     # collection of socket props
@@ -247,6 +243,7 @@ class ColSocketProperties(bpy.types.PropertyGroup):
 
     # --------------------------------
     # TODO : can I use decorator instead?
+    # get candidate sockets for this material (self)
     def get_candidate_sockets(self):
         list_input_nodes = [
             nd
@@ -264,12 +261,89 @@ class ColSocketProperties(bpy.types.PropertyGroup):
     # ---------------
 
 
-# class ColMaterials(bpy.types.PropertyGroup):
-#     collection: bpy.props.CollectionProperty(  # type: ignore
-#         type=ColSocketProperties
-#     )
+# -------------------
+def get_update_materials_collection(self):
+    # for mat in self.candidate_materials:
 
-#     update_collection
+    # set of materials currently in collection
+    self.set_material_names_in_collection = set(
+        mat.name for mat in self.collection
+    )
+    # print(self.set_material_names_in_collection)
+
+    # set of materials in Blender data structure
+    # candidate materials: those with node_tree
+    self.set_material_names_in_data = set(
+        mat.name for mat in self.candidate_materials
+    )
+    # print(self.set_material_names_in_data)
+
+    # set of materials in one only
+    self.set_material_names_in_one_only = (
+        self.set_material_names_in_collection.symmetric_difference(
+            self.set_material_names_in_data
+        )
+    )
+    # print(self.set_material_names_in_one_only)
+
+    # if there are materials in one only
+    if self.set_material_names_in_one_only:
+        set_update_materials_collection(self, True)
+        return True
+    else:
+        return False
+
+
+def set_update_materials_collection(self, value):
+    # update set to True
+    if value:
+        # for all materials that are in one set only
+        for mat_name in self.set_material_names_in_one_only:
+            # - if material is in collection only: remove from collection
+            if mat_name in self.set_material_names_in_collection:
+                self.collection.remove(self.collection.find(mat_name))
+
+            # - if in data structure only: add to collection
+            if mat_name in self.set_material_names_in_data:
+                mat = self.collection.add()
+                # attributes: name, collection, update_collection
+                mat.name = mat_name
+                # mat.collection = bpy.props.CollectionProperty(
+                #     type=ColSocketProperties
+                # )
+                # force populate with sockets here?
+                # mat.update_collection = True
+                # ---this triggers set_update_collection,
+                # but self is 'ColSocketProperties',
+                # where it should be mat
+
+
+# -------------------------------
+# Collection of materials
+class ColMaterials(bpy.types.PropertyGroup):
+    # collection of [collections of socket properties] (one per material)
+    collection: bpy.props.CollectionProperty(  # type: ignore
+        type=ColSocketProperties
+    )
+
+    # autopopulate collection of materials
+    update_mat_collection: bpy.props.BoolProperty(  # type: ignore
+        default=False,
+        get=get_update_materials_collection,
+        set=set_update_materials_collection,
+    )
+
+    # ----------------------------
+    # TODO : can I use decorator instead?
+    # get candidate materials? i.e., materials with node_tree
+    # (with 'use nodes' enabled)
+    # self is the collection of materials
+    def get_candidate_materials(self):
+        list_materials = [mat for mat in bpy.data.materials if mat.node_tree]
+        return list_materials
+
+    candidate_materials = property(fget=get_candidate_materials)
+    # ----------------------------
 
 
 # ------------------------------------
@@ -329,13 +403,24 @@ class SamplePanel(bpy.types.Panel):
         # and 'context.scene.sockets2randomise_props.update_collection'
         # returns TRUE
         cs = context.scene
-        if cs.socket_props_per_material[
-            context.object.active_material.name
+        co = context.object
+        active_material_name = co.active_material.name
+        # force an update on the materials first
+        if cs.socket_props_per_material.update_mat_collection:
+            print("Collection of materials updated")
+
+        # then force an update in the sockets per material
+        if cs.socket_props_per_material.collection[
+            active_material_name
         ].update_collection:
             print("Collection of sockets updated")
-        sockets_props_collection = cs.socket_props_per_material[
-            context.object.active_material.name
+
+        # get (updated) collection of socket properties
+        # for the current material
+        sockets_props_collection = cs.socket_props_per_material.collection[
+            active_material_name
         ].collection
+        # print([s.name for s in sockets_props_collection])
 
         # define UI fields for every socket property
         # NOTE: if I don't sort the input nodes, everytime one of the nodes is
@@ -447,17 +532,17 @@ class SamplePanel(bpy.types.Panel):
 
 
 # ------------------------------------
-classes = [SocketProperties, ColSocketProperties, SamplePanel]
+classes = [SocketProperties, ColSocketProperties, ColMaterials, SamplePanel]
 
 
 def register():
     for cls in classes:
         bpy.utils.register_class(cls)
 
-        if cls == ColSocketProperties:
+        if cls == ColMaterials:
             bp = bpy.props
-            bpy.types.Scene.socket_props_per_material = bp.CollectionProperty(
-                type=ColSocketProperties
+            bpy.types.Scene.socket_props_per_material = bp.PointerProperty(
+                type=ColMaterials
             )
 
     for attr, attr_val in zip(
