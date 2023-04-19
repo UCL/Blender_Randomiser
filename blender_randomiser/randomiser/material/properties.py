@@ -178,7 +178,7 @@ class SocketProperties(bpy.types.PropertyGroup):
     # TODO: I don't really get why this type definition is also an assignment?
 
     # ---------------------
-    # name
+    # name of the socket
     # NOTE: if we make a Blender collection of this type of objects,
     # we will be able to access them by name
     name: bpy.props.StringProperty()  # type: ignore
@@ -367,7 +367,7 @@ class ColSocketProperties(bpy.types.PropertyGroup):
 
     """
 
-    # can I use this to hold the name of the material?
+    # name of the material
     name: bpy.props.StringProperty()  # type: ignore
 
     # collection of socket properties
@@ -375,7 +375,7 @@ class ColSocketProperties(bpy.types.PropertyGroup):
         type=SocketProperties
     )
 
-    # 'dummy' attribute to update collection
+    # 'dummy' attribute to update collection of socket properties
     update_collection: bpy.props.BoolProperty(  # type: ignore
         default=False,
         get=get_update_collection,
@@ -385,7 +385,8 @@ class ColSocketProperties(bpy.types.PropertyGroup):
     # --------------------------------
     # candidate sockets for this material
     # TODO : can I use decorator instead?
-    def get_candidate_sockets(self):
+    @property
+    def candidate_sockets(self):  # getter method
         list_input_nodes = [
             nd
             for nd in bpy.data.materials[self.name].node_tree.nodes
@@ -398,7 +399,6 @@ class ColSocketProperties(bpy.types.PropertyGroup):
         list_sockets = [out for nd in list_input_nodes for out in nd.outputs]
         return list_sockets
 
-    candidate_sockets = property(fget=get_candidate_sockets)
     # ---------------
 
 
