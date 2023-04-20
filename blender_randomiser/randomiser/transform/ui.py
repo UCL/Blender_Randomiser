@@ -124,6 +124,29 @@ class PanelAddRandomTransform(bpy.types.Panel):
             "camera_rot_z_max",
         )
 
+        # Seed
+        row = self.layout.row(align=True)
+        split = row.split()
+        left_col = split.column(align=True)
+        right_col = split.column(align=True)
+
+        # put the toggle on the left col
+        left_col_row = left_col.row(align=True)
+        left_col_row.alignment = "RIGHT"  # alignment first!
+        left_col_row.prop(
+            context.scene.randomise_camera_props, "seed_toggle", icon_only=True
+        )
+        left_col_row.label(text="Set random seed")
+
+        # put field in right col
+        right_col.enabled = (
+            context.scene.randomise_camera_props.seed_toggle
+        )  # only disable the next part of the row
+        right_col.prop(context.scene.randomise_camera_props, "seed")
+        # alternative:
+        # row = self.layout.row(align=True)
+        # row.prop(context.scene.random_cube_props, "seed_toggle")
+
         # # Big render button
         # layout.label(text="Big Button:")
         # row = layout.row()

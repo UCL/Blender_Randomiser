@@ -58,6 +58,14 @@ class ApplyRandomTransform(bpy.types.Operator):  # ---check types
         rot_z_range = [rot_z_min, rot_z_max]
         delta_on = context.scene.randomise_camera_props.bool_delta
 
+        # get inputs
+        # seed: If None, fresh unpredictable entropy will be pulled from the OS
+        seed_no = (
+            context.scene.randomise_camera_props.seed
+            if context.scene.randomise_camera_props.seed_toggle
+            else None
+        )
+
         # randomize_selected(context, loc, rot, delta_on, loc_x_min, loc_x_max)
         randomize_selected(
             context,
@@ -70,6 +78,7 @@ class ApplyRandomTransform(bpy.types.Operator):  # ---check types
             rot_y_range,
             rot_z_range,
             delta_on,
+            seed_no,
         )
 
         return {"FINISHED"}
@@ -112,25 +121,19 @@ def randomize_selected(
     rot_y_range,
     rot_z_range,
     delta_on,
+    seed_no,
 ):
-    from random import uniform
+    from random import seed, uniform
 
-    # random.seed(seed)
-
-    def rand_vec(vec_range):
-        return Vector(uniform(-val, val) for val in vec_range)
-        # return Vector(uniform(-val, val) for val in vec_range)
-
-    def rand_num(min, max):
+    def rand_num(min, max, seed_no):
+        seed(seed_no)
         return uniform(min, max)
 
     # for obj in context.selected_objects:
     if loc:
-        rand_x = rand_num(loc_x_range[0], loc_x_range[1])
-        rand_y = rand_num(loc_y_range[0], loc_y_range[1])
-        rand_z = rand_num(loc_z_range[0], loc_z_range[1])
-
-        # obj.location += rand_vec(loc)
+        rand_x = rand_num(loc_x_range[0], loc_x_range[1], seed_no)
+        rand_y = rand_num(loc_y_range[0], loc_y_range[1], seed_no)
+        rand_z = rand_num(loc_z_range[0], loc_z_range[1], seed_no)
 
         if delta_on:
             # pdb.set_trace()
@@ -146,11 +149,10 @@ def randomize_selected(
         uniform(0.0, 0.0), uniform(0.0, 0.0), uniform(0.0, 0.0)
 
     if rot:
-        rand_x = rand_num(rot_x_range[0], rot_x_range[1])
-        rand_y = rand_num(rot_y_range[0], rot_y_range[1])
-        rand_z = rand_num(rot_z_range[0], rot_z_range[1])
+        rand_x = rand_num(rot_x_range[0], rot_x_range[1], seed_no)
+        rand_y = rand_num(rot_y_range[0], rot_y_range[1], seed_no)
+        rand_z = rand_num(rot_z_range[0], rot_z_range[1], seed_no)
         vec = Vector([rand_x, rand_y, rand_z])
-        # vec = rand_vec(rot) #assume input is degrees
         deg2rad = np.pi / 180
 
         # pdb.set_trace()
