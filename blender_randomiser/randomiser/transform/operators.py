@@ -90,6 +90,8 @@ def register():
 
     print("registered")
 
+    # bpy.app.handlers.frame_change_post.append(my_handler)
+
 
 def unregister():
     """
@@ -99,6 +101,13 @@ def unregister():
         bpy.utils.unregister_class(cls)
 
     print("unregistered")
+
+    # bpy.app.handlers.frame_change_post.remove(my_handler)
+
+
+# def my_handler(scene):
+#     print("Frame Change", scene.frame_current)
+#     bpy.app.handlers.frame_change_pre.append(my_handler)
 
 
 def randomize_selected(
