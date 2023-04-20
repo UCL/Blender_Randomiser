@@ -44,10 +44,6 @@ class EXAMPLE_PT_panel(bpy.types.Panel):
     def draw(self, context):
         layout = self.layout
         layout.label(text="This is the main panel.")
-        # row = layout.row()
-        # row.prop(
-        #     context.scene, "materials_count"
-        # )  # I think this needs to be a bpy.prop
 
 
 # ----------------------
@@ -66,7 +62,16 @@ class EXAMPLE_PT_subpanel(bpy.types.Panel):
     @classmethod
     def poll(cls, context):
         # only display subpanels for which this is true
-        return cls.material_str in context.scene.list_candidate_materials
+        return cls.subpanel_material_idx < len(context.scene.list_materials)
+
+    def draw_header(self, context):
+        layout = self.layout
+        if self.subpanel_material_idx < len(context.scene.list_materials):
+            layout.label(
+                text=context.scene.list_materials[self.subpanel_material_idx]
+            )
+        else:
+            layout.label(text="PATATA")
 
     def draw(self, context):
         layout = self.layout
@@ -76,10 +81,12 @@ class EXAMPLE_PT_subpanel(bpy.types.Panel):
 # ----------------------
 # Register / unregister
 # ---------------------
-list_clasess = [
+list_classes_to_register = [
     EXAMPLE_PT_panel,  # do not register subpanel!
 ]
-# we register each subpanel individually (all MAX_NUMBER_OF_PANELS)
+
+# we register each subpanel individually
+# (we register all MAX_NUMBER_OF_PANELS panels)
 for i in range(MAX_NUMBER_OF_PANELS):
     panel = type(
         f"EXAMPLE_PT_subpanel_{i}",  # user-defined class name
@@ -89,56 +96,33 @@ for i in range(MAX_NUMBER_OF_PANELS):
         ),  # parent classes
         {
             "bl_idname": f"EXAMPLE_PT_sub_panel_{i}",
-            "bl_label": f"Material {i}",
-            "material_str": i + 1,
+            "bl_label": "",  # f"Material {i}",
+            "subpanel_material_idx": i,
+            # "draw_header": draw_header,
         },
     )
-    list_clasess.append(panel)  # type: ignore
+    list_classes_to_register.append(panel)  # type: ignore
 
 
 def register():
-    # for cls in list_clasess:
-    #     bpy.utils.register_class(cls)
-    #
-    # bpy.types.Scene.materials_count = bpy.props.IntProperty(
-    #     name="Materials count",
-    #     default=1,
-    #     get=get_candidate_materials,
-    #     set=set_candidate_materials,
-    # )
+    for cls in list_classes_to_register:
+        bpy.utils.register_class(cls)
 
-    bpy.utils.register_class(EXAMPLE_PT_panel)
-
-    bpy.types.Scene.list_candidate_materials = property(
+    # add list of candidate materials as managed property
+    bpy.types.Scene.list_materials = property(
         fget=get_candidate_materials, fset=set_candidate_materials
     )
-
-    print(bpy.context.scene.list_candidate_materials)
-    for i, m_str in enumerate(bpy.context.scene.list_candidate_materials):
-        panel = type(
-            f"EXAMPLE_PT_subpanel_{i}",  # user-defined class name
-            (
-                EXAMPLE_PT_subpanel,
-                bpy.types.Panel,
-            ),  # parent classes
-            {
-                "bl_idname": f"EXAMPLE_PT_sub_panel_{i}",
-                "bl_label": m_str,
-                "material_str": m_str,
-            },
-        )
-        bpy.utils.register_class(panel)
 
     print("registered")
 
 
 def unregister():
-    for cls in list_clasess:
+    for cls in list_classes_to_register:
         bpy.utils.unregister_class(cls)
 
     # remove from bpy.context.scene...
-    if hasattr(bpy.types.Scene, "list_candidate_materials"):
-        delattr(bpy.types.Scene, "list_candidate_materials")
+    if hasattr(bpy.types.Scene, "list_materials"):
+        delattr(bpy.types.Scene, "list_materials")
 
     print("unregistered")
 
