@@ -14,6 +14,7 @@ Example:
 
 """
 
+import pdb
 from pathlib import Path
 
 import bpy
@@ -23,8 +24,11 @@ def main():
     import argparse
     import sys
 
+    # pdb.set_trace()
+
     # get Python args (passed after "--")
     argv = sys.argv
+    # pdb.set_trace()
     if "--" not in argv:
         argv = []
     else:
@@ -32,6 +36,7 @@ def main():
 
     # ---------
     # initialise parser
+    pdb.set_trace()
     parser = argparse.ArgumentParser(
         description=(
             "To launch Blender and install+enable the desired add-ons, run:"
@@ -57,6 +62,14 @@ def main():
         "path to parent dir",
     )
 
+    parser.add_argument(
+        "randomisation_seed",
+        metavar="N",
+        type=int,
+        nargs="+",
+        help="an integer for the accumulator",
+    )
+
     # build parser object
     args = parser.parse_args(argv)
 
@@ -73,6 +86,7 @@ def main():
         return
     # ---------
 
+    pdb.set_trace()
     # extract list of python files
     # TODO: option to exclude files (w regex?)
     if len(args.addons_paths) == 1 and Path(args.addons_paths[0]).is_dir():
@@ -89,6 +103,17 @@ def main():
         bpy.ops.preferences.addon_enable(module=Path(p).stem)
 
         print(f'"{Path(p).stem}" installed from source script and enabled')
+
+    pdb.set_trace()
+    if (
+        len(args.randomisation_seed) == 1
+    ):  # ßßand args.randomisation_seed[0].is_int():
+        pdb.set_trace()
+        bpy.context.scene.randomise_camera_props.seed = (
+            args.randomisation_seed[0]
+        )
+
+    pdb.set_trace()
 
 
 if __name__ == "__main__":
