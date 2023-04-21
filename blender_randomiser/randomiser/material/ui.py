@@ -13,17 +13,32 @@ class PanelRandomMaterialNodes(bpy.types.Panel):
     # TODO: are these docstrings shown in the UI as tooltips somewhere?
 
     # metadata
-    bl_idname = "NODE_MATERIAL_PT_random"
+    bl_idname = "NODE_MATERIAL_PT_random"  # what is this for?
     bl_label = "Randomise MATERIAL"  # title of the panel displayed to the user
     bl_space_type = "NODE_EDITOR"
     bl_region_type = "UI"
-    bl_category = "Randomiser"
+    bl_category = "Randomiser"  # this shows up as the tab name
 
     @classmethod
     def poll(self, context):
+        cs = context.scene
+        cob = context.object
+
+        # force an update on the materials collection first
+        # the '.update_collection' attribute
+        # triggers the get function that checks if an update is
+        # required. If it is, the collection of sockets is updated
+        # and returns TRUE
+        if cs.socket_props_per_material.update_materials_collection:
+            print("Collection of materials updated")
+
         # draw the panel only if there is an active material
-        # for the selected object
-        return context.object.active_material is not None
+        # for the selected object, and if this material is in
+        # the materials collection (i.e., if 'use_nodes' is True
+        # for this material)
+        return (cob.active_material is not None) and (
+            cob.active_material.name in cs.socket_props_per_material.collection
+        )
 
     def draw(self, context):
         cs = context.scene
@@ -35,16 +50,21 @@ class PanelRandomMaterialNodes(bpy.types.Panel):
             cob.active_material.name
         )
 
-        # force an update on the materials collection first
-        # the '.update_collection' attribute
-        # triggers the get function that checks if an update is
-        # required. If it is, the collection of sockets is updated
-        # and returns TRUE
-        if cs.socket_props_per_material.update_materials_collection:
-            print("Collection of materials updated")
+        # # force an update on the materials collection first
+        # # the '.update_collection' attribute
+        # # triggers the get function that checks if an update is
+        # # required. If it is, the collection of sockets is updated
+        # # and returns TRUE
+        # if cs.socket_props_per_material.update_materials_collection:
+        #     print("Collection of materials updated")
 
         # then force an update in the sockets per material
         active_material_name = cob.active_material.name
+        # if cs.socket_props_per_material.collection[
+        #     active_material_name
+        # ].update_sockets_collection:
+        # NOTE: the active material may not be in the collection if
+        # use_nodes is unticked
         if cs.socket_props_per_material.collection[
             active_material_name
         ].update_sockets_collection:

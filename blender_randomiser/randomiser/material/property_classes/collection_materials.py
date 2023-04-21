@@ -77,7 +77,7 @@ class ColMaterials(bpy.types.PropertyGroup):
     @property
     def candidate_materials(self):  # getter method
         # self is the collection of materials
-        list_materials = [mat for mat in bpy.data.materials if mat.node_tree]
+        list_materials = [mat for mat in bpy.data.materials if mat.use_nodes]
         return list_materials
 
     # ----------------------------
