@@ -10,7 +10,7 @@ from . import config
 
 
 # ----------------------
-# Main panel
+# Common sections
 # ---------------------
 class TemplatePanel(bpy.types.Panel):
     bl_space_type = "NODE_EDITOR"
@@ -18,30 +18,20 @@ class TemplatePanel(bpy.types.Panel):
     bl_category = "Randomiser"  # this shows up as the tab name
 
 
+# ----------------------
+# Main panel
+# ---------------------
 class MainPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
     bl_idname = "NODE_MATERIAL_PT_mainpanel"
     bl_label = "Randomise MATERIAL"
 
     def draw(self, context):
-        layout = self.layout
-        layout.label(text="Select material to see available sockets.")
-
-        # add operator for all
-        row = layout.row(align=True)
-        row_split = row.split()
-        row_split.column(align=True)
-        row_split.column(align=True)
-        row_split.column(align=True)
-        row_split.column(align=True)
-        col5 = row_split.column(align=True)
-        col5.operator(
-            "node.randomise_all_sockets",
-            text="Randomise all",
-        )
+        column = self.layout.column(align=True)
+        column.label(text="Select material to see available sockets.")
 
 
 # ------------------------------
-# Subpanel for active material
+# Subpanel for each material
 # -----------------------------
 class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
     """Class defining the panel for randomising
@@ -59,19 +49,7 @@ class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
 
     @classmethod
     def poll(cls, context):
-        # RN: Only display if
-        # - there is an active material, and
-        # - the active material is in the collection
-
-        # For subpanels for all materials: Only display if
-        # - subpanel material index is lower than the length of
-        # the list of materials
         cs = context.scene
-        # cob = context.object
-
-        # subpanel_material = cs.socket_props_per_material.candidate_materials[
-        #     self.subpanel_material_idx
-        # ]
 
         # force an update on the materials collection first
         # the '.update_collection' attribute
@@ -86,22 +64,11 @@ class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
             cs.socket_props_per_material.collection
         )
 
-        # draw the panel only if there is an active material
-        # for the selected object, and if this material is in
-        # the materials collection (i.e., if 'use_nodes' is True
-        # for this material)
-        # NOTE: the active material may not be in the collection if
-        # use_nodes is unticked
-        # return (cob.active_material is not None) and (
-        #     cob.active_material.name
-        #     in cs.socket_props_per_material.collection
-        # )
-
     def draw_header(self, context):
         cs = context.scene
         layout = self.layout
 
-        # TODO: maybe a dict? can order change?
+        # TODO: maybe a dict? can order of materials change?
         subpanel_material = cs.socket_props_per_material.candidate_materials[
             self.subpanel_material_idx
         ]
@@ -109,9 +76,7 @@ class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
         layout.label(text=subpanel_material.name)
 
     def draw(self, context):
-        # material for this subpanel
         cs = context.scene
-        # cob = context.object
 
         subpanel_material = cs.socket_props_per_material.candidate_materials[
             self.subpanel_material_idx
@@ -128,16 +93,6 @@ class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
         #  'layout', 'rna_type',
         #  'subpanel_material_idx', 'text', 'use_pin']
         # ----------------
-
-        # if this subpanel's material is the active material:
-        # overwrite bl_options ---- this doesnt work bc it's just DEFAULT
-        # TODO: should this be in draw?
-        # subpanel_material = cs.socket_props_per_material.candidate_materials[
-        #     self.subpanel_material_idx
-        # ]
-        # if cob.active_material.name != subpanel_material.name:
-        #     print(self.bl_options)
-        #     self.bl_options = {"DEFAULT_CLOSED"}  #
 
         # Get list of input nodes to randomise
         # for this subpanel's material
@@ -256,7 +211,7 @@ class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
                     icon_only=True,
                 )
 
-        # add randomise button for operator at the end
+        # add randomise button for each operator at the end
         # (only if there are input nodes)
         # if list_input_nodes:
         #     row = layout.row(align=True)
@@ -272,14 +227,37 @@ class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
         #     )
 
 
-# --------------------------------------------------
-# Register and unregister functions:
+# -----------------------------
+# Subpanel for operator
+# ---------------------------
+class SubPanelRandomMaterialOperator(TemplatePanel, bpy.types.Panel):
+    bl_idname = "NODE_MATERIAL_PT_subpanel_operator"
+    bl_parent_id = "NODE_MATERIAL_PT_mainpanel"  # use its bl_idname
+    bl_label = ""  # title of the panel displayed to the user
+    bl_options = {"HIDE_HEADER"}
+
+    @classmethod
+    def poll(cls, context):
+        return context.object is not None
+
+    def draw(self, context):
+        column = self.layout.column(align=True)
+        column.operator(
+            "node.randomise_all_sockets",
+            text="Randomise",
+        )
+
+
+# -----------------------
+# Classes to register
+# ---------------------
+
+# main panel
 list_classes_to_register = [
     MainPanelRandomMaterialNodes,
-    # SubPanelRandomMaterialNodes,
 ]
 
-# add subpanels per i to list of classes to register
+# subpanels per material (defined dynamically)
 for i in range(config.MAX_NUMBER_OF_SUBPANELS):
     subpanel_class_i = type(
         f"NODE_MATERIAL_PT_subpanel_{i}",
@@ -294,7 +272,15 @@ for i in range(config.MAX_NUMBER_OF_SUBPANELS):
     )
     list_classes_to_register.append(subpanel_class_i)  # type: ignore
 
+# subpanel with operator
+# (add the last one to the list,
+# render it at the bottom)
+list_classes_to_register.append(SubPanelRandomMaterialOperator)
 
+
+# -----------------------------------------
+# Register and unregister functions
+# ------------------------------------------
 def register():
     for cls in list_classes_to_register:
         bpy.utils.register_class(cls)
