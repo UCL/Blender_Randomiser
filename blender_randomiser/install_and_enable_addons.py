@@ -103,7 +103,6 @@ def main():
     if (
         len(args.randomisation_seed) == 1
     ):  
-        pdb.set_trace()
         bpy.context.scene.randomise_camera_props.seed = (
             args.randomisation_seed[0]
         )
