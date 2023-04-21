@@ -34,7 +34,6 @@ def main():
 
     # ---------
     # initialise parser
-    pdb.set_trace()
     parser = argparse.ArgumentParser(
         description=(
             "To launch Blender and install+enable the desired add-ons, run:"
