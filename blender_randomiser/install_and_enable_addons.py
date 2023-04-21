@@ -107,7 +107,6 @@ def main():
             args.randomisation_seed[0]
         )
 
-    pdb.set_trace()
 
 
 if __name__ == "__main__":
