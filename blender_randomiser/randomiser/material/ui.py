@@ -43,6 +43,7 @@ class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
     bl_parent_id = "NODE_MATERIAL_PT_mainpanel"  # use bl_idname
     bl_label = ""  # title of the panel displayed to the user
     bl_options = {"DEFAULT_CLOSED"}
+    # https://docs.blender.org/api/master/bpy.types.Panel.html#bpy.types.Panel.bl_options
 
     @classmethod
     def poll(cls, context):
@@ -71,7 +72,6 @@ class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
         # only display subpanels for which this is true
         return cls.subpanel_material_idx < len(
             cs.socket_props_per_material.collection
-            # list of materials in collection
         )
 
         # draw the panel only if there is an active material
@@ -99,10 +99,33 @@ class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
     def draw(self, context):
         # material for this subpanel
         cs = context.scene
+        # cob = context.object
+
         subpanel_material = cs.socket_props_per_material.candidate_materials[
             self.subpanel_material_idx
         ]
         subpanel_material_name = subpanel_material.name
+
+        # --------
+        # print(dir(self))
+        # ['__doc__', '__module__', 'bl_category', 'bl_context',
+        #  'bl_description', 'bl_idname', 'bl_label', 'bl_options',
+        #  'bl_order', 'bl_owner_id', 'bl_parent_id', 'bl_region_type',
+        #  'bl_rna', 'bl_space_type', 'bl_translation_context',
+        #  'bl_ui_units_x', 'custom_data', 'is_popover',
+        #  'layout', 'rna_type',
+        #  'subpanel_material_idx', 'text', 'use_pin']
+        # ----------------
+
+        # if this subpanel's material is the active material:
+        # overwrite bl_options ---- this doesnt work bc it's just DEFAULT
+        # TODO: should this be in draw?
+        # subpanel_material = cs.socket_props_per_material.candidate_materials[
+        #     self.subpanel_material_idx
+        # ]
+        # if cob.active_material.name != subpanel_material.name:
+        #     print(self.bl_options)
+        #     self.bl_options = {"DEFAULT_CLOSED"}  #
 
         # Get list of input nodes to randomise
         # for this subpanel's material
