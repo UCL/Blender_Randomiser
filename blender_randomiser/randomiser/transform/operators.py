@@ -80,7 +80,11 @@ class ApplyRandomTransform(bpy.types.Operator):  # ---check types
 def randomise_per_frame(dummy):
     # not sure why I need dummy here?
 
-    print("persitent dummy worked")
+    print("Frame changed")
+
+    bpy.ops.opr.apply_random_transform()
+
+    print("Randomisation applied")
 
     return
 
