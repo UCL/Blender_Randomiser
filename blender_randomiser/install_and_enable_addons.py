@@ -83,7 +83,6 @@ def main():
         return
     # ---------
 
-    pdb.set_trace()
     # extract list of python files
     # TODO: option to exclude files (w regex?)
     if len(args.addons_paths) == 1 and Path(args.addons_paths[0]).is_dir():
