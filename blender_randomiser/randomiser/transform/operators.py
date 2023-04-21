@@ -59,7 +59,7 @@ class ApplyRandomTransform(bpy.types.Operator):  # ---check types
         delta_on = context.scene.randomise_camera_props.bool_delta
 
         # get inputs
-        # seed: If None, fresh unpredictable entropy will be pulled from the OS
+      
         seed_no = (
             context.scene.randomise_camera_props.seed
             if context.scene.randomise_camera_props.seed_toggle
