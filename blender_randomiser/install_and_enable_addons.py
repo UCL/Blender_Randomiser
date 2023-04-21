@@ -27,7 +27,6 @@ def main():
 
     # get Python args (passed after "--")
     argv = sys.argv
-    # pdb.set_trace()
     if "--" not in argv:
         argv = []
     else:
