@@ -92,6 +92,16 @@ def constrain_max_closure(m_str):
 # ---------------------------
 # Properties
 class PropertiesApplyRandomTransform(bpy.types.PropertyGroup):
+    """
+    Class holding the set of properties
+    for the camera position and rotation:
+    - min/max values for x/y/z component of position and rotation, and
+    - boolean for delta position and rotation
+    - boolean for setting seed value
+    - integer for the actual seed value
+
+    """
+
     # Camera position and rotation
     camera_pos: bpy.props.FloatVectorProperty(  # type: ignore
         size=3,

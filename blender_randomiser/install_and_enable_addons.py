@@ -14,7 +14,6 @@ Example:
 
 """
 
-import pdb
 from pathlib import Path
 
 import bpy
@@ -23,7 +22,6 @@ import bpy
 def main():
     import argparse
     import sys
-
 
     # get Python args (passed after "--")
     argv = sys.argv
@@ -64,7 +62,7 @@ def main():
         metavar="N",
         type=int,
         nargs="+",
-        help="an integer for the accumulator",
+        help="an integer for the randomisation seed",
     )
 
     # build parser object
@@ -100,13 +98,10 @@ def main():
 
         print(f'"{Path(p).stem}" installed from source script and enabled')
 
-    if (
-        len(args.randomisation_seed) == 1
-    ):  
+    if len(args.randomisation_seed) == 1:
         bpy.context.scene.randomise_camera_props.seed = (
             args.randomisation_seed[0]
         )
-
 
 
 if __name__ == "__main__":
