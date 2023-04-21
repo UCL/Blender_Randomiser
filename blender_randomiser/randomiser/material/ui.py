@@ -6,8 +6,7 @@ https://blender.stackexchange.com/questions/185693/how-can-i-control-the-number-
 import bpy
 
 from .. import utils
-
-MAX_NUMBER_OF_PANELS = 100
+from . import config
 
 
 # ----------------------
@@ -254,7 +253,10 @@ class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
             col3 = row_split.column(align=True)
             col4 = row_split.column(align=True)
             col5 = row_split.column(align=True)
-            col5.operator("node.randomise_socket", text="Randomise")
+            col5.operator(
+                f"node.rand_sckt_subpanel_{self.subpanel_material_idx}",
+                text="Randomise",
+            )
 
 
 # --------------------------------------------------
@@ -265,7 +267,7 @@ list_classes_to_register = [
 ]
 
 # add subpanels per i to list of classes to register
-for i in range(MAX_NUMBER_OF_PANELS):
+for i in range(config.MAX_NUMBER_OF_SUBPANELS):
     subpanel_class_i = type(
         f"NODE_MATERIAL_PT_subpanel_{i}",
         (
@@ -274,8 +276,6 @@ for i in range(MAX_NUMBER_OF_PANELS):
         ),  # parent classes (is Panel req?)
         {
             "bl_idname": f"NODE_MATERIAL_PT_subpanel_{i}",
-            # "bl_label": "",
-            #  I change title of subpanel this via draw_header
             "subpanel_material_idx": i,
         },
     )

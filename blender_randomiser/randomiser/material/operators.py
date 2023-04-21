@@ -1,9 +1,11 @@
 import bpy
 import numpy as np
 
+from . import config
+
 
 # -------------------------------
-## Operators
+## Operator tempalte
 class RandomiseMaterialNodes(bpy.types.Operator):
     """Randomise the selected output sockets
 
@@ -25,16 +27,15 @@ class RandomiseMaterialNodes(bpy.types.Operator):
     bl_label = "Randomise selected sockets"
     bl_options = {"REGISTER", "UNDO"}
 
-    # link operators to materials
-    subpanel_material_idx = 0
+    # link operators to materials ---added to each operator instance
+    # subpanel_material_idx = 0
 
-    # check if there is an object in this context
-    # TODO: do I need to check this?
     @classmethod
     def poll(cls, context):
-        # if False: show as disabled
-        # only draw/execute if panel conditions met?
-        return context.object is not None  # False
+        # used to check if the operator can run.
+        return cls.subpanel_material_idx < len(
+            context.scene.socket_props_per_material.collection
+        )
 
     def invoke(self, context, event):
         """Initialise parmeters before executing
@@ -170,10 +171,21 @@ class RandomiseMaterialNodes(bpy.types.Operator):
 
 # -------------------------------
 ## Register operators
-
-list_classes_to_register = [
-    RandomiseMaterialNodes,
-]
+list_classes_to_register = []
+for i in range(config.MAX_NUMBER_OF_SUBPANELS):
+    operator_i = type(
+        f"RandomiseMaterialNodes_subpanel_{i}",
+        (
+            RandomiseMaterialNodes,
+            bpy.types.Operator,
+        ),
+        {
+            "bl_idname": f"node.rand_sckt_subpanel_{i}",
+            "bl_label": "",
+            "subpanel_material_idx": i,
+        },
+    )
+    list_classes_to_register.append(operator_i)
 
 
 def register():
