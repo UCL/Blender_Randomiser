@@ -66,51 +66,72 @@ class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
 
     def draw_header(self, context):
         cs = context.scene
-        layout = self.layout
-
         # TODO: maybe a dict? can order of materials change?
         subpanel_material = cs.socket_props_per_material.candidate_materials[
             self.subpanel_material_idx
         ]
 
-        layout.label(text=subpanel_material.name)
+        layout = self.layout
+        layout.use_property_split = True
+        layout.use_property_decorate = False  # No animation.
+
+        # ----
+        # # row = layout.row(align=True)
+        # layout.label(text=subpanel_material.name)
+        # layout.operator(
+        #     f"node.view_graph_for_material_{self.subpanel_material_idx}",
+        #     text='View graph',
+        #     emboss=True,
+        # )
+
+        # --
+        layout.operator(
+            f"node.view_graph_for_material_{self.subpanel_material_idx}",
+            text=subpanel_material.name,
+            emboss=True,
+        )
+        # --
+
+        #
+        # layout = self.layout
+        # row = layout.row()
+        # split = row.split()
+        # left_col = split.column(align=True)
+        # right_col = split.column(align=True)
+
+        # left_col.alignment = "RIGHT"
+        # left_col.label(text="Target volume size")
+        # right_col.operator(
+        #     f"node.view_graph_for_material_{self.subpanel_material_idx}",
+        #     text=subpanel_material.name,
+        #     emboss=True
+        # )
 
     def draw(self, context):
+        # get name of the material for this subpanel
         cs = context.scene
-
         subpanel_material = cs.socket_props_per_material.candidate_materials[
             self.subpanel_material_idx
         ]
-        subpanel_material_name = subpanel_material.name
-
-        # --------
-        # print(dir(self))
-        # ['__doc__', '__module__', 'bl_category', 'bl_context',
-        #  'bl_description', 'bl_idname', 'bl_label', 'bl_options',
-        #  'bl_order', 'bl_owner_id', 'bl_parent_id', 'bl_region_type',
-        #  'bl_rna', 'bl_space_type', 'bl_translation_context',
-        #  'bl_ui_units_x', 'custom_data', 'is_popover',
-        #  'layout', 'rna_type',
-        #  'subpanel_material_idx', 'text', 'use_pin']
-        # ----------------
+        # subpanel_material_name = subpanel_material.name
 
         # Get list of input nodes to randomise
         # for this subpanel's material
         list_input_nodes = utils.get_material_input_nodes_to_randomise(
-            subpanel_material_name
+            subpanel_material.name
         )
 
         # then force an update in the sockets per material
         # subpanel_material_name = subpanel_material.name
         if cs.socket_props_per_material.collection[
-            subpanel_material_name
+            subpanel_material.name
         ].update_sockets_collection:
             print("Collection of sockets updated")
 
         # get (updated) collection of socket properties
         # for the current material
         sockets_props_collection = cs.socket_props_per_material.collection[
-            subpanel_material_name
+            subpanel_material.name
         ].collection
 
         # Define UI fields for every socket property
@@ -211,25 +232,25 @@ class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
                     icon_only=True,
                 )
 
-        # add randomise button for each operator at the end
+        # add view graph button for each material at the end
         # (only if there are input nodes)
         # if list_input_nodes:
-        #     row = layout.row(align=True)
-        #     row_split = row.split()
-        #     col1 = row_split.column(align=True)
-        #     col2 = row_split.column(align=True)
-        #     col3 = row_split.column(align=True)
-        #     col4 = row_split.column(align=True)
-        #     col5 = row_split.column(align=True)
-        #     col5.operator(
-        #         f"node.rand_sckt_subpanel_{self.subpanel_material_idx}",
-        #         text="Randomise",
-        #     )
+        # row = layout.row(align=True)
+        # row_split = row.split()
+        # col1 = row_split.column(align=True)
+        # col2 = row_split.column(align=True)
+        # col3 = row_split.column(align=True)
+        # col4 = row_split.column(align=True)
+        # col5 = row_split.column(align=True)
+        # col5.operator(
+        #     f"node.view_graph_for_material_{self.subpanel_material_idx}",
+        #     text="View graph",
+        # )
 
 
-# -----------------------------
-# Subpanel for operator
-# ---------------------------
+# -----------------------------------
+# Subpanel for randomise-all operator
+# ----------------------------------
 class SubPanelRandomMaterialOperator(TemplatePanel, bpy.types.Panel):
     bl_idname = "NODE_MATERIAL_PT_subpanel_operator"
     bl_parent_id = "NODE_MATERIAL_PT_mainpanel"  # use its bl_idname
