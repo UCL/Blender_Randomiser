@@ -100,7 +100,6 @@ def main():
 
         print(f'"{Path(p).stem}" installed from source script and enabled')
 
-    pdb.set_trace()
     if (
         len(args.randomisation_seed) == 1
     ):  # ßßand args.randomisation_seed[0].is_int():
