@@ -1,5 +1,6 @@
 import bpy
 import numpy as np
+from bpy.app.handlers import persistent
 from mathutils import Vector
 
 
@@ -75,6 +76,15 @@ class ApplyRandomTransform(bpy.types.Operator):  # ---check types
         return {"FINISHED"}
 
 
+@persistent
+def randomise_per_frame(dummy):
+    # not sure why I need dummy here?
+
+    print("persitent dummy worked")
+
+    return
+
+
 # --------------------------------------------------
 # Register and unregister functions:
 list_classes_to_register = [
@@ -88,9 +98,9 @@ def register():
     for cls in list_classes_to_register:
         bpy.utils.register_class(cls)
 
-    print("registered")
+    bpy.app.handlers.frame_change_pre.append(randomise_per_frame)
 
-    # bpy.app.handlers.frame_change_post.append(my_handler)
+    print("registered")
 
 
 def unregister():
@@ -100,9 +110,9 @@ def unregister():
     for cls in list_classes_to_register:
         bpy.utils.unregister_class(cls)
 
-    print("unregistered")
+    bpy.app.handlers.frame_change_pre.remove(randomise_per_frame)
 
-    # bpy.app.handlers.frame_change_post.remove(my_handler)
+    print("unregistered")
 
 
 # def my_handler(scene):
