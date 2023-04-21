@@ -26,6 +26,19 @@ class MainPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
         layout = self.layout
         layout.label(text="Select material to see available sockets.")
 
+        # add operator for all
+        row = layout.row(align=True)
+        row_split = row.split()
+        row_split.column(align=True)
+        row_split.column(align=True)
+        row_split.column(align=True)
+        row_split.column(align=True)
+        col5 = row_split.column(align=True)
+        col5.operator(
+            "node.randomise_all_sockets",
+            text="Randomise all",
+        )
+
 
 # ------------------------------
 # Subpanel for active material
@@ -41,7 +54,7 @@ class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
     )
     bl_parent_id = "NODE_MATERIAL_PT_mainpanel"  # use bl_idname
     bl_label = ""  # title of the panel displayed to the user
-    bl_options = {"DEFAULT_CLOSED"}
+    # bl_options = {"DEFAULT_CLOSED"}
     # https://docs.blender.org/api/master/bpy.types.Panel.html#bpy.types.Panel.bl_options
 
     @classmethod
@@ -245,18 +258,18 @@ class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
 
         # add randomise button for operator at the end
         # (only if there are input nodes)
-        if list_input_nodes:
-            row = layout.row(align=True)
-            row_split = row.split()
-            col1 = row_split.column(align=True)
-            col2 = row_split.column(align=True)
-            col3 = row_split.column(align=True)
-            col4 = row_split.column(align=True)
-            col5 = row_split.column(align=True)
-            col5.operator(
-                f"node.rand_sckt_subpanel_{self.subpanel_material_idx}",
-                text="Randomise",
-            )
+        # if list_input_nodes:
+        #     row = layout.row(align=True)
+        #     row_split = row.split()
+        #     col1 = row_split.column(align=True)
+        #     col2 = row_split.column(align=True)
+        #     col3 = row_split.column(align=True)
+        #     col4 = row_split.column(align=True)
+        #     col5 = row_split.column(align=True)
+        #     col5.operator(
+        #         f"node.rand_sckt_subpanel_{self.subpanel_material_idx}",
+        #         text="Randomise",
+        #     )
 
 
 # --------------------------------------------------
