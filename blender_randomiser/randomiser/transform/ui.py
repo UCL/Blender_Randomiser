@@ -143,9 +143,6 @@ class PanelAddRandomTransform(bpy.types.Panel):
             context.scene.randomise_camera_props.seed_toggle
         )  # only disable the next part of the row
         right_col.prop(context.scene.randomise_camera_props, "seed")
-        # alternative:
-        # row = self.layout.row(align=True)
-        # row.prop(context.scene.random_cube_props, "seed_toggle")
 
         # # Big render button
         # layout.label(text="Big Button:")
