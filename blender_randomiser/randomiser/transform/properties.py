@@ -1,5 +1,6 @@
 import bpy
 import numpy as np
+from bpy.app.handlers import persistent
 
 
 # -----------------------------------------
@@ -156,6 +157,15 @@ class PropertiesApplyRandomTransform(bpy.types.PropertyGroup):
     bool_delta: bpy.props.BoolProperty()  # type: ignore
 
 
+@persistent
+def randomise_per_frame(dummy):
+    # not sure why I need dummy here?
+
+    print("persitent dummy worked")
+
+    return
+
+
 # --------------------------------------------------
 # Register and unregister functions:
 list_classes_to_register = [
@@ -174,6 +184,8 @@ def register():
                 type=PropertiesApplyRandomTransform
             )
 
+    bpy.app.handlers.frame_change_pre.append(randomise_per_frame)
+
     print("registered")
 
 
@@ -185,5 +197,7 @@ def unregister():
         bpy.utils.unregister_class(cls)
 
     del bpy.types.Scene.randomise_camera_props
+
+    bpy.app.handlers.frame_change_pre.remove(randomise_per_frame)
 
     print("unregistered")
