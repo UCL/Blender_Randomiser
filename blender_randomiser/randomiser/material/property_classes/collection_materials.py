@@ -2,13 +2,12 @@ import bpy
 
 from .collection_socket_properties import ColSocketProperties
 
-
 # -----------------------------------------------------------------
 # Setter / getter methods for update_materials_collection attribute
 # ----------------------------------------------------------------
-def get_update_materials_collection(self):
-    # for mat in self.candidate_materials:
 
+
+def compute_materials_sets(self):
     # set of materials currently in collection
     self.set_material_names_in_collection = set(
         mat.name for mat in self.collection
@@ -28,9 +27,14 @@ def get_update_materials_collection(self):
             self.set_material_names_in_data
         )
     )
-    # print(self.set_material_names_in_one_only)
 
-    # if there are materials in one only
+
+def get_update_materials_collection(self):
+    # for mat in self.candidate_materials:
+
+    compute_materials_sets(self)
+
+    # if there are materials in one set only
     if self.set_material_names_in_one_only:
         set_update_materials_collection(self, True)
         return True
@@ -39,8 +43,13 @@ def get_update_materials_collection(self):
 
 
 def set_update_materials_collection(self, value):
-    # update set to True
+    # if update value is set to True
     if value:
+        # if the update fn is triggered directly and not via
+        # getter fn: compute sets
+        if not hasattr(self, "set_material_names_in_one_only"):
+            compute_materials_sets(self)
+
         # for all materials that are in one set only
         for mat_name in self.set_material_names_in_one_only:
             # - if material is in collection only: remove from collection
