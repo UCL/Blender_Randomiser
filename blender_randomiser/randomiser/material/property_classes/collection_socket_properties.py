@@ -8,6 +8,52 @@ from .socket_properties import SocketProperties
 # -----------------------------------------------------------------
 # Setter / getter methods for update_sockets_collection attribute
 # ----------------------------------------------------------------
+def compute_sockets_sets(self):
+    # set of sockets in collection for this material
+    self.set_sckt_names_in_collection_of_props = set(
+        sck_p.name for sck_p in self.collection
+    )
+
+    # set of sockets in graph *for this material* !
+    self.set_sckt_names_in_graph = set(
+        sck.node.name + "_" + sck.name for sck in self.candidate_sockets
+    )
+
+    # set of sockets that are just in one of the two groups
+    self.set_of_sckt_names_in_one_only = (
+        self.set_sckt_names_in_collection_of_props.symmetric_difference(
+            self.set_sckt_names_in_graph
+        )
+    )
+
+
+def get_update_collection(self):
+    """Get function for the update_sockets_collection attribute
+    of the class ColSocketProperties
+
+    It will run when the property value is 'get' and
+    it will update the collection of socket properties if required
+
+    Returns
+    -------
+    boolean
+        returns True if the collection of socket properties is updated,
+        otherwise it returns False
+    """
+    # compute the different sets of sockets
+    compute_sockets_sets(self)
+
+    # if there is a difference between
+    # sets of sockets in graph and in collection:
+    # edit the set of sockets in collection
+    # for this material with the latest data
+    if self.set_of_sckt_names_in_one_only:
+        set_update_collection(self, True)
+        return True  # if returns True, it has been updated
+    else:
+        return False  # if returns False, it hasn't
+
+
 def set_update_collection(self, value):
     """
     'Set' function for the update_sockets_collection attribute
@@ -32,6 +78,11 @@ def set_update_collection(self, value):
     """
 
     if value:
+        # if the update fn is triggered directly and not via
+        # getter fn: compute sets
+        if not hasattr(self, "set_of_sckt_names_in_one_only"):
+            compute_sockets_sets(self)
+
         # update sockets that are only in either
         # the collection set or the graph set
         for sckt_name in self.set_of_sckt_names_in_one_only:
@@ -84,47 +135,6 @@ def set_update_collection(self, value):
                         m_str + "_" + socket_attrib_str,
                         (ini_min_max_values[m_str],) * n_dim,
                     )
-
-
-def get_update_collection(self):
-    """Get function for the update_sockets_collection attribute
-    of the class ColSocketProperties
-
-    It will run when the property value is 'get' and
-    it will update the collection of socket properties if required
-
-    Returns
-    -------
-    boolean
-        returns True if the collection of socket properties is updated,
-        otherwise it returns False
-    """
-
-    # set of sockets in collection for this material
-    self.set_sckt_names_in_collection_of_props = set(
-        sck_p.name for sck_p in self.collection
-    )
-
-    # set of sockets in graph *for this material* !
-    self.set_sckt_names_in_graph = set(
-        sck.node.name + "_" + sck.name for sck in self.candidate_sockets
-    )
-
-    # set of sockets that are just in one of the two groups
-    self.set_of_sckt_names_in_one_only = (
-        self.set_sckt_names_in_collection_of_props.symmetric_difference(
-            self.set_sckt_names_in_graph
-        )
-    )
-
-    # if there is a difference:
-    # edit the set of sockets in collection
-    # for this material with the latest data
-    if self.set_of_sckt_names_in_one_only:
-        set_update_collection(self, True)
-        return True  # if returns True, it has been updated
-    else:
-        return False  # if returns False, it hasn't
 
 
 # -----------------------
