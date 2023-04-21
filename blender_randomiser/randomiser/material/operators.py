@@ -25,13 +25,16 @@ class RandomiseMaterialNodes(bpy.types.Operator):
     bl_label = "Randomise selected sockets"
     bl_options = {"REGISTER", "UNDO"}
 
+    # link operators to materials
+    subpanel_material_idx = 0
+
     # check if there is an object in this context
     # TODO: do I need to check this?
     @classmethod
     def poll(cls, context):
         # if False: show as disabled
         # only draw/execute if panel conditions met?
-        return False  # context.object is not None
+        return context.object is not None  # False
 
     def invoke(self, context, event):
         """Initialise parmeters before executing
