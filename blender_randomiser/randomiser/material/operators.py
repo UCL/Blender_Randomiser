@@ -22,14 +22,16 @@ class RandomiseMaterialNodes(bpy.types.Operator):
 
     # metadata
     bl_idname = "node.randomise_socket"  # this is appended to bpy.ops.
-    bl_label = "Randomise selected sockets from input material nodes"
+    bl_label = "Randomise selected sockets"
     bl_options = {"REGISTER", "UNDO"}
 
     # check if there is an object in this context
     # TODO: do I need to check this?
     @classmethod
     def poll(cls, context):
-        return context.object is not None
+        # if False: show as disabled
+        # only draw/execute if panel conditions met?
+        return False  # context.object is not None
 
     def invoke(self, context, event):
         """Initialise parmeters before executing
@@ -55,18 +57,23 @@ class RandomiseMaterialNodes(bpy.types.Operator):
         """
         # add list of socket properties to operator self
         # (this list should have been updated already, when drawing the panel)
+        # self is RandomiseMaterialNodes!!!
         cs = context.scene
-        cob = context.object
-        active_material_name = cob.active_material.name
+        subpanel_material = cs.socket_props_per_material.candidate_materials[
+            self.subpanel_material_idx
+        ]
+        subpanel_material_name = subpanel_material.name
+
         # get collection of socket properties for the active material
         self.sockets_props_collection = (
             cs.socket_props_per_material.collection[
-                active_material_name
+                subpanel_material_name
             ].collection
         )
+
         # get candidate sockets for the active mat
         self.candidate_sockets = cs.socket_props_per_material.collection[
-            active_material_name
+            subpanel_material_name
         ].candidate_sockets
 
         # if socket unlinked and randomisation toggle is True:
@@ -113,6 +120,7 @@ class RandomiseMaterialNodes(bpy.types.Operator):
         _type_
             _description_
         """
+        cs = context.scene
 
         # Construct a numpy random number generator
         rng = np.random.default_rng()
@@ -125,7 +133,7 @@ class RandomiseMaterialNodes(bpy.types.Operator):
             min_val = np.array(
                 getattr(
                     self.sockets_props_collection[socket_id],
-                    "min_" + context.scene.socket_type_to_attr[type(sckt)],
+                    "min_" + cs.socket_type_to_attr[type(sckt)],
                 )
             )
 
@@ -133,7 +141,7 @@ class RandomiseMaterialNodes(bpy.types.Operator):
             max_val = np.array(
                 getattr(
                     self.sockets_props_collection[socket_id],
-                    "max_" + context.scene.socket_type_to_attr[type(sckt)],
+                    "max_" + cs.socket_type_to_attr[type(sckt)],
                 )
             )
 
