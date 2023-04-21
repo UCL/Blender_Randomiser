@@ -102,7 +102,7 @@ def main():
 
     if (
         len(args.randomisation_seed) == 1
-    ):  # ßßand args.randomisation_seed[0].is_int():
+    ):  
         pdb.set_trace()
         bpy.context.scene.randomise_camera_props.seed = (
             args.randomisation_seed[0]
