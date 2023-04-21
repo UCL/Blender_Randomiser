@@ -24,7 +24,6 @@ def main():
     import argparse
     import sys
 
-    # pdb.set_trace()
 
     # get Python args (passed after "--")
     argv = sys.argv
