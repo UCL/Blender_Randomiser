@@ -1,48 +1,120 @@
+"""
+Solution to show all materials in subpanels inspired on this SO answer:
+https://blender.stackexchange.com/questions/185693/how-can-i-control-the-number-of-sub-panel-instances-from-an-intproperty
+
+"""
 import bpy
 
 from .. import utils
+from . import config
 
 
-# Panel
-class PanelRandomMaterialNodes(bpy.types.Panel):
+# ----------------------
+# Common sections
+# ---------------------
+class TemplatePanel(bpy.types.Panel):
+    bl_space_type = "NODE_EDITOR"
+    bl_region_type = "UI"
+    bl_category = "Randomiser"  # this shows up as the tab name
+
+
+# ----------------------
+# Main panel
+# ---------------------
+class MainPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
+    bl_idname = "NODE_MATERIAL_PT_mainpanel"
+    bl_label = "Randomise MATERIAL"
+
+    def draw(self, context):
+        column = self.layout.column(align=True)
+        column.label(text="Select material to see available sockets.")
+
+
+# ------------------------------
+# Subpanel for each material
+# -----------------------------
+class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
     """Class defining the panel for randomising
     material node properties
 
     """
 
-    # TODO: are these docstrings shown in the UI as tooltips somewhere?
-
-    # metadata
-    bl_idname = "NODE_MATERIAL_PT_random"
-    bl_label = "Randomise MATERIAL"  # title of the panel displayed to the user
-    bl_space_type = "NODE_EDITOR"
-    bl_region_type = "UI"
-    bl_category = "Randomiser"
+    bl_idname = (
+        "NODE_MATERIAL_PT_subpanel"  # what is this for? --internal reference?
+    )
+    bl_parent_id = "NODE_MATERIAL_PT_mainpanel"  # use bl_idname
+    bl_label = ""  # title of the panel displayed to the user
+    # bl_options = {"DEFAULT_CLOSED"}
+    # https://docs.blender.org/api/master/bpy.types.Panel.html#bpy.types.Panel.bl_options
 
     @classmethod
-    def poll(self, context):
-        # TODO: is the object context what I need to check?
-        return context.object is not None
+    def poll(cls, context):
+        cs = context.scene
 
-    def draw(self, context):
-        # Get list of input nodes to randomise
-        list_input_nodes = utils.get_material_input_nodes_to_randomise()
-
-        # Get collection of sockets' properties
-        # 'context.scene.sockets2randomise_props.update_collection'
+        # force an update on the materials collection first
+        # the '.update_collection' attribute
         # triggers the get function that checks if an update is
         # required. If it is, the collection of sockets is updated
-        # and 'context.scene.sockets2randomise_props.update_collection'
-        # returns TRUE
-        cs = context.scene
-        if cs.sockets2randomise_props.update_collection:
-            print("Collection of sockets updated")
-        sockets_props_collection = cs.sockets2randomise_props.collection
+        # and returns TRUE
+        if cs.socket_props_per_material.update_materials_collection:
+            print("Collection of materials updated")
 
-        # define UI fields for every socket property
+        # only display subpanels for which this is true
+        return cls.subpanel_material_idx < len(
+            cs.socket_props_per_material.collection
+        )
+
+    def draw_header(self, context):
+        cs = context.scene
+        # TODO: maybe a dict? can order of materials change?
+        subpanel_material = cs.socket_props_per_material.collection[
+            self.subpanel_material_idx
+        ]
+
+        layout = self.layout
+        layout.use_property_split = True
+        layout.use_property_decorate = False  # No animation.
+
+        # For now: view graph button on top of material name
+        layout.operator(
+            f"node.view_graph_for_material_{self.subpanel_material_idx}",
+            text=subpanel_material.name,
+            emboss=True,
+        )
+
+    def draw(self, context):
+        # get name of the material for this subpanel
+        cs = context.scene
+        subpanel_material = cs.socket_props_per_material.collection[
+            self.subpanel_material_idx
+        ]
+
+        # Get list of input nodes to randomise
+        # for this subpanel's material
+        list_input_nodes = utils.get_material_input_nodes_to_randomise(
+            subpanel_material.name
+        )
+
+        # then force an update in the sockets per material
+        # subpanel_material_name = subpanel_material.name
+        if cs.socket_props_per_material.collection[
+            subpanel_material.name
+        ].update_sockets_collection:
+            print("Collection of sockets updated")
+
+        # get (updated) collection of socket properties
+        # for the current material
+        sockets_props_collection = cs.socket_props_per_material.collection[
+            subpanel_material.name
+        ].collection
+
+        # Define UI fields for every socket property
+        # NOTE: if I don't sort the input nodes, everytime one of the nodes is
+        # selected in the graph it moves to the bottom of the panel (?).
+        # TODO: sort by date of creation? ---I didn't find an easy way to do it
         layout = self.layout
         for i_n, nd in enumerate(
-            sorted(list_input_nodes, key=lambda nd: nd.name)
+            sorted(list_input_nodes, key=lambda x: x.name)
         ):
             row = layout.row()
 
@@ -134,24 +206,61 @@ class PanelRandomMaterialNodes(bpy.types.Panel):
                     icon_only=True,
                 )
 
-        # add randomise button for operator
-        row = layout.row(align=True)
-        row_split = row.split()
-        col1 = row_split.column(align=True)
-        col2 = row_split.column(align=True)
-        col3 = row_split.column(align=True)
-        col4 = row_split.column(align=True)
-        col5 = row_split.column(align=True)
-        col5.operator("node.randomise_socket", text="Randomise")
+
+# -----------------------------------
+# Subpanel for randomise-all operator
+# ----------------------------------
+class SubPanelRandomMaterialOperator(TemplatePanel, bpy.types.Panel):
+    bl_idname = "NODE_MATERIAL_PT_subpanel_operator"
+    bl_parent_id = "NODE_MATERIAL_PT_mainpanel"  # use its bl_idname
+    bl_label = ""  # title of the panel displayed to the user
+    bl_options = {"HIDE_HEADER"}
+
+    @classmethod
+    def poll(cls, context):
+        return context.object is not None
+
+    def draw(self, context):
+        column = self.layout.column(align=True)
+        column.operator(
+            "node.randomise_all_sockets",
+            text="Randomise",
+        )
 
 
-# --------------------------------------------------
-# Register and unregister functions:
+# -----------------------
+# Classes to register
+# ---------------------
+
+# main panel
 list_classes_to_register = [
-    PanelRandomMaterialNodes,
+    MainPanelRandomMaterialNodes,
 ]
 
+# subpanels per material (defined dynamically)
+for i in range(config.MAX_NUMBER_OF_SUBPANELS):
+    subpanel_class_i = type(
+        f"NODE_MATERIAL_PT_subpanel_{i}",
+        (
+            SubPanelRandomMaterialNodes,
+            bpy.types.Panel,
+        ),  # parent classes (is Panel req?)
+        {
+            "bl_idname": f"NODE_MATERIAL_PT_subpanel_{i}",
+            "subpanel_material_idx": i,
+        },
+    )
+    list_classes_to_register.append(subpanel_class_i)  # type: ignore
 
+# subpanel with operator
+# (add the last one to the list,
+# render it at the bottom)
+list_classes_to_register.append(SubPanelRandomMaterialOperator)
+
+
+# -----------------------------------------
+# Register and unregister functions
+# ------------------------------------------
 def register():
     for cls in list_classes_to_register:
         bpy.utils.register_class(cls)
