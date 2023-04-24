@@ -67,7 +67,7 @@ class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
     def draw_header(self, context):
         cs = context.scene
         # TODO: maybe a dict? can order of materials change?
-        subpanel_material = cs.socket_props_per_material.candidate_materials[
+        subpanel_material = cs.socket_props_per_material.collection[
             self.subpanel_material_idx
         ]
 
@@ -75,45 +75,19 @@ class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
         layout.use_property_split = True
         layout.use_property_decorate = False  # No animation.
 
-        # ----
-        # # row = layout.row(align=True)
-        # layout.label(text=subpanel_material.name)
-        # layout.operator(
-        #     f"node.view_graph_for_material_{self.subpanel_material_idx}",
-        #     text='View graph',
-        #     emboss=True,
-        # )
-
-        # --
+        # For now: view graph button on top of material name
         layout.operator(
             f"node.view_graph_for_material_{self.subpanel_material_idx}",
             text=subpanel_material.name,
             emboss=True,
         )
-        # --
-
-        #
-        # layout = self.layout
-        # row = layout.row()
-        # split = row.split()
-        # left_col = split.column(align=True)
-        # right_col = split.column(align=True)
-
-        # left_col.alignment = "RIGHT"
-        # left_col.label(text="Target volume size")
-        # right_col.operator(
-        #     f"node.view_graph_for_material_{self.subpanel_material_idx}",
-        #     text=subpanel_material.name,
-        #     emboss=True
-        # )
 
     def draw(self, context):
         # get name of the material for this subpanel
         cs = context.scene
-        subpanel_material = cs.socket_props_per_material.candidate_materials[
+        subpanel_material = cs.socket_props_per_material.collection[
             self.subpanel_material_idx
         ]
-        # subpanel_material_name = subpanel_material.name
 
         # Get list of input nodes to randomise
         # for this subpanel's material
@@ -231,21 +205,6 @@ class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
                     "bool_randomise",
                     icon_only=True,
                 )
-
-        # add view graph button for each material at the end
-        # (only if there are input nodes)
-        # if list_input_nodes:
-        # row = layout.row(align=True)
-        # row_split = row.split()
-        # col1 = row_split.column(align=True)
-        # col2 = row_split.column(align=True)
-        # col3 = row_split.column(align=True)
-        # col4 = row_split.column(align=True)
-        # col5 = row_split.column(align=True)
-        # col5.operator(
-        #     f"node.view_graph_for_material_{self.subpanel_material_idx}",
-        #     text="View graph",
-        # )
 
 
 # -----------------------------------

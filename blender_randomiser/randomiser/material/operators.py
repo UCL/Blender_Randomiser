@@ -60,7 +60,8 @@ class RandomiseAllMaterialNodes(bpy.types.Operator):
         cs = context.scene
         self.list_subpanel_material_names = [
             mat.name
-            for mat in cs.socket_props_per_material.candidate_materials
+            for mat in cs.socket_props_per_material.collection
+            # for mat in cs.socket_props_per_material.candidate_materials
         ]
 
         # for every material: save sockets to randomise
@@ -214,7 +215,7 @@ class ViewNodeGraphOneMaterial(bpy.types.Operator):
     def poll(cls, context):
         # used to check if the operator can run.
         cs = context.scene
-        subpanel_material = cs.socket_props_per_material.candidate_materials[
+        subpanel_material = cs.socket_props_per_material.collection[
             cls.subpanel_material_idx
         ]
         # TODO: have this here or in invoke?
@@ -249,7 +250,7 @@ class ViewNodeGraphOneMaterial(bpy.types.Operator):
         # (this list should have been updated already, when drawing the panel)
         # self is RandomiseMaterialNodes!!!
         cs = context.scene
-        subpanel_material = cs.socket_props_per_material.candidate_materials[
+        subpanel_material = cs.socket_props_per_material.collection[
             self.subpanel_material_idx
         ]
         self.subpanel_material_name = subpanel_material.name
