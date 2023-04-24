@@ -9,7 +9,7 @@ from mathutils import Vector
 ## Operators
 class ApplyRandomTransform(bpy.types.Operator):  # ---check types
     # docstring shows as a tooltip for menu items and buttons.
-    """Randomise the camera object
+    """Randomise the position and orientation of the camera
 
     Parameters
     ----------
