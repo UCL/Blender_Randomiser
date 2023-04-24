@@ -77,8 +77,6 @@ class ApplyRandomTransform(bpy.types.Operator):  # ---check types
         rot_z_range = [rot_z_min, rot_z_max]
         delta_on = context.scene.randomise_camera_props.bool_delta
 
-        
-
         seed_no = (
             context.scene.randomise_camera_props.seed
             if context.scene.randomise_camera_props.seed_toggle
@@ -119,6 +117,20 @@ def randomize_selected(
     delta_on,
     seed_no,
 ):
+    """Generate random numbers between the range for x/y/z
+    directions in location and rotation
+
+    Parameters
+    ----------
+    bpy : _type_
+        _description_
+
+    Returns
+    -------
+    _type_
+        _description_
+    """
+
     def rand_num(min, max, seed_no):
         seed(seed_no)
         return uniform(min, max)
