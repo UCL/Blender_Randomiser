@@ -77,7 +77,7 @@ class ApplyRandomTransform(bpy.types.Operator):  # ---check types
         rot_z_range = [rot_z_min, rot_z_max]
         delta_on = context.scene.randomise_camera_props.bool_delta
 
-        # get inputs
+        
 
         seed_no = (
             context.scene.randomise_camera_props.seed
