@@ -49,7 +49,7 @@ def main():
     # add arguments
     # required (positonal)
     parser.add_argument(
-        "addons_paths",
+        "-p",
         nargs="*",
         type=str,  # types: string, int, long, choice, float and complex.
         metavar="ADDONS_PATHS",  # A name for the argument in usage messages.
@@ -58,11 +58,11 @@ def main():
     )
 
     parser.add_argument(
-        "randomisation_seed",
+        "-s",
         metavar="N",
         type=int,
         nargs="+",
-        help="an integer for the accumulator",
+        help="an integer for the randomisation_seed",
     )
 
     # build parser object
@@ -75,33 +75,33 @@ def main():
         return
 
     # error if required arguments not provided
-    if not args.addons_paths:
-        print("Error: paths to add-ons not provided, aborting.")
-        parser.print_help()
-        return
+    # if not args.p:
+    #     print("Error: paths to add-ons not provided, aborting.")
+    #     parser.print_help()
+    #     return
     # ---------
 
     # extract list of python files
     # TODO: option to exclude files (w regex?)
-    if len(args.addons_paths) == 1 and Path(args.addons_paths[0]).is_dir():
-        list_files = [
-            str(item) for item in Path(args.addons_paths[0]).glob("*.py")
-        ]
+    # if len(args.p) == 1 and Path(args.p[0]).is_dir():
+    #     list_files = [
+    #         str(item) for item in Path(args.p[0]).glob("*.py")
+    #     ]
 
-    else:  # TODO: check if list of paths?
-        list_files = args.addons_paths
+    # else:  # TODO: check if list of paths?
+    #     list_files = args.p
 
     # install and enable addons in list
-    for p in list_files:
-        bpy.ops.preferences.addon_install(filepath=p)
-        bpy.ops.preferences.addon_enable(module=Path(p).stem)
+    if args.p is not None:
+        list_files = args.p
+        for p in list_files:
+            bpy.ops.preferences.addon_install(filepath=p)
+            bpy.ops.preferences.addon_enable(module=Path(p).stem)
 
-        print(f'"{Path(p).stem}" installed from source script and enabled')
+            print(f'"{Path(p).stem}" installed from source script and enabled')
 
-    if len(args.randomisation_seed) == 1:
-        bpy.context.scene.randomise_camera_props.seed = (
-            args.randomisation_seed[0]
-        )
+    if args.s is not None:
+        bpy.context.scene.randomise_camera_props.seed = args.s[0]
 
         bpy.context.scene.randomise_camera_props.seed_toggle = True
 
