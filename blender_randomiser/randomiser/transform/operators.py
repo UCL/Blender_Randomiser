@@ -23,7 +23,7 @@ class ApplyRandomTransform(bpy.types.Operator):  # ---check types
     """
 
     bl_idname = "opr.apply_random_transform"  # appended to bpy.ops.
-    bl_label = "Apply random transform to object"
+    bl_label = "Apply random transform to camera"
     bl_options = {"REGISTER", "UNDO"}
 
     @classmethod
