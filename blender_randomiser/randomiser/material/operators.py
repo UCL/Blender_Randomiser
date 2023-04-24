@@ -259,7 +259,15 @@ class ViewNodeGraphOneMaterial(bpy.types.Operator):
     def execute(self, context):
         """Execute 'view graph' operator
 
-        Show the node graph for this material
+        Show the node graph for this material.
+
+        We change the view by changing the 'slot'. If we change the
+        active material only, the slot in view is 'overwritten' with
+        the active material every time.
+
+        It may be the case that a material is not assigned to any slot.
+        In that case, if the view-graph button is clicked, a new
+        slot is added for that material.
 
         Parameters
         ----------
@@ -272,7 +280,32 @@ class ViewNodeGraphOneMaterial(bpy.types.Operator):
             _description_
         """
         cob = context.object
-        cob.active_material = bpy.data.materials[self.subpanel_material_name]
+
+        # get the subpanel's material slot index
+        # returns -1 if there is no slot for that material
+        slot_idx_for_subpanel_material = cob.material_slots.find(
+            self.subpanel_material_name
+        )
+
+        # change active slot shown in graph
+        # NOTE: switching slot switches the active material too
+        if (
+            slot_idx_for_subpanel_material == -1
+        ):  # if no slot for this material
+            bpy.ops.object.material_slot_add()  # add a new slot
+            cob.active_material_index = len(cob.material_slots) - 1
+        else:
+            cob.active_material_index = slot_idx_for_subpanel_material
+
+        # check if the subpanel's material is the active one
+        # (when I switch slot the material switches too)
+        if (
+            bpy.data.materials[self.subpanel_material_name]
+            != cob.active_material
+        ):
+            cob.active_material = bpy.data.materials[
+                self.subpanel_material_name
+            ]
 
         return {"FINISHED"}
 
