@@ -1,3 +1,5 @@
+from random import seed, uniform
+
 import bpy
 import numpy as np
 from mathutils import Vector
@@ -7,29 +9,46 @@ from mathutils import Vector
 ## Operators
 class ApplyRandomTransform(bpy.types.Operator):  # ---check types
     # docstring shows as a tooltip for menu items and buttons.
-    """Add a random cube within a predefined volume"""
+    """Randomise the position and orientation of the camera
+
+    Parameters
+    ----------
+    bpy : _type_
+        _description_
+
+    Returns
+    -------
+    _type_
+        _description_
+    """
 
     bl_idname = "opr.apply_random_transform"  # appended to bpy.ops.
-    bl_label = "Apply random transform to object"
+    bl_label = "Apply random transform to camera"
     bl_options = {"REGISTER", "UNDO"}
 
-    # check if the operator can be executed/invoked
-    # in the current context
     @classmethod
     def poll(cls, context):
         # check the context here
         return context.object is not None
 
-    # ----------------------
-    ## Invoke
-    # runs before execute, to initialise ....?
-    # def invoke(self, context, event):
-    #     wm = context.window_manager
-    #     return wm.invoke_props_dialog(self)
-
     # -------------------------------
     ### Execute fn
     def execute(self, context):
+        """Execute the randomiser operator
+
+        Randomise the position and rotation x,y,z components
+        of the camera between their min and max values.
+
+        Parameters
+        ----------
+        context : _type_
+            _description_
+
+        Returns
+        -------
+        _type_
+            _description_
+        """
         loc = context.scene.randomise_camera_props.camera_pos
         rot = context.scene.randomise_camera_props.camera_rot
 
@@ -58,7 +77,12 @@ class ApplyRandomTransform(bpy.types.Operator):  # ---check types
         rot_z_range = [rot_z_min, rot_z_max]
         delta_on = context.scene.randomise_camera_props.bool_delta
 
-        # randomize_selected(context, loc, rot, delta_on, loc_x_min, loc_x_max)
+        seed_no = (
+            context.scene.randomise_camera_props.seed
+            if context.scene.randomise_camera_props.seed_toggle
+            else None
+        )
+
         randomize_selected(
             context,
             loc,
@@ -70,9 +94,93 @@ class ApplyRandomTransform(bpy.types.Operator):  # ---check types
             rot_y_range,
             rot_z_range,
             delta_on,
+            seed_no,
         )
 
         return {"FINISHED"}
+
+
+# --------------------------------------------------
+# Randomise_selected function:
+
+
+def randomize_selected(
+    context,  # seed, delta,
+    loc,
+    loc_x_range,
+    loc_y_range,
+    loc_z_range,
+    rot,
+    rot_x_range,
+    rot_y_range,
+    rot_z_range,
+    delta_on,
+    seed_no,
+):
+    """Generate random numbers between the range for x/y/z
+    directions in location and rotation
+
+    Parameters
+    ----------
+    bpy : _type_
+        _description_
+
+    Returns
+    -------
+    _type_
+        _description_
+    """
+
+    def rand_num(min, max, seed_no):
+        seed(seed_no)
+        return uniform(min, max)
+
+    # for obj in context.selected_objects:
+    if loc:
+        rand_x = rand_num(loc_x_range[0], loc_x_range[1], seed_no)
+        rand_y = rand_num(loc_y_range[0], loc_y_range[1], seed_no)
+        rand_z = rand_num(loc_z_range[0], loc_z_range[1], seed_no)
+
+        if delta_on:
+            bpy.data.objects["Camera"].delta_location = Vector(
+                [rand_x, rand_y, rand_z]
+            )
+        else:
+            bpy.data.objects["Camera"].location = Vector(
+                [rand_x, rand_y, rand_z]
+            )
+
+    else:  # otherwise the values change under us
+        uniform(0.0, 0.0), uniform(0.0, 0.0), uniform(0.0, 0.0)
+
+    if rot:
+        rand_x = rand_num(rot_x_range[0], rot_x_range[1], seed_no)
+        rand_y = rand_num(rot_y_range[0], rot_y_range[1], seed_no)
+        rand_z = rand_num(rot_z_range[0], rot_z_range[1], seed_no)
+        vec = Vector([rand_x, rand_y, rand_z])
+        deg2rad = np.pi / 180
+
+        vec = vec * deg2rad  # convert degrees to radians
+
+        rotation_mode = bpy.data.objects["Camera"].rotation_mode
+        if rotation_mode in {"QUATERNION", "AXIS_ANGLE"}:
+            bpy.data.objects["Camera"].rotation_mode = "XYZ"
+
+        bpy.data.objects["Camera"].rotation_euler[0] = vec[0]  # in radians
+        bpy.data.objects["Camera"].rotation_euler[1] = vec[1]
+        bpy.data.objects["Camera"].rotation_euler[2] = vec[2]
+
+        if delta_on:
+            bpy.data.objects["Camera"].delta_rotation_euler[0] = vec[0]
+            bpy.data.objects["Camera"].delta_rotation_euler[1] = vec[1]
+            bpy.data.objects["Camera"].delta_rotation_euler[2] = vec[2]
+        else:
+            bpy.data.objects["Camera"].rotation_euler[0] = vec[0]
+            bpy.data.objects["Camera"].rotation_euler[1] = vec[1]
+            bpy.data.objects["Camera"].rotation_euler[2] = vec[2]
+        bpy.data.objects["Camera"].rotation_mode = rotation_mode
+    else:
+        uniform(0.0, 0.0), uniform(0.0, 0.0), uniform(0.0, 0.0)
 
 
 # --------------------------------------------------
@@ -99,84 +207,3 @@ def unregister():
         bpy.utils.unregister_class(cls)
 
     print("unregistered")
-
-
-def randomize_selected(
-    context,  # seed, delta,
-    loc,
-    loc_x_range,
-    loc_y_range,
-    loc_z_range,
-    rot,
-    rot_x_range,
-    rot_y_range,
-    rot_z_range,
-    delta_on,
-):
-    from random import uniform
-
-    # random.seed(seed)
-
-    def rand_vec(vec_range):
-        return Vector(uniform(-val, val) for val in vec_range)
-        # return Vector(uniform(-val, val) for val in vec_range)
-
-    def rand_num(min, max):
-        return uniform(min, max)
-
-    # for obj in context.selected_objects:
-    if loc:
-        rand_x = rand_num(loc_x_range[0], loc_x_range[1])
-        rand_y = rand_num(loc_y_range[0], loc_y_range[1])
-        rand_z = rand_num(loc_z_range[0], loc_z_range[1])
-
-        # obj.location += rand_vec(loc)
-
-        if delta_on:
-            # pdb.set_trace()
-            bpy.data.objects["Camera"].delta_location = Vector(
-                [rand_x, rand_y, rand_z]
-            )
-        else:
-            bpy.data.objects["Camera"].location = Vector(
-                [rand_x, rand_y, rand_z]
-            )
-
-    else:  # otherwise the values change under us
-        uniform(0.0, 0.0), uniform(0.0, 0.0), uniform(0.0, 0.0)
-
-    if rot:
-        rand_x = rand_num(rot_x_range[0], rot_x_range[1])
-        rand_y = rand_num(rot_y_range[0], rot_y_range[1])
-        rand_z = rand_num(rot_z_range[0], rot_z_range[1])
-        vec = Vector([rand_x, rand_y, rand_z])
-        # vec = rand_vec(rot) #assume input is degrees
-        deg2rad = np.pi / 180
-
-        # pdb.set_trace()
-
-        vec = vec * deg2rad  # convert degrees to radians
-
-        # pdb.set_trace()
-
-        rotation_mode = bpy.data.objects["Camera"].rotation_mode
-        if rotation_mode in {"QUATERNION", "AXIS_ANGLE"}:
-            bpy.data.objects["Camera"].rotation_mode = "XYZ"
-
-        bpy.data.objects["Camera"].rotation_euler[0] = vec[0]  # in radians
-        bpy.data.objects["Camera"].rotation_euler[1] = vec[1]
-        bpy.data.objects["Camera"].rotation_euler[2] = vec[2]
-
-        # pdb.set_trace()
-
-        if delta_on:
-            bpy.data.objects["Camera"].delta_rotation_euler[0] = vec[0]
-            bpy.data.objects["Camera"].delta_rotation_euler[1] = vec[1]
-            bpy.data.objects["Camera"].delta_rotation_euler[2] = vec[2]
-        else:
-            bpy.data.objects["Camera"].rotation_euler[0] = vec[0]
-            bpy.data.objects["Camera"].rotation_euler[1] = vec[1]
-            bpy.data.objects["Camera"].rotation_euler[2] = vec[2]
-        bpy.data.objects["Camera"].rotation_mode = rotation_mode
-    else:
-        uniform(0.0, 0.0), uniform(0.0, 0.0), uniform(0.0, 0.0)

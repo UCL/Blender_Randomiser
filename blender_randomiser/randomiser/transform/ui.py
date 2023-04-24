@@ -4,6 +4,11 @@ import bpy
 # -------
 # Panel
 class PanelAddRandomTransform(bpy.types.Panel):
+    """Class defining the panel for randomising
+    the camera transform
+
+    """
+
     bl_idname = "NODE_MATERIAL_PT_random_transform"
     bl_label = "Randomise TRANSFORM"
     # title of the panel / label displayed to the user
@@ -17,41 +22,18 @@ class PanelAddRandomTransform(bpy.types.Panel):
 
     def draw(self, context):
         col = self.layout.column()
-        # row = col.row()
-        # row.prop(
-        #     context.scene.randomise_camera_props,
-        #     "camera_pos",
-        # )
-        # row = col.row()
-        # row.prop(
-        #     context.scene.randomise_camera_props,
-        #     "camera_rot",
-        # )
         row = col.row()
         row.prop(
             context.scene.randomise_camera_props,
             "bool_delta",
         )
-        # for (prop_name, _) in PROPS:
-        #     row = col.row()
-        #     # if prop_name == 'camera_pos':
-        #     #     row = row.row()
-        #     #     row.enabled = context.scene.randomise_camera_pos
-        #     # elif prop_name == 'rotation':
-        #     #     row = row.row()
-        #     #     row.enabled = context.scene.randomise_rotation
-        #     row.prop(context.scene, prop_name)
 
         col.operator("opr.apply_random_transform", text="Randomize")
-        ##### do we need this to randomise or to apply transform?????
-        # Randomize_transform updates automatically
-        # every time you change the random seed
 
         layout = self.layout
 
         # Create a simple row.
         # Create an row where the buttons are aligned to each other.
-
         layout.label(text=" Randomise position:")
         row = layout.row()  # row = layout.row(align=True)
         row.prop(
@@ -63,7 +45,6 @@ class PanelAddRandomTransform(bpy.types.Panel):
             "camera_pos_x_max",
         )
 
-        # layout.label(text=" Randomise position y:")
         row = layout.row()
         row.prop(
             context.scene.randomise_camera_props,
@@ -74,7 +55,6 @@ class PanelAddRandomTransform(bpy.types.Panel):
             "camera_pos_y_max",
         )
 
-        # layout.label(text=" Randomise position z:")
         row = layout.row()
         row.prop(
             context.scene.randomise_camera_props,
@@ -124,44 +104,25 @@ class PanelAddRandomTransform(bpy.types.Panel):
             "camera_rot_z_max",
         )
 
-        # # Big render button
-        # layout.label(text="Big Button:")
-        # row = layout.row()
-        # row.scale_y = 3.0
-        # row.operator("render.render")
+        # Seed
+        row = self.layout.row(align=True)
+        split = row.split()
+        left_col = split.column(align=True)
+        right_col = split.column(align=True)
 
-        # # Different sizes in a row
-        # layout.label(text="Different button sizes:")
-        # row = layout.row(align=True)
-        # row.operator("render.render")
+        # put the toggle on the left col
+        left_col_row = left_col.row(align=True)
+        left_col_row.alignment = "RIGHT"  # alignment first!
+        left_col_row.prop(
+            context.scene.randomise_camera_props, "seed_toggle", icon_only=True
+        )
+        left_col_row.label(text="Set random seed")
 
-        # sub = row.row()
-        # sub.scale_x = 2.0
-        # sub.operator("render.render")
-
-        # row.operator("render.render")
-
-
-# PROPS = [
-#     # ('random_seed', bpy.props.IntProperty(name='Random Seed', default=0)),
-#     #('randomise_camera_pos',
-# bpy.props.BoolProperty(name='Randomize camera_pos', default=False))
-#     ('camera_pos',
-# bpy.props.FloatProperty(name='Camera camera_pos', default=[0,0,0])),
-#     #('randomise_rotation',
-# bpy.props.BoolProperty(name='Randomize Rotation', default=False))
-#     ('rotation',
-# bpy.props.FloatProperty(name='Camera Rotation', default=[0,0,0])),
-# ]
-
-
-# #-------------------------------
-# Define function to append operator to menu's methods
-# def menu_func(self, context):
-#     # self.layout is a bpy.types.UILayout
-#     # operator:
-#     # https://docs.blender.org/api/current/bpy.types.UILayout.html#bpy.types.UILayout.operator
-#     self.layout.operator(AddRandomCube.bl_idname)
+        # put field in right col
+        right_col.enabled = (
+            context.scene.randomise_camera_props.seed_toggle
+        )  # only disable the next part of the row
+        right_col.prop(context.scene.randomise_camera_props, "seed")
 
 
 # --------------------------------------------------
