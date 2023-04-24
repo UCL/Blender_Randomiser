@@ -5,7 +5,7 @@ import bpy
 # Panel
 class PanelAddRandomTransform(bpy.types.Panel):
     """Class defining the panel for randomising
-    transform properties
+    the camera transform
 
     """
 
