@@ -62,7 +62,7 @@ def main():
         metavar="N",
         type=int,
         nargs="+",
-        help="an integer for the randomisation seed",
+        help="an integer for the accumulator",
     )
 
     # build parser object
@@ -102,6 +102,8 @@ def main():
         bpy.context.scene.randomise_camera_props.seed = (
             args.randomisation_seed[0]
         )
+
+        bpy.context.scene.randomise_camera_props.seed_toggle = True
 
 
 if __name__ == "__main__":
