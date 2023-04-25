@@ -78,13 +78,9 @@ class ApplyRandomTransform(bpy.types.Operator):  # ---check types
 
 @persistent
 def randomise_per_frame(dummy):
-    # not sure why I need dummy here?
-
     print("Frame changed")
 
-    bpy.ops.opr.apply_random_transform()
-
-    print("Randomisation applied")
+    bpy.ops.camera.apply_random_transform()
 
     return
 
@@ -117,11 +113,6 @@ def unregister():
     bpy.app.handlers.frame_change_pre.remove(randomise_per_frame)
 
     print("unregistered")
-
-
-# def my_handler(scene):
-#     print("Frame Change", scene.frame_current)
-#     bpy.app.handlers.frame_change_pre.append(my_handler)
 
 
 def randomize_selected(
