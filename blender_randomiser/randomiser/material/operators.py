@@ -1,5 +1,6 @@
 import bpy
 import numpy as np
+from bpy.app.handlers import persistent
 
 
 # -------------------------------
@@ -145,6 +146,15 @@ class RandomiseMaterialNodes(bpy.types.Operator):
         return {"FINISHED"}
 
 
+@persistent
+def randomise_per_frame(dummy):
+    print("Frame changed")
+
+    bpy.ops.node.randomise_socket()
+
+    return
+
+
 # -------------------------------
 ## Register operators
 
@@ -156,10 +166,14 @@ list_classes_to_register = [
 def register():
     for cls in list_classes_to_register:
         bpy.utils.register_class(cls)
+
+    bpy.app.handlers.frame_change_pre.append(randomise_per_frame)
     print("material operators registered")
 
 
 def unregister():
     for cls in list_classes_to_register:
         bpy.utils.unregister_class(cls)
+
+    bpy.app.handlers.frame_change_pre.remove(randomise_per_frame)
     print("material operators unregistered")
