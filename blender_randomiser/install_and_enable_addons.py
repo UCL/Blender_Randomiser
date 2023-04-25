@@ -58,11 +58,11 @@ def main():
     )
 
     parser.add_argument(
-        "randomisation_seed",
+        "-seed",
         metavar="N",
         type=int,
         nargs="+",
-        help="an integer for the accumulator",
+        help="an integer for the randomisation seed",
     )
 
     # build parser object
@@ -98,10 +98,8 @@ def main():
 
         print(f'"{Path(p).stem}" installed from source script and enabled')
 
-    if len(args.randomisation_seed) == 1:
-        bpy.context.scene.randomise_camera_props.seed = (
-            args.randomisation_seed[0]
-        )
+    if args.seed is not None:
+        bpy.context.scene.randomise_camera_props.seed = args.seed[0]
 
         bpy.context.scene.randomise_camera_props.seed_toggle = True
 
