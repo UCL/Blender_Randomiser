@@ -146,11 +146,11 @@ class RandomiseMaterialNodes(bpy.types.Operator):
         return {"FINISHED"}
 
 
+# Without persistent, the function is removed from the handlers' list
+#  once executed
 @persistent
-def randomise_per_frame(dummy):
-    print("Frame changed")
-
-    bpy.ops.node.randomise_socket()
+def randomise_material_nodes_per_frame(dummy):
+    bpy.ops.node.randomise_socket("INVOKE_DEFAULT")
 
     return
 
@@ -167,7 +167,10 @@ def register():
     for cls in list_classes_to_register:
         bpy.utils.register_class(cls)
 
-    bpy.app.handlers.frame_change_pre.append(randomise_per_frame)
+    bpy.app.handlers.frame_change_pre.append(
+        randomise_material_nodes_per_frame
+    )
+
     print("material operators registered")
 
 
@@ -175,5 +178,8 @@ def unregister():
     for cls in list_classes_to_register:
         bpy.utils.unregister_class(cls)
 
-    bpy.app.handlers.frame_change_pre.remove(randomise_per_frame)
+    bpy.app.handlers.frame_change_pre.remove(
+        randomise_material_nodes_per_frame
+    )
+
     print("material operators unregistered")
