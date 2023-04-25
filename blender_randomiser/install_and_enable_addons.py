@@ -58,7 +58,8 @@ def main():
     )
 
     parser.add_argument(
-        "-seed",
+        "-s",
+        "--seed",
         metavar="N",
         type=int,
         nargs="+",
