@@ -77,10 +77,8 @@ class ApplyRandomTransform(bpy.types.Operator):  # ---check types
 
 
 @persistent
-def randomise_per_frame(dummy):
-    print("Frame changed")
-
-    bpy.ops.camera.apply_random_transform()
+def randomise_camera_transform_per_frame(dummy):
+    bpy.ops.camera.apply_random_transform("INVOKE_DEFAULT")
 
     return
 
@@ -98,7 +96,9 @@ def register():
     for cls in list_classes_to_register:
         bpy.utils.register_class(cls)
 
-    bpy.app.handlers.frame_change_pre.append(randomise_per_frame)
+    bpy.app.handlers.frame_change_pre.append(
+        randomise_camera_transform_per_frame
+    )
 
     print("registered")
 
@@ -110,7 +110,9 @@ def unregister():
     for cls in list_classes_to_register:
         bpy.utils.unregister_class(cls)
 
-    bpy.app.handlers.frame_change_pre.remove(randomise_per_frame)
+    bpy.app.handlers.frame_change_pre.remove(
+        randomise_camera_transform_per_frame
+    )
 
     print("unregistered")
 
