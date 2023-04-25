@@ -101,9 +101,26 @@ def main():
             print(f'"{Path(p).stem}" installed from source script and enabled')
 
     if args.s is not None:
-        bpy.context.scene.randomise_camera_props.seed = args.s[0]
+        addon1 = Path(
+            """/Applications/Blender.app/Contents/
+            Resources/3.4/scripts/addons/randomiser"""
+        )
+        addon2 = Path(
+            """~/Library/Application\ Support/
+            Blender/3.4/scripts/addons/randomiser"""
+        )
+        addon3 = Path(
+            """/Applications/Blender.app/Contents/
+            Resources/3.4/scripts/addons_contrib/randomiser"""
+        )
+        if addon1.exists() or addon2.exists() or addon3.exists():
+            bpy.context.scene.randomise_camera_props.seed = args.s[0]
 
-        bpy.context.scene.randomise_camera_props.seed_toggle = True
+            bpy.context.scene.randomise_camera_props.seed_toggle = True
+        else:
+            print(
+                "Randomiser addon doesn't exist so can't pass seed to Blender"
+            )
 
 
 if __name__ == "__main__":
