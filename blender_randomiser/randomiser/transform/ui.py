@@ -42,7 +42,7 @@ class PanelAddRandomTransform(bpy.types.Panel):
         #     #     row.enabled = context.scene.randomise_rotation
         #     row.prop(context.scene, prop_name)
 
-        col.operator("opr.apply_random_transform", text="Randomize")
+        col.operator("camera.apply_random_transform", text="Randomize")
         ##### do we need this to randomise or to apply transform?????
         # Randomize_transform updates automatically
         # every time you change the random seed
