@@ -15,6 +15,7 @@ Example:
 """
 
 from pathlib import Path
+from random import seed
 
 import bpy
 
@@ -101,7 +102,7 @@ def main():
 
     if args.seed is not None:
         bpy.context.scene.randomise_camera_props.seed = args.seed[0]
-
+        seed(args.seed[0])
         bpy.context.scene.randomise_camera_props.seed_toggle = True
 
 
