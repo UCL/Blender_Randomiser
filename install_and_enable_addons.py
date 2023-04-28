@@ -39,6 +39,7 @@ def main():
             + __file__
             + " -- [list of paths to addons to install and enable OR"
             " path to parent dir]"
+            ""
             "To launch Blender *with factory settings* add:"
             "  blender --factory-startup --python "
             + __file__

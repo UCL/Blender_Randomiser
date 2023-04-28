@@ -8,7 +8,7 @@ git clone https://github.com/UCL/Blender_Randomiser.git
 
 ### To install via Blender settings
 1. Zip the following directory:
-    `Blender_Randomiser/blender_randomiser/randomiser/`
+    `Blender_Randomiser/randomiser/`
 2. Launch Blender
 3. Navigate to Edit > Preferences
 4. On the left-hand side panel, select 'Add-ons'
