@@ -57,6 +57,15 @@ def main():
         "path to parent dir",
     )
 
+    parser.add_argument(
+        "-s",
+        "--seed",
+        metavar="N",
+        type=int,
+        nargs="+",
+        help="an integer for the randomisation seed",
+    )
+
     # build parser object
     args = parser.parse_args(argv)
 
@@ -89,6 +98,11 @@ def main():
         bpy.ops.preferences.addon_enable(module=Path(p).stem)
 
         print(f'"{Path(p).stem}" installed from source script and enabled')
+
+    if args.seed is not None:
+        bpy.context.scene.randomise_camera_props.seed = args.seed[0]
+
+        bpy.context.scene.randomise_camera_props.seed_toggle = True
 
 
 if __name__ == "__main__":

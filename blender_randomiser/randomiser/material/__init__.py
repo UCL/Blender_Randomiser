@@ -1,4 +1,4 @@
-from . import operators, properties, ui
+from . import operators, ui, properties
 
 
 def register():
