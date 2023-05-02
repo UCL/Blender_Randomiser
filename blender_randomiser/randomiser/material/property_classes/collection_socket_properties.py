@@ -2,6 +2,7 @@ import re
 
 import bpy
 
+from ... import utils
 from .socket_properties import SocketProperties
 
 
@@ -187,16 +188,19 @@ class ColSocketProperties(bpy.types.PropertyGroup):
         list
             list of sockets in the input nodes in the graph
         """
-        list_input_nodes = [
-            nd
-            for nd in bpy.data.materials[self.name].node_tree.nodes
-            if len(nd.inputs) == 0
-            and nd.name.lower().startswith("random".lower())
-        ]
+        # get list of input nodes for this material
+        # input nodes are defined as those:
+        # - with no input sockets
+        # - their name starts with random
+        # - and they can be independent or inside a node group
+        list_input_nodes = utils.get_material_input_nodes_to_randomise(
+            self.name
+        )
 
         # list of sockets
         # TODO: should we exclude unlinked ones here instead?
         list_sockets = [out for nd in list_input_nodes for out in nd.outputs]
+
         return list_sockets
 
     # ---------------

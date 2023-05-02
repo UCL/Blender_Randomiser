@@ -171,10 +171,11 @@ class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
 
                 # socket min and max columns
                 socket_id = nd.name + "_" + sckt.name
-                for m_str, col in zip(["min", "max"], [col3, col4]):
-                    # if socket is a color: format min/max as a color picker
-                    # and an array (color picker doesn't include alpha value)
-                    if type(sckt) == bpy.types.NodeSocketColor:
+                # for m_str, col in zip(["min", "max"], [col3, col4]):
+                # if socket is a color: format min/max as a color picker
+                # and an array (color picker doesn't include alpha value)
+                if type(sckt) == bpy.types.NodeSocketColor:
+                    for m_str, col in zip(["min", "max"], [col3, col4]):
                         # color picker
                         col.template_color_picker(
                             sockets_props_collection[socket_id],
@@ -191,8 +192,9 @@ class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
                                 text=cl,
                                 index=j,
                             )
-                    # if socket is not color type: format as a regular property
-                    else:
+                # if socket is not color type: format as a regular property
+                else:
+                    for m_str, col in zip(["min", "max"], [col3, col4]):
                         col.prop(
                             sockets_props_collection[socket_id],
                             m_str + "_" + cs.socket_type_to_attr[type(sckt)],
