@@ -114,7 +114,12 @@ class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
         # TODO: sort by date of creation? ---I didn't find an easy way to do it
         layout = self.layout
         for i_n, nd in enumerate(
-            sorted(list_input_nodes, key=lambda x: x.name)
+            sorted(
+                list_input_nodes,
+                key=lambda x: x.name
+                if x.id_data.name not in bpy.data.node_groups
+                else x.id_data.name + "_" + x.name,
+            )
         ):
             row = layout.row()
 
@@ -129,7 +134,10 @@ class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
                 col5 = row_split.column(align=True)
 
                 # input node name
-                col1.label(text=nd.name)
+                node_label = nd.name
+                if nd.id_data.name in bpy.data.node_groups:
+                    node_label = nd.id_data.name + "_" + node_label
+                col1.label(text=node_label)
                 col1.alignment = "CENTER"
 
                 # min label
@@ -144,7 +152,11 @@ class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
             else:
                 row.separator(factor=1.0)  # add empty row before each node
                 row = layout.row()
-                row.label(text=nd.name)
+
+                node_label = nd.name
+                if nd.id_data.name in bpy.data.node_groups:
+                    node_label = nd.id_data.name + "_" + node_label
+                row.label(text=node_label)
 
             # add sockets for this node in the subseq rows
             for sckt in nd.outputs:
@@ -171,6 +183,9 @@ class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
 
                 # socket min and max columns
                 socket_id = nd.name + "_" + sckt.name
+                if nd.id_data.name in bpy.data.node_groups:
+                    socket_id = nd.id_data.name + "_" + socket_id
+
                 # for m_str, col in zip(["min", "max"], [col3, col4]):
                 # if socket is a color: format min/max as a color picker
                 # and an array (color picker doesn't include alpha value)
