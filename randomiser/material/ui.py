@@ -30,9 +30,9 @@ class MainPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
         column.label(text="Select material to see available sockets.")
 
 
-# ------------------------------
-# Subpanel for each material
-# -----------------------------
+# ---------------------------------------------------
+# Common layout for list of sockets to randomise
+# ----------------------------------------------------
 def draw_sockets_list(
     cs,
     layout,
@@ -66,10 +66,10 @@ def draw_sockets_list(
             col5 = row_split.column(align=True)
 
             # input node name
-            node_label = nd.name
-            if nd.id_data.name in bpy.data.node_groups:
-                node_label = nd.id_data.name + "_" + node_label
-            col1.label(text=node_label)
+            # node_label = nd.name
+            # if nd.id_data.name in bpy.data.node_groups:
+            #     node_label = nd.id_data.name + "_" + node_label
+            col1.label(text=nd.name)
             col1.alignment = "CENTER"
 
             # min label
@@ -85,10 +85,10 @@ def draw_sockets_list(
             row.separator(factor=1.0)  # add empty row before each node
             row = layout.row()
 
-            node_label = nd.name
-            if nd.id_data.name in bpy.data.node_groups:
-                node_label = nd.id_data.name + "_" + node_label
-            row.label(text=node_label)
+            # node_label = nd.name
+            # if nd.id_data.name in bpy.data.node_groups:
+            #     node_label = nd.id_data.name + "_" + node_label
+            row.label(text=nd.name)
 
         # add sockets for this node in the subseq rows
         for sckt in nd.outputs:
@@ -154,6 +154,9 @@ def draw_sockets_list(
             )
 
 
+# ------------------------------
+# Subpanel for each material
+# -----------------------------
 class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
     """Class defining the panel for randomising
     material node properties
@@ -240,144 +243,6 @@ class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
             sockets_props_collection,
         )
 
-        # # Define UI fields for every socket property
-        # # NOTE: if I don't sort the input nodes,
-        # everytime one of the nodes is
-        # # selected in the graph it moves to the bottom of the panel (?).
-        # # TODO: sort by date of creation?
-        #  ---I didn't find an easy way to do it
-        # layout = self.layout
-        # for i_n, nd in enumerate(
-        #     sorted(
-        #         list_input_nodes,
-        #         key=lambda x: x.name
-        #         # if x.id_data.name not in bpy.data.node_groups
-        #         # else x.id_data.name + "_" + x.name,
-        #     )
-        # ):
-        #     row = layout.row()
-
-        #     # if first node: add labels for
-        #     # name, min, max and randomisation toggle
-        #     if i_n == 0:
-        #         row_split = row.split()
-        #         col1 = row_split.column(align=True)
-        #         col2 = row_split.column(align=True)
-        #         col3 = row_split.column(align=True)
-        #         col4 = row_split.column(align=True)
-        #         col5 = row_split.column(align=True)
-
-        #         # input node name
-        #         node_label = nd.name
-        #         if nd.id_data.name in bpy.data.node_groups:
-        #             node_label = nd.id_data.name + "_" + node_label
-        #         col1.label(text=node_label)
-        #         col1.alignment = "CENTER"
-
-        #         # min label
-        #         col3.alignment = "CENTER"
-        #         col3.label(text="min")
-
-        #         # max label
-        #         col4.alignment = "CENTER"
-        #         col4.label(text="max")
-
-        #     # if not first node: add just node name
-        #     else:
-        #         row.separator(factor=1.0)  # add empty row before each node
-        #         row = layout.row()
-
-        #         node_label = nd.name
-        #         if nd.id_data.name in bpy.data.node_groups:
-        #             node_label = nd.id_data.name + "_" + node_label
-        #         row.label(text=node_label)
-
-        #     # add sockets for this node in the subseq rows
-        #     for sckt in nd.outputs:
-        #         # split row in 5 columns
-        #         row = layout.row()
-        #         row_split = row.split()
-        #         col1 = row_split.column(align=True)
-        #         col2 = row_split.column(align=True)
-        #         col3 = row_split.column(align=True)
-        #         col4 = row_split.column(align=True)
-        #         col5 = row_split.column(align=True)
-
-        #         # socket name
-        #         col1.alignment = "RIGHT"
-        #         col1.label(text=sckt.name)
-
-        #         # socket current value
-        #         col2.prop(
-        #             sckt,
-        #             "default_value",
-        #             icon_only=True,
-        #         )
-        #         col2.enabled = False  # current value is not editable
-
-        #         # socket min and max columns
-        #         socket_id = nd.name + "_" + sckt.name
-        #         if nd.id_data.name in bpy.data.node_groups:
-        #             socket_id = nd.id_data.name + "_" + socket_id
-
-        #         # for m_str, col in zip(["min", "max"], [col3, col4]):
-        #         # if socket is a color: format min/max as a color picker
-        #         # and an array (color picker doesn't include alpha value)
-        #         if type(sckt) == bpy.types.NodeSocketColor:
-        #             for m_str, col in zip(["min", "max"], [col3, col4]):
-        #                 # color picker
-        #                 col.template_color_picker(
-        #                     sockets_props_collection[socket_id],
-        #                     m_str + "_" + cs.socket_type_to_attr[type(sckt)],
-        #                 )
-        #                 # array
-        #                 for j, cl in enumerate(["R", "G", "B", "alpha"]):
-        #                     col.prop(
-        #                         sockets_props_collection[socket_id],
-        #                         m_str
-        #                         + "_"
-        #                         + cs.socket_type_to_attr[type(sckt)],
-        #                         icon_only=False,
-        #                         text=cl,
-        #                         index=j,
-        #                     )
-        #         # if socket is not color type: format as a regular property
-        #         else:
-        #             for m_str, col in zip(["min", "max"], [col3, col4]):
-        #                 col.prop(
-        #                     sockets_props_collection[socket_id],
-        #                     m_str + "_" + cs.socket_type_to_attr[type(sckt)],
-        #                     icon_only=True,
-        #                 )
-
-        #         # randomisation toggle
-        #         col5.prop(
-        #             sockets_props_collection[socket_id],
-        #             "bool_randomise",
-        #             icon_only=True,
-        #         )
-
-
-# -----------------------------------
-# Subpanel for the 'randomise-all' operator
-# ----------------------------------
-class SubPanelRandomMaterialOperator(TemplatePanel, bpy.types.Panel):
-    bl_idname = "NODE_MATERIAL_PT_subpanel_operator"
-    bl_parent_id = "NODE_MATERIAL_PT_mainpanel"  # use its bl_idname
-    bl_label = ""  # title of the panel displayed to the user
-    bl_options = {"HIDE_HEADER"}
-
-    @classmethod
-    def poll(cls, context):
-        return context.object is not None
-
-    def draw(self, context):
-        column = self.layout.column(align=True)
-        column.operator(
-            "node.randomise_all_sockets",
-            text="Randomise",
-        )
-
 
 # -----------------------------------
 # Subsubpanel for node groups
@@ -442,9 +307,63 @@ class SubSubPanelGroupNodes(TemplatePanel, bpy.types.Panel):
 
     # ------------
     def draw(self, context):
-        layout = self.layout
-        row = layout.row()
-        row.label(text="PATATA")
+        # get name of the material for this subpanel
+        cs = context.scene
+        subpanel_material = cs.socket_props_per_material.collection[
+            self.subpanel_material_idx
+        ]
+
+        # then force an update in the sockets per material
+        # subpanel_material_name = subpanel_material.name
+        if cs.socket_props_per_material.collection[
+            subpanel_material.name
+        ].update_sockets_collection:
+            print("Collection of sockets updated")
+
+        # get (updated) collection of socket properties
+        # for the current material
+        sockets_props_collection = cs.socket_props_per_material.collection[
+            subpanel_material.name
+        ].collection
+
+        # Get list of input nodes to randomise
+        # for this subpanel's material
+        list_input_nodes = utils.get_material_input_nodes_to_randomise_group(
+            subpanel_material.name
+        )
+
+        list_input_nodes = sorted(
+            list_input_nodes,
+            key=lambda x: x.name,  # x.id_data.name + "_" + x.name,
+        )  # OJO different sorting for group nodes!
+
+        draw_sockets_list(
+            cs,
+            self.layout,
+            list_input_nodes,
+            sockets_props_collection,
+        )
+
+
+# -----------------------------------
+# Subpanel for the 'randomise-all' operator
+# ----------------------------------
+class SubPanelRandomMaterialOperator(TemplatePanel, bpy.types.Panel):
+    bl_idname = "NODE_MATERIAL_PT_subpanel_operator"
+    bl_parent_id = "NODE_MATERIAL_PT_mainpanel"  # use its bl_idname
+    bl_label = ""  # title of the panel displayed to the user
+    bl_options = {"HIDE_HEADER"}
+
+    @classmethod
+    def poll(cls, context):
+        return context.object is not None
+
+    def draw(self, context):
+        column = self.layout.column(align=True)
+        column.operator(
+            "node.randomise_all_sockets",
+            text="Randomise",
+        )
 
 
 # -----------------------
