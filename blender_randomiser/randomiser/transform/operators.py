@@ -114,7 +114,7 @@ def randomise_camera_transform_per_frame(dummy):
 
 
 
-def randomize_selected(
+def randomise_selected(
     context,  # seed, delta,
     loc,
     loc_x_range,
