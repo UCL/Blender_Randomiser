@@ -99,7 +99,7 @@ class EXAMPLE_PT_subsubpanel(bpy.types.Panel):
 
 
 # ----------------------
-# Register / unregister
+# List classes to register
 # ---------------------
 list_clasess = [
     EXAMPLE_PT_panel,  # do not register subpanel!
@@ -121,7 +121,7 @@ for i in range(MAX_NUMBER_OF_PANELS):
     )
     list_clasess.append(panel)  # type: ignore
 
-    for k in range(3):
+    for k in range(MAX_NUMBER_OF_PANELS):
         subsubpanel = type(
             f"EXAMPLE_PT_subsubpanel_{i}_{k}",
             (
@@ -138,9 +138,9 @@ for i in range(MAX_NUMBER_OF_PANELS):
         list_clasess.append(subsubpanel)  # type: ignore
 
 
-print(list_clasess)
-
-
+# ----------------------
+# Register / unregister functions
+# ---------------------
 def register():
     for cls in list_clasess:
         bpy.utils.register_class(cls)
