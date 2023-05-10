@@ -15,6 +15,7 @@ Example:
 """
 
 from pathlib import Path
+from random import seed
 
 import bpy
 
@@ -39,6 +40,7 @@ def main():
             + __file__
             + " -- [list of paths to addons to install and enable OR"
             " path to parent dir]"
+            ""
             "To launch Blender *with factory settings* add:"
             "  blender --factory-startup --python "
             + __file__
@@ -101,7 +103,7 @@ def main():
 
     if args.seed is not None:
         bpy.context.scene.randomise_camera_props.seed = args.seed[0]
-
+        seed(args.seed[0])
         bpy.context.scene.randomise_camera_props.seed_toggle = True
 
 

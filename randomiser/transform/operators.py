@@ -1,4 +1,4 @@
-from random import seed, uniform
+from random import uniform
 
 import bpy
 import numpy as np
@@ -79,11 +79,7 @@ class ApplyRandomTransform(bpy.types.Operator):  # ---check types
         rot_z_range = [rot_z_min, rot_z_max]
         delta_on = context.scene.randomise_camera_props.bool_delta
 
-        seed_no = (
-            context.scene.randomise_camera_props.seed
-            if context.scene.randomise_camera_props.seed_toggle
-            else None
-        )
+        # pdb.set_trace()
 
         randomise_selected(
             context,
@@ -96,7 +92,6 @@ class ApplyRandomTransform(bpy.types.Operator):  # ---check types
             rot_y_range,
             rot_z_range,
             delta_on,
-            seed_no,
         )
 
         return {"FINISHED"}
@@ -111,6 +106,8 @@ def randomise_camera_transform_per_frame(dummy):
 
 # --------------------------------------------------
 # Randomise_selected function:
+def rand_num(min, max):
+    return uniform(min, max)
 
 
 def randomise_selected(
@@ -124,7 +121,6 @@ def randomise_selected(
     rot_y_range,
     rot_z_range,
     delta_on,
-    seed_no,
 ):
     """Generate random numbers between the range for x/y/z
     directions in location and rotation
@@ -140,15 +136,13 @@ def randomise_selected(
         _description_
     """
 
-    def rand_num(min, max, seed_no):
-        seed(seed_no)
-        return uniform(min, max)
-
     # for obj in context.selected_objects:
+    # pdb.set_trace()
     if loc:
-        rand_x = rand_num(loc_x_range[0], loc_x_range[1], seed_no)
-        rand_y = rand_num(loc_y_range[0], loc_y_range[1], seed_no)
-        rand_z = rand_num(loc_z_range[0], loc_z_range[1], seed_no)
+        rand_x = rand_num(loc_x_range[0], loc_x_range[1])
+        rand_y = rand_num(loc_y_range[0], loc_y_range[1])
+        rand_z = rand_num(loc_z_range[0], loc_z_range[1])
+        # pdb.set_trace()
 
         if delta_on:
             bpy.data.objects["Camera"].delta_location = Vector(
@@ -163,9 +157,9 @@ def randomise_selected(
         uniform(0.0, 0.0), uniform(0.0, 0.0), uniform(0.0, 0.0)
 
     if rot:
-        rand_x = rand_num(rot_x_range[0], rot_x_range[1], seed_no)
-        rand_y = rand_num(rot_y_range[0], rot_y_range[1], seed_no)
-        rand_z = rand_num(rot_z_range[0], rot_z_range[1], seed_no)
+        rand_x = rand_num(rot_x_range[0], rot_x_range[1])
+        rand_y = rand_num(rot_y_range[0], rot_y_range[1])
+        rand_z = rand_num(rot_z_range[0], rot_z_range[1])
         vec = Vector([rand_x, rand_y, rand_z])
         deg2rad = np.pi / 180
 
