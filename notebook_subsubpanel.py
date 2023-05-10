@@ -70,7 +70,8 @@ class EXAMPLE_PT_subpanel(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
-        layout.label(text="BLA")
+        row = layout.row()
+        row.label(text="BLA")
 
 
 # ----------------------
@@ -89,11 +90,12 @@ class EXAMPLE_PT_subsubpanel(bpy.types.Panel):
     @classmethod
     def poll(cls, context):
         # only display subpanels for which this is true
-        return cls.subpanel_count <= context.scene.materials_count
+        return cls.subsubpanel_count <= 2  # context.scene.materials_count
 
     def draw(self, context):
         layout = self.layout
-        layout.label(text="subBLA")
+        row = layout.row()
+        row.label(text="subBLA")
 
 
 # ----------------------
@@ -102,6 +104,7 @@ class EXAMPLE_PT_subsubpanel(bpy.types.Panel):
 list_clasess = [
     EXAMPLE_PT_panel,  # do not register subpanel!
 ]
+
 # we register each subpanel individually (all MAX_NUMBER_OF_PANELS)
 for i in range(MAX_NUMBER_OF_PANELS):
     panel = type(
@@ -117,6 +120,25 @@ for i in range(MAX_NUMBER_OF_PANELS):
         },
     )
     list_clasess.append(panel)  # type: ignore
+
+    for k in range(3):
+        subsubpanel = type(
+            f"EXAMPLE_PT_subsubpanel_{i}_{k}",
+            (
+                EXAMPLE_PT_subsubpanel,  # panel
+                bpy.types.Panel,
+            ),
+            {
+                "bl_idname": f"EXAMPLE_PT_sub_sub_panel_{i}_{k}",
+                "bl_parent_id": f"EXAMPLE_PT_sub_panel_{i}",  # ---- added
+                "bl_label": f"Node group {k}",
+                "subsubpanel_count": k,
+            },
+        )
+        list_clasess.append(subsubpanel)  # type: ignore
+
+
+print(list_clasess)
 
 
 def register():
