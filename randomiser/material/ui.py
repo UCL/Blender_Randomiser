@@ -33,6 +33,127 @@ class MainPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
 # ------------------------------
 # Subpanel for each material
 # -----------------------------
+def draw_sockets_list(
+    cs,
+    layout,
+    list_input_nodes_sorted,
+    sockets_props_collection,
+):
+    # Define UI fields for every socket property
+    # NOTE: if I don't sort the input nodes, everytime one of the nodes is
+    # selected in the graph it moves to the bottom of the panel (?).
+    # TODO: sort by date of creation? ---I didn't find an easy way to do it
+    # layout = self.layout
+    for i_n, nd in enumerate(
+        list_input_nodes_sorted
+        # sorted(
+        #     list_input_nodes,
+        #     key=lambda x: x.name
+        #     # if x.id_data.name not in bpy.data.node_groups
+        #     # else x.id_data.name + "_" + x.name,
+        # )
+    ):
+        row = layout.row()
+
+        # if first node: add labels for
+        # name, min, max and randomisation toggle
+        if i_n == 0:
+            row_split = row.split()
+            col1 = row_split.column(align=True)
+            col2 = row_split.column(align=True)
+            col3 = row_split.column(align=True)
+            col4 = row_split.column(align=True)
+            col5 = row_split.column(align=True)
+
+            # input node name
+            node_label = nd.name
+            if nd.id_data.name in bpy.data.node_groups:
+                node_label = nd.id_data.name + "_" + node_label
+            col1.label(text=node_label)
+            col1.alignment = "CENTER"
+
+            # min label
+            col3.alignment = "CENTER"
+            col3.label(text="min")
+
+            # max label
+            col4.alignment = "CENTER"
+            col4.label(text="max")
+
+        # if not first node: add just node name
+        else:
+            row.separator(factor=1.0)  # add empty row before each node
+            row = layout.row()
+
+            node_label = nd.name
+            if nd.id_data.name in bpy.data.node_groups:
+                node_label = nd.id_data.name + "_" + node_label
+            row.label(text=node_label)
+
+        # add sockets for this node in the subseq rows
+        for sckt in nd.outputs:
+            # split row in 5 columns
+            row = layout.row()
+            row_split = row.split()
+            col1 = row_split.column(align=True)
+            col2 = row_split.column(align=True)
+            col3 = row_split.column(align=True)
+            col4 = row_split.column(align=True)
+            col5 = row_split.column(align=True)
+
+            # socket name
+            col1.alignment = "RIGHT"
+            col1.label(text=sckt.name)
+
+            # socket current value
+            col2.prop(
+                sckt,
+                "default_value",
+                icon_only=True,
+            )
+            col2.enabled = False  # current value is not editable
+
+            # socket min and max columns
+            socket_id = nd.name + "_" + sckt.name
+            if nd.id_data.name in bpy.data.node_groups:
+                socket_id = nd.id_data.name + "_" + socket_id
+
+            # for m_str, col in zip(["min", "max"], [col3, col4]):
+            # if socket is a color: format min/max as a color picker
+            # and an array (color picker doesn't include alpha value)
+            if type(sckt) == bpy.types.NodeSocketColor:
+                for m_str, col in zip(["min", "max"], [col3, col4]):
+                    # color picker
+                    col.template_color_picker(
+                        sockets_props_collection[socket_id],
+                        m_str + "_" + cs.socket_type_to_attr[type(sckt)],
+                    )
+                    # array
+                    for j, cl in enumerate(["R", "G", "B", "alpha"]):
+                        col.prop(
+                            sockets_props_collection[socket_id],
+                            m_str + "_" + cs.socket_type_to_attr[type(sckt)],
+                            icon_only=False,
+                            text=cl,
+                            index=j,
+                        )
+            # if socket is not color type: format as a regular property
+            else:
+                for m_str, col in zip(["min", "max"], [col3, col4]):
+                    col.prop(
+                        sockets_props_collection[socket_id],
+                        m_str + "_" + cs.socket_type_to_attr[type(sckt)],
+                        icon_only=True,
+                    )
+
+            # randomisation toggle
+            col5.prop(
+                sockets_props_collection[socket_id],
+                "bool_randomise",
+                icon_only=True,
+            )
+
+
 class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
     """Class defining the panel for randomising
     material node properties
@@ -89,12 +210,6 @@ class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
             self.subpanel_material_idx
         ]
 
-        # Get list of input nodes to randomise
-        # for this subpanel's material
-        list_input_nodes = utils.get_material_input_nodes_to_randomise_all(
-            subpanel_material.name
-        )
-
         # then force an update in the sockets per material
         # subpanel_material_name = subpanel_material.name
         if cs.socket_props_per_material.collection[
@@ -108,120 +223,139 @@ class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
             subpanel_material.name
         ].collection
 
-        # Define UI fields for every socket property
-        # NOTE: if I don't sort the input nodes, everytime one of the nodes is
-        # selected in the graph it moves to the bottom of the panel (?).
-        # TODO: sort by date of creation? ---I didn't find an easy way to do it
-        layout = self.layout
-        for i_n, nd in enumerate(
-            sorted(
-                list_input_nodes,
-                key=lambda x: x.name
-                if x.id_data.name not in bpy.data.node_groups
-                else x.id_data.name + "_" + x.name,
-            )
-        ):
-            row = layout.row()
+        # Get list of input nodes to randomise
+        # for this subpanel's material
+        list_input_nodes = utils.get_material_input_nodes_to_randomise_indep(
+            subpanel_material.name
+        )
 
-            # if first node: add labels for
-            # name, min, max and randomisation toggle
-            if i_n == 0:
-                row_split = row.split()
-                col1 = row_split.column(align=True)
-                col2 = row_split.column(align=True)
-                col3 = row_split.column(align=True)
-                col4 = row_split.column(align=True)
-                col5 = row_split.column(align=True)
+        list_input_nodes = sorted(
+            list_input_nodes, key=lambda x: x.name
+        )  # OJO different sorting for group nodes!
 
-                # input node name
-                node_label = nd.name
-                if nd.id_data.name in bpy.data.node_groups:
-                    node_label = nd.id_data.name + "_" + node_label
-                col1.label(text=node_label)
-                col1.alignment = "CENTER"
+        draw_sockets_list(
+            cs,
+            self.layout,
+            list_input_nodes,
+            sockets_props_collection,
+        )
 
-                # min label
-                col3.alignment = "CENTER"
-                col3.label(text="min")
+        # # Define UI fields for every socket property
+        # # NOTE: if I don't sort the input nodes,
+        # everytime one of the nodes is
+        # # selected in the graph it moves to the bottom of the panel (?).
+        # # TODO: sort by date of creation?
+        #  ---I didn't find an easy way to do it
+        # layout = self.layout
+        # for i_n, nd in enumerate(
+        #     sorted(
+        #         list_input_nodes,
+        #         key=lambda x: x.name
+        #         # if x.id_data.name not in bpy.data.node_groups
+        #         # else x.id_data.name + "_" + x.name,
+        #     )
+        # ):
+        #     row = layout.row()
 
-                # max label
-                col4.alignment = "CENTER"
-                col4.label(text="max")
+        #     # if first node: add labels for
+        #     # name, min, max and randomisation toggle
+        #     if i_n == 0:
+        #         row_split = row.split()
+        #         col1 = row_split.column(align=True)
+        #         col2 = row_split.column(align=True)
+        #         col3 = row_split.column(align=True)
+        #         col4 = row_split.column(align=True)
+        #         col5 = row_split.column(align=True)
 
-            # if not first node: add just node name
-            else:
-                row.separator(factor=1.0)  # add empty row before each node
-                row = layout.row()
+        #         # input node name
+        #         node_label = nd.name
+        #         if nd.id_data.name in bpy.data.node_groups:
+        #             node_label = nd.id_data.name + "_" + node_label
+        #         col1.label(text=node_label)
+        #         col1.alignment = "CENTER"
 
-                node_label = nd.name
-                if nd.id_data.name in bpy.data.node_groups:
-                    node_label = nd.id_data.name + "_" + node_label
-                row.label(text=node_label)
+        #         # min label
+        #         col3.alignment = "CENTER"
+        #         col3.label(text="min")
 
-            # add sockets for this node in the subseq rows
-            for sckt in nd.outputs:
-                # split row in 5 columns
-                row = layout.row()
-                row_split = row.split()
-                col1 = row_split.column(align=True)
-                col2 = row_split.column(align=True)
-                col3 = row_split.column(align=True)
-                col4 = row_split.column(align=True)
-                col5 = row_split.column(align=True)
+        #         # max label
+        #         col4.alignment = "CENTER"
+        #         col4.label(text="max")
 
-                # socket name
-                col1.alignment = "RIGHT"
-                col1.label(text=sckt.name)
+        #     # if not first node: add just node name
+        #     else:
+        #         row.separator(factor=1.0)  # add empty row before each node
+        #         row = layout.row()
 
-                # socket current value
-                col2.prop(
-                    sckt,
-                    "default_value",
-                    icon_only=True,
-                )
-                col2.enabled = False  # current value is not editable
+        #         node_label = nd.name
+        #         if nd.id_data.name in bpy.data.node_groups:
+        #             node_label = nd.id_data.name + "_" + node_label
+        #         row.label(text=node_label)
 
-                # socket min and max columns
-                socket_id = nd.name + "_" + sckt.name
-                if nd.id_data.name in bpy.data.node_groups:
-                    socket_id = nd.id_data.name + "_" + socket_id
+        #     # add sockets for this node in the subseq rows
+        #     for sckt in nd.outputs:
+        #         # split row in 5 columns
+        #         row = layout.row()
+        #         row_split = row.split()
+        #         col1 = row_split.column(align=True)
+        #         col2 = row_split.column(align=True)
+        #         col3 = row_split.column(align=True)
+        #         col4 = row_split.column(align=True)
+        #         col5 = row_split.column(align=True)
 
-                # for m_str, col in zip(["min", "max"], [col3, col4]):
-                # if socket is a color: format min/max as a color picker
-                # and an array (color picker doesn't include alpha value)
-                if type(sckt) == bpy.types.NodeSocketColor:
-                    for m_str, col in zip(["min", "max"], [col3, col4]):
-                        # color picker
-                        col.template_color_picker(
-                            sockets_props_collection[socket_id],
-                            m_str + "_" + cs.socket_type_to_attr[type(sckt)],
-                        )
-                        # array
-                        for j, cl in enumerate(["R", "G", "B", "alpha"]):
-                            col.prop(
-                                sockets_props_collection[socket_id],
-                                m_str
-                                + "_"
-                                + cs.socket_type_to_attr[type(sckt)],
-                                icon_only=False,
-                                text=cl,
-                                index=j,
-                            )
-                # if socket is not color type: format as a regular property
-                else:
-                    for m_str, col in zip(["min", "max"], [col3, col4]):
-                        col.prop(
-                            sockets_props_collection[socket_id],
-                            m_str + "_" + cs.socket_type_to_attr[type(sckt)],
-                            icon_only=True,
-                        )
+        #         # socket name
+        #         col1.alignment = "RIGHT"
+        #         col1.label(text=sckt.name)
 
-                # randomisation toggle
-                col5.prop(
-                    sockets_props_collection[socket_id],
-                    "bool_randomise",
-                    icon_only=True,
-                )
+        #         # socket current value
+        #         col2.prop(
+        #             sckt,
+        #             "default_value",
+        #             icon_only=True,
+        #         )
+        #         col2.enabled = False  # current value is not editable
+
+        #         # socket min and max columns
+        #         socket_id = nd.name + "_" + sckt.name
+        #         if nd.id_data.name in bpy.data.node_groups:
+        #             socket_id = nd.id_data.name + "_" + socket_id
+
+        #         # for m_str, col in zip(["min", "max"], [col3, col4]):
+        #         # if socket is a color: format min/max as a color picker
+        #         # and an array (color picker doesn't include alpha value)
+        #         if type(sckt) == bpy.types.NodeSocketColor:
+        #             for m_str, col in zip(["min", "max"], [col3, col4]):
+        #                 # color picker
+        #                 col.template_color_picker(
+        #                     sockets_props_collection[socket_id],
+        #                     m_str + "_" + cs.socket_type_to_attr[type(sckt)],
+        #                 )
+        #                 # array
+        #                 for j, cl in enumerate(["R", "G", "B", "alpha"]):
+        #                     col.prop(
+        #                         sockets_props_collection[socket_id],
+        #                         m_str
+        #                         + "_"
+        #                         + cs.socket_type_to_attr[type(sckt)],
+        #                         icon_only=False,
+        #                         text=cl,
+        #                         index=j,
+        #                     )
+        #         # if socket is not color type: format as a regular property
+        #         else:
+        #             for m_str, col in zip(["min", "max"], [col3, col4]):
+        #                 col.prop(
+        #                     sockets_props_collection[socket_id],
+        #                     m_str + "_" + cs.socket_type_to_attr[type(sckt)],
+        #                     icon_only=True,
+        #                 )
+
+        #         # randomisation toggle
+        #         col5.prop(
+        #             sockets_props_collection[socket_id],
+        #             "bool_randomise",
+        #             icon_only=True,
+        #         )
 
 
 # -----------------------------------
