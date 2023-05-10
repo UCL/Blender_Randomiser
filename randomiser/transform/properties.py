@@ -184,7 +184,7 @@ def register():
                 type=PropertiesApplyRandomTransform
             )
 
-    print("registered")
+    print("transform properties registered")
 
 
 def unregister():
@@ -196,4 +196,4 @@ def unregister():
 
     del bpy.types.Scene.randomise_camera_props
 
-    print("unregistered")
+    print("transform properties unregistered")
