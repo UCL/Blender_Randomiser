@@ -225,7 +225,7 @@ class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
 
 
 # -----------------------------------
-# Subpanel for randomise-all operator
+# Subpanel for the 'randomise-all' operator
 # ----------------------------------
 class SubPanelRandomMaterialOperator(TemplatePanel, bpy.types.Panel):
     bl_idname = "NODE_MATERIAL_PT_subpanel_operator"
@@ -245,6 +245,88 @@ class SubPanelRandomMaterialOperator(TemplatePanel, bpy.types.Panel):
         )
 
 
+# -----------------------------------
+# Subsubpanel for node groups
+# ----------------------------------
+class SubSubPanelGroupNodes(TemplatePanel, bpy.types.Panel):
+    """Class defining the panel for randomising
+    material node properties
+
+    """
+
+    bl_idname = "NODE_MATERIAL_PT_subsubpanel"
+    bl_parent_id = "NODE_MATERIAL_PT_subpanel"  # use bl_idname
+    bl_label = ""
+
+    @classmethod
+    def poll(cls, context):
+        # force an update on the materials collection first
+        # the '.update_collection' attribute
+        # triggers the get function that checks if an update is
+        # required. If it is, the collection of sockets is updated
+        # and returns TRUE
+        # if cs.socket_props_per_material.update_materials_collection:
+        #     print("Collection of materials updated")
+        print(f"material idx: {cls.subpanel_material_idx}")
+        print(f"group node idx: {cls.subsubpanel_group_node_idx}")
+
+        # get material of parent subpanel
+        cs = context.scene
+        subpanel_material_str = cs.socket_props_per_material.collection[
+            cls.subpanel_material_idx  # can I access this here?
+        ].name
+        print(subpanel_material_str)
+
+        # get list of group nodes for this material
+        # TODO: sort by name?
+        # TODO: add to cls?
+        [
+            nd.name
+            for nd in bpy.data.materials[subpanel_material_str].node_tree.nodes
+            if nd.type == "GROUP"
+        ].sort()
+
+        # only display this sub-subpanel if its idx is in the group nodes
+        # list defined for this material?
+        # return cls.group_node_name in list_group_nodes_names
+
+        # only display this sub-subpanel if its idx is < total group nodes for
+        # this material
+        return True
+        # return cls.subpanel_material_idx < len(
+        #     cs.socket_props_per_material.collection
+        # ) and cls.subsubpanel_group_node_idx < len(
+        #     list_group_nodes_names
+        # )
+
+    def draw_header(self, context):
+        cs = context.scene
+        subpanel_material_str = cs.socket_props_per_material.collection[
+            self.subpanel_material_idx
+        ].name
+
+        list_group_nodes_names = [
+            nd.name
+            for nd in bpy.data.materials[subpanel_material_str].node_tree.nodes
+            if nd.type == "GROUP"
+        ].sort()
+
+        layout = self.layout
+        layout.use_property_split = True
+        layout.use_property_decorate = False  # No animation.
+
+        # For now: view graph button on top of material name
+        layout.label(
+            text=list_group_nodes_names[self.subsubpanel_group_node_idx]
+        )
+
+    def draw(self, context):
+        column = self.layout.column(align=True)
+        column.label(
+            text="PATATA",
+        )
+
+
 # -----------------------
 # Classes to register
 # ---------------------
@@ -254,8 +336,14 @@ list_classes_to_register = [
     MainPanelRandomMaterialNodes,
 ]
 
-# subpanels per material (defined dynamically)
+# ---------
+# define a subpanel class for each material (defined dynamically)
+# NOTE: because we don't know the number of materials that will be
+# defiend a priori, we define n=MAX_NUMBER_OF_SUBPANELS classes and
+# assign an index to each of them. We will only display the subpanels
+# whose index is < len(list_of_materials)
 for i in range(config.MAX_NUMBER_OF_SUBPANELS):
+    # define subpanel class for material i
     subpanel_class_i = type(
         f"NODE_MATERIAL_PT_subpanel_{i}",
         (
@@ -267,11 +355,35 @@ for i in range(config.MAX_NUMBER_OF_SUBPANELS):
             "subpanel_material_idx": i,
         },
     )
+    # append to list of classes to register
     list_classes_to_register.append(subpanel_class_i)  # type: ignore
 
+    ###########
+    # define 3 subsubpanel classes for each material i
+    for k in range(
+        1
+    ):  # -----------------------------------------add as global var?
+        subsubpanel_class_k = type(
+            f"NODE_MATERIAL_PT_subpanel_{i}_subsubpanel_{k}",
+            (
+                subpanel_class_i,  # SubSubPanelGroupNodes,
+                bpy.types.Panel,
+            ),
+            {
+                "bl_idname": f"NODE_MATERIAL_PT_subsubpanel_{i}_{k}",
+                "bl_parent_id": f"NODE_MATERIAL_PT_subpanel_{i}",  # ---- added
+                "subsubpanel_group_node_idx": k,
+            },
+        )
+
+        # append to list of classes to register
+        list_classes_to_register.append(subsubpanel_class_k)  # type: ignore
+    ###########
+
+# --------
 # subpanel with operator
-# (add the last one to the list,
-# render it at the bottom)
+# NOTE: we need to add it as the last one to the list,
+# to render it at the bottom
 list_classes_to_register.append(SubPanelRandomMaterialOperator)
 
 

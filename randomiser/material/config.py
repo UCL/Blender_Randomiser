@@ -1,3 +1,3 @@
 # Parameters shared across materials modules
 
-MAX_NUMBER_OF_SUBPANELS = 100
+MAX_NUMBER_OF_SUBPANELS = 2  # 100
