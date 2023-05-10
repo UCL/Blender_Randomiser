@@ -91,7 +91,7 @@ class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
 
         # Get list of input nodes to randomise
         # for this subpanel's material
-        list_input_nodes = utils.get_material_input_nodes_to_randomise(
+        list_input_nodes = utils.get_material_input_nodes_to_randomise_all(
             subpanel_material.name
         )
 
