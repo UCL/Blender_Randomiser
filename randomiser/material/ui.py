@@ -266,7 +266,7 @@ class SubSubPanelGroupNodes(TemplatePanel, bpy.types.Panel):
         # triggers the get function that checks if an update is
         # required. If it is, the collection of sockets is updated
         # and returns TRUE
-        # TODO: is this required? (I am already updating when the parent
+        # TODO: is this required here? (I am already updating when the parent
         # subpanel is drawn)
         cs = context.scene
         if cs.socket_props_per_material.update_materials_collection:
@@ -277,63 +277,36 @@ class SubSubPanelGroupNodes(TemplatePanel, bpy.types.Panel):
             cls.subpanel_material_idx  # can I access this here?
         ].name
 
-        # get list of group nodes for this material
+        # get list of group nodes for this material -- assign to this class
         # TODO: sort by name?
-        # TODO: add to cls?
-        list_group_nodes_names = sorted(
-            [
-                nd.name
-                for nd in bpy.data.materials[
-                    subpanel_material_str
-                ].node_tree.nodes
-                if nd.type == "GROUP"
-            ]
+        # TODO: is it better to add to cls somewhere else? (not sure where...)
+        cls.list_group_nodes_names = (
+            sorted(  # sorting is relevant for header later
+                [
+                    nd.name
+                    for nd in bpy.data.materials[
+                        subpanel_material_str
+                    ].node_tree.nodes
+                    if nd.type == "GROUP"
+                ]
+            )
         )
-
-        print(list_group_nodes_names)
-
-        # only display this sub-subpanel if its idx is in the group nodes
-        # list defined for this material?
-        # return cls.group_node_name in list_group_nodes_names
-
         # only display this sub-subpanel if its idx is < total group nodes for
         # this material
-        return cls.subsubpanel_group_node_idx < len(list_group_nodes_names)
-        # if list_group_nodes_names:
-        #     return cls.subsubpanel_group_node_idx < len(
-        # list_group_nodes_names)
-        # else:
-        #     return False
-
-        # return cls.subpanel_material_idx < len(
-        #     cs.socket_props_per_material.collection
-        # ) and cls.subsubpanel_group_node_idx < len(
-        #     list_group_nodes_names
-        # )
+        return cls.subsubpanel_group_node_idx < len(cls.list_group_nodes_names)
 
     # ---------------------------
-    # def draw_header(self, context):
-    #     cs = context.scene
-    #     subpanel_material_str = cs.socket_props_per_material.collection[
-    #         self.subpanel_material_idx
-    #     ].name
+    def draw_header(self, context):
+        layout = self.layout
+        layout.use_property_split = True
+        layout.use_property_decorate = False  # No animation.
 
-    #     list_group_nodes_names = [
-    #         nd.name
-    #         for nd in bpy.data.materials[
-    # subpanel_material_str].node_tree.nodes
-    #         if nd.type == "GROUP"
-    #     ].sort()
+        # show name of the group node
+        layout.label(
+            text=self.list_group_nodes_names[self.subsubpanel_group_node_idx]
+        )
 
-    #     layout = self.layout
-    #     layout.use_property_split = True
-    #     layout.use_property_decorate = False  # No animation.
-
-    #     # For now: view graph button on top of material name
-    #     layout.label(
-    #         text=list_group_nodes_names[self.subsubpanel_group_node_idx]
-    #     )
-
+    # ------------
     def draw(self, context):
         layout = self.layout
         row = layout.row()
@@ -385,7 +358,7 @@ for i in range(config.MAX_NUMBER_OF_SUBPANELS):
             {
                 "bl_idname": f"NODE_MATERIAL_PT_subsubpanel_{i}_{k}",
                 "bl_parent_id": f"NODE_MATERIAL_PT_subpanel_{i}",  # ---- added
-                "bl_label": f"Node group {k}",
+                # "bl_label": f"Node group {k}",
                 "subpanel_material_idx": i,
                 "subsubpanel_group_node_idx": k,
             },
