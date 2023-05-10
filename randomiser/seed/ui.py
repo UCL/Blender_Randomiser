@@ -3,13 +3,14 @@ import bpy
 
 # -------
 # Panel
-class PanelAddRandomSeed(bpy.types.Panel):
-    """Class defining the panel for randomising
-    the camera transform
+# -------
+class PanelRandomSeed(bpy.types.Panel):
+    """Class defining the panel for the
+    randomisation seed
 
     """
 
-    bl_idname = "Random_seed_global"
+    bl_idname = "SEED_PT_random_seed_global"
     bl_label = "Random SEED"
     # title of the panel / label displayed to the user
     bl_space_type = "NODE_EDITOR"
@@ -39,23 +40,27 @@ class PanelAddRandomSeed(bpy.types.Panel):
         right_col.enabled = (
             context.scene.seed_properties.seed_toggle
         )  # only disable the next part of the row
-        right_col.prop(context.scene.seed_properties, "seed")
+        right_col.prop(context.scene.seed_properties, "seed", icon_only=True)
 
 
-# --------------------------------------------------
-# Register and unregister functions:
+# -----------------------
+# Classes to register
+# -----------------------
 list_classes_to_register = [
-    PanelAddRandomSeed,
+    PanelRandomSeed,
 ]
 
 
+# -----------------------------------------
+# Register and unregister functions
+# ------------------------------------------
 def register():
     """This is run when the add-on is enabled"""
 
     for cls in list_classes_to_register:
         bpy.utils.register_class(cls)
 
-    print("registered")
+    print("seed UI registered")
 
 
 def unregister():
@@ -65,4 +70,4 @@ def unregister():
     for cls in list_classes_to_register:
         bpy.utils.unregister_class(cls)
 
-    print("unregistered")
+    print("seed UI unregistered")
