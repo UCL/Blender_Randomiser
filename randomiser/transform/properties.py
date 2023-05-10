@@ -165,14 +165,6 @@ class PropertiesApplyRandomTransform(bpy.types.PropertyGroup):
     # BOOL
     bool_delta: bpy.props.BoolProperty()  # type: ignore
 
-    seed_toggle_prop = bpy.props.BoolProperty(
-        name="Set random seed", default=False
-    )
-    seed_toggle: seed_toggle_prop  # type: ignore
-
-    seed_prop = bpy.props.IntProperty(name="Seed", default=42)
-    seed: seed_prop  # type: ignore
-
 
 # --------------------------------------------------
 # Register and unregister functions:
