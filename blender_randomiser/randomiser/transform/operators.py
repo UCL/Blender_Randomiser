@@ -85,7 +85,7 @@ class ApplyRandomTransform(bpy.types.Operator):  # ---check types
             else None
         )
 
-        randomize_selected(
+        randomise_selected(
             context,
             loc,
             loc_x_range,
@@ -111,7 +111,6 @@ def randomise_camera_transform_per_frame(dummy):
 
 # --------------------------------------------------
 # Randomise_selected function:
-
 
 
 def randomise_selected(
