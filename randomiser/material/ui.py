@@ -39,10 +39,8 @@ class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
 
     """
 
-    bl_idname = (
-        "NODE_MATERIAL_PT_subpanel"  # what is this for? --internal reference?
-    )
-    bl_parent_id = "NODE_MATERIAL_PT_mainpanel"  # use bl_idname
+    bl_idname = "NODE_MATERIAL_PT_subpanel"
+    bl_parent_id = "NODE_MATERIAL_PT_mainpanel"
     bl_label = ""  # title of the panel displayed to the user
     # bl_options = {"DEFAULT_CLOSED"}
     # https://docs.blender.org/api/master/bpy.types.Panel.html#bpy.types.Panel.bl_options
@@ -110,8 +108,9 @@ class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
 
         # Define UI fields for every socket property
         # NOTE: if I don't sort the input nodes, everytime one of the nodes is
-        # selected in the graph it moves to the bottom of the panel (?).
-        # TODO: sort by date of creation? ---I didn't find an easy way to do it
+        # selected in the graph it moves to the bottom of the panel.
+        # TODO: sort by date of creation instead?
+        # ---I didn't find an easy way to do this
         layout = self.layout
         for i_n, nd in enumerate(
             sorted(
@@ -229,7 +228,7 @@ class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
 # ----------------------------------
 class SubPanelRandomMaterialOperator(TemplatePanel, bpy.types.Panel):
     bl_idname = "NODE_MATERIAL_PT_subpanel_operator"
-    bl_parent_id = "NODE_MATERIAL_PT_mainpanel"  # use its bl_idname
+    bl_parent_id = "NODE_MATERIAL_PT_mainpanel"
     bl_label = ""  # title of the panel displayed to the user
     bl_options = {"HIDE_HEADER"}
 
@@ -261,7 +260,7 @@ for i in range(config.MAX_NUMBER_OF_SUBPANELS):
         (
             SubPanelRandomMaterialNodes,
             bpy.types.Panel,
-        ),  # parent classes (is Panel req?)
+        ),  # parent classes (Q FOR REVIEW: is Panel req?)
         {
             "bl_idname": f"NODE_MATERIAL_PT_subpanel_{i}",
             "subpanel_material_idx": i,

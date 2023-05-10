@@ -28,11 +28,6 @@ def compute_sockets_sets(self):
         else:
             list_sckt_names_in_graph.append(sck.node.name + "_" + sck.name)
 
-    # self.set_sckt_names_in_graph = set(
-    #     sck.node.name + "_" + sck.name
-    #     for sck in self.candidate_sockets
-    #     if sck.node.id_data
-    # )
     self.set_sckt_names_in_graph = set(list_sckt_names_in_graph)
 
     # set of sockets that are just in one of the two groups
@@ -115,6 +110,7 @@ def set_update_collection(self, value):
                 sckt_prop.bool_randomise = True
 
                 # ---------------------------
+                # TODO: review - is this too hacky?
                 # get socket object for this socket name
                 # NOTE: my definition of socket name
                 # (node.name + _ + socket.name)
@@ -128,14 +124,7 @@ def set_update_collection(self, value):
                         sckt = s
                         break
 
-                # sckt = [
-                #     s
-                #     for s in self.candidate_sockets
-                #     if s.node.name + "_" + s.name == sckt_name
-                # ][0]
-
                 # add min/max values
-                # TODO: review - is this too hacky?
                 # for this socket type, get the name of the attribute
                 # holding the min/max properties
                 socket_attrib_str = bpy.context.scene.socket_type_to_attr[
@@ -154,7 +143,7 @@ def set_update_collection(self, value):
                     bpy.context.scene.socket_type_to_ini_min_max[type(sckt)]
                 )
 
-                # assign initial value ----only if
+                # assign initial value
                 for m_str in ["min", "max"]:
                     setattr(
                         sckt_prop,

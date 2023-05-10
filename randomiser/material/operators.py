@@ -117,17 +117,6 @@ class RandomiseAllMaterialNodes(bpy.types.Operator):
                         sckt
                     )
 
-            # after modifying randomisation toggle
-            # - save list of sockets to randomise to dict
-            # to dict, with key = material
-            # self.sockets_to_randomise_per_material[mat_str] = [
-            #     sckt
-            #     for sckt in candidate_sockets
-            #     if sockets_props_collection[
-            #         sckt.node.name + "_" + sckt.name
-            #     ].bool_randomise
-            # ]
-
         return self.execute(context)
 
     def execute(self, context):
@@ -223,13 +212,11 @@ class ViewNodeGraphOneMaterial(bpy.types.Operator):
 
     # metadata
     bl_idname = (
-        "node.view_graph"  # this is appended to bpy.ops. --will be overwritten
+        "node.view_graph"  # this is appended to bpy.ops.
+        # NOTE: it will be overwritten
     )
     bl_label = "View node graph for this material"
     bl_options = {"REGISTER", "UNDO"}
-
-    # link material to this operator ---added to each operator instance
-    # subpanel_material_idx = 0
 
     @classmethod
     def poll(cls, context):
@@ -239,7 +226,7 @@ class ViewNodeGraphOneMaterial(bpy.types.Operator):
             cls.subpanel_material_idx
         ]
         # TODO: have this here or in invoke?
-        # cls.subpanel_material_name = subpanel_material.name
+        # e.g: cls.subpanel_material_name = subpanel_material.name
         return subpanel_material.name in [
             mat.name for mat in bpy.data.materials
         ]
@@ -268,7 +255,6 @@ class ViewNodeGraphOneMaterial(bpy.types.Operator):
         """
         # add list of socket properties to operator self
         # (this list should have been updated already, when drawing the panel)
-        # self is RandomiseMaterialNodes!!!
         cs = context.scene
         subpanel_material = cs.socket_props_per_material.collection[
             self.subpanel_material_idx
@@ -348,8 +334,6 @@ for i in range(config.MAX_NUMBER_OF_SUBPANELS):
             "bl_idname": f"node.view_graph_for_material_{i}",
             "bl_label": "",
             "subpanel_material_idx": i,
-            # why not directly material_str? --because here I cannot access
-            # list of materials yet (restricted context)
         },
     )
     list_classes_to_register.append(operator_i)  # type: ignore

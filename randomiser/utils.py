@@ -27,7 +27,7 @@ def get_material_input_nodes_to_randomise(
         list of the input nodes to randomise
     """
 
-    # list of nodes for current material
+    # list of nodes for current material:
     # split into those belonging to a group or not
     list_material_nodes_indep = []
     list_material_nodes_in_groups = []
@@ -39,15 +39,12 @@ def get_material_input_nodes_to_randomise(
                 nd.node_tree.nodes
             )  # nodes inside groups
 
-    # ensure list_material_nodes_in_groups is unique
-    # TODO: what if two groups have a node with the same name??
-    # --it will work if nodegroups have different names!
-    # maybe assume geometry node groups will start/end with Geometry?
+    # ensure the list of nodes in groups for this material is unique
+    # (it may not be if a node has two pointers in this material)
     list_material_nodes_in_groups = list(set(list_material_nodes_in_groups))
 
-    # find input nodes that startwith random
-    # in any of those groups
-    # excluding 'Group' nodes
+    # find input nodes that start with random
+    # in any of those groups, excluding 'Group' nodes
     list_input_nodes = [
         nd
         for nd in list_material_nodes_indep + list_material_nodes_in_groups
