@@ -80,6 +80,7 @@ class RandomiseAllMaterialNodes(bpy.types.Operator):
 
             # if socket unlinked and randomisation toggle is True:
             # modify socket props to set toggle to False
+            self.sockets_to_randomise_per_material[mat_str] = []
             for sckt in candidate_sockets:
                 # get socket identifier sting
                 sckt_id = sckt.node.name + "_" + sckt.name
@@ -101,17 +102,9 @@ class RandomiseAllMaterialNodes(bpy.types.Operator):
                         "randomisation toggle set to False",
                     )
 
-            # after modifying randomisation toggle
-            # - save list of sockets to randomise to dict
-            # to dict, with key = material
-            # TODO: combine with previous for loop?
-            self.sockets_to_randomise_per_material[mat_str] = []
-            for sckt in candidate_sockets:
-                # get socket id
-                sckt_id = sckt.node.name + "_" + sckt.name
-                if sckt.node.id_data.name in bpy.data.node_groups:
-                    sckt_id = sckt.node.id_data.name + "_" + sckt_id
-
+                # after modifying randomisation toggle
+                # save list of sockets to randomise to dict,
+                # with key = material
                 if sockets_props_collection[sckt_id].bool_randomise:
                     self.sockets_to_randomise_per_material[mat_str].append(
                         sckt
