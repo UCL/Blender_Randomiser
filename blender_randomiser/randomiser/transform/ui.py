@@ -30,7 +30,6 @@ class PanelAddRandomTransform(bpy.types.Panel):
 
         col.operator("camera.apply_random_transform", text="Randomize")
 
-
         layout = self.layout
 
         # Create a simple row.
