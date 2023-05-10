@@ -3,14 +3,10 @@ import bpy
 
 # ---------------------------
 # Properties
-class PropertiesApplyRandomSeed(bpy.types.PropertyGroup):
+class PropertiesRandomSeed(bpy.types.PropertyGroup):
     """
     Class holding the set of properties
-    for the camera position and rotation:
-    - min/max values for x/y/z component of position and rotation, and
-    - boolean for delta position and rotation
-    - boolean for setting seed value
-    - integer for the actual seed value
+    for the random seed
 
     """
 
@@ -23,10 +19,11 @@ class PropertiesApplyRandomSeed(bpy.types.PropertyGroup):
     seed: seed_prop  # type: ignore
 
 
-# --------------------------------------------------
-# Register and unregister functions:
+# ------------------------------------
+# Register / unregister classes
+# ------------------------------------
 list_classes_to_register = [
-    PropertiesApplyRandomSeed,
+    PropertiesRandomSeed,
 ]
 
 
@@ -37,10 +34,10 @@ def register():
         bpy.utils.register_class(cls)
 
         bpy.types.Scene.seed_properties = bpy.props.PointerProperty(
-            type=PropertiesApplyRandomSeed
-        )  # bpy.context.scene.seed_properties.seed
+            type=PropertiesRandomSeed
+        )
 
-    print("registered")
+    print("seed properties registered")
 
 
 def unregister():
@@ -52,4 +49,4 @@ def unregister():
 
     del bpy.types.Scene.seed_properties
 
-    print("unregistered")
+    print("seed properties unregistered")
