@@ -44,6 +44,12 @@ class PanelAddRandomTransform(bpy.types.Panel):
             icon_only=True,
         )
 
+        row.prop(
+            context.scene.randomise_camera_props,
+            "bool_rand_posx",
+            icon_only=True,
+        )
+
         row = layout.row()
         row.label(text="y_position")
         row.prop(
@@ -58,6 +64,12 @@ class PanelAddRandomTransform(bpy.types.Panel):
             icon_only=True,
         )
 
+        row.prop(
+            context.scene.randomise_camera_props,
+            "bool_rand_posy",
+            icon_only=True,
+        )
+
         row = layout.row()
         row.label(text="z_position")
         row.prop(
@@ -69,6 +81,12 @@ class PanelAddRandomTransform(bpy.types.Panel):
         row.prop(
             context.scene.randomise_camera_props,
             "camera_pos_z_max",
+            icon_only=True,
+        )
+
+        row.prop(
+            context.scene.randomise_camera_props,
+            "bool_rand_posz",
             icon_only=True,
         )
 
@@ -88,6 +106,12 @@ class PanelAddRandomTransform(bpy.types.Panel):
             icon_only=True,
         )
 
+        row.prop(
+            context.scene.randomise_camera_props,
+            "bool_rand_rotx",
+            icon_only=True,
+        )
+
         row = layout.row()
         row.label(text="y_rotation")
         row.prop(
@@ -99,6 +123,12 @@ class PanelAddRandomTransform(bpy.types.Panel):
         row.prop(
             context.scene.randomise_camera_props,
             "camera_rot_y_max",
+            icon_only=True,
+        )
+
+        row.prop(
+            context.scene.randomise_camera_props,
+            "bool_rand_roty",
             icon_only=True,
         )
 
@@ -116,6 +146,13 @@ class PanelAddRandomTransform(bpy.types.Panel):
             icon_only=True,
         )
 
+        row.prop(
+            context.scene.randomise_camera_props,
+            "bool_rand_rotz",
+            icon_only=True,
+        )
+
+        # Bool delta
         col = self.layout.column()
         row = col.row()
         row.prop(
@@ -123,7 +160,8 @@ class PanelAddRandomTransform(bpy.types.Panel):
             "bool_delta",
         )
 
-        col.operator("opr.apply_random_transform", text="Randomize")
+        # Randomise button
+        col.operator("opr.apply_random_transform", text="Randomise")
 
 
 # --------------------------------------------------

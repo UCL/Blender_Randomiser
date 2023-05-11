@@ -165,6 +165,13 @@ class PropertiesApplyRandomTransform(bpy.types.PropertyGroup):
     # BOOL
     bool_delta: bpy.props.BoolProperty()  # type: ignore
 
+    bool_rand_posx: bpy.props.BoolProperty(default=True)  # type: ignore
+    bool_rand_posy: bpy.props.BoolProperty(default=True)  # type: ignore
+    bool_rand_posz: bpy.props.BoolProperty(default=True)  # type: ignore
+    bool_rand_rotx: bpy.props.BoolProperty(default=True)  # type: ignore
+    bool_rand_roty: bpy.props.BoolProperty(default=True)  # type: ignore
+    bool_rand_rotz: bpy.props.BoolProperty(default=True)  # type: ignore
+
     seed_toggle_prop = bpy.props.BoolProperty(
         name="Set random seed", default=False
     )

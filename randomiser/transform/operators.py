@@ -76,8 +76,12 @@ class ApplyRandomTransform(bpy.types.Operator):  # ---check types
         rot_z_max = context.scene.randomise_camera_props.camera_rot_z_max[0]
         rot_z_range = [rot_z_min, rot_z_max]
         delta_on = context.scene.randomise_camera_props.bool_delta
-
-        # pdb.set_trace()
+        rand_posx = context.scene.randomise_camera_props.bool_rand_posx
+        rand_posy = context.scene.randomise_camera_props.bool_rand_posy
+        rand_posz = context.scene.randomise_camera_props.bool_rand_posz
+        rand_rotx = context.scene.randomise_camera_props.bool_rand_rotx
+        rand_roty = context.scene.randomise_camera_props.bool_rand_roty
+        rand_rotz = context.scene.randomise_camera_props.bool_rand_rotz
 
         randomize_selected(
             context,
@@ -90,6 +94,12 @@ class ApplyRandomTransform(bpy.types.Operator):  # ---check types
             rot_y_range,
             rot_z_range,
             delta_on,
+            rand_posx,
+            rand_posy,
+            rand_posz,
+            rand_rotx,
+            rand_roty,
+            rand_rotz,
         )
 
         return {"FINISHED"}
@@ -112,6 +122,12 @@ def randomize_selected(
     rot_y_range,
     rot_z_range,
     delta_on,
+    rand_posx,
+    rand_posy,
+    rand_posz,
+    rand_rotx,
+    rand_roty,
+    rand_rotz,
 ):
     """Generate random numbers between the range for x/y/z
     directions in location and rotation
@@ -130,10 +146,20 @@ def randomize_selected(
     # for obj in context.selected_objects:
     # pdb.set_trace()
     if loc:
-        rand_x = rand_num(loc_x_range[0], loc_x_range[1])
-        rand_y = rand_num(loc_y_range[0], loc_y_range[1])
-        rand_z = rand_num(loc_z_range[0], loc_z_range[1])
-        # pdb.set_trace()
+        if rand_posx:
+            rand_x = rand_num(loc_x_range[0], loc_x_range[1])
+        else:
+            rand_x = uniform(0.0, 0.0)
+
+        if rand_posy:
+            rand_y = rand_num(loc_y_range[0], loc_y_range[1])
+        else:
+            rand_y = uniform(0.0, 0.0)
+
+        if rand_posz:
+            rand_z = rand_num(loc_z_range[0], loc_z_range[1])
+        else:
+            rand_z = uniform(0.0, 0.0)
 
         if delta_on:
             bpy.data.objects["Camera"].delta_location = Vector(
@@ -148,9 +174,21 @@ def randomize_selected(
         uniform(0.0, 0.0), uniform(0.0, 0.0), uniform(0.0, 0.0)
 
     if rot:
-        rand_x = rand_num(rot_x_range[0], rot_x_range[1])
-        rand_y = rand_num(rot_y_range[0], rot_y_range[1])
-        rand_z = rand_num(rot_z_range[0], rot_z_range[1])
+        if rand_rotx:
+            rand_x = rand_num(rot_x_range[0], rot_x_range[1])
+        else:
+            rand_x = uniform(0.0, 0.0)
+
+        if rand_roty:
+            rand_y = rand_num(rot_y_range[0], rot_y_range[1])
+        else:
+            rand_y = uniform(0.0, 0.0)
+
+        if rand_rotz:
+            rand_z = rand_num(rot_z_range[0], rot_z_range[1])
+        else:
+            rand_z = uniform(0.0, 0.0)
+
         vec = Vector([rand_x, rand_y, rand_z])
         deg2rad = np.pi / 180
 
