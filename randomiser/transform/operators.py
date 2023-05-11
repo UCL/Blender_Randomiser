@@ -101,15 +101,16 @@ def randomise_camera_transform_per_frame(dummy):
 
     return
 
+
 # --------------------------------------------------
 # Randomise_selected function:
+
 
 def rand_num(min, max):
     return uniform(min, max)
 
 
-
-def randomize_selected(
+def randomise_selected(
     context,
     loc,
     loc_x_range,
