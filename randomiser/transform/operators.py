@@ -7,8 +7,9 @@ from mathutils import Vector
 
 
 # -------------------------------
-## Operators
-class ApplyRandomTransform(bpy.types.Operator):  # ---check types
+# Operator
+# -------------------------------
+class ApplyRandomTransform(bpy.types.Operator):
     # docstring shows as a tooltip for menu items and buttons.
     """Randomise the position and orientation of the camera
 
@@ -33,8 +34,6 @@ class ApplyRandomTransform(bpy.types.Operator):  # ---check types
         # check the context here
         return context.object is not None
 
-    # -------------------------------
-    ### Execute fn
     def execute(self, context):
         """Execute the randomiser operator
 
@@ -77,9 +76,8 @@ class ApplyRandomTransform(bpy.types.Operator):  # ---check types
         rot_z_min = context.scene.randomise_camera_props.camera_rot_z_min[0]
         rot_z_max = context.scene.randomise_camera_props.camera_rot_z_max[0]
         rot_z_range = [rot_z_min, rot_z_max]
-        delta_on = context.scene.randomise_camera_props.bool_delta
 
-        # pdb.set_trace()
+        delta_on = context.scene.randomise_camera_props.bool_delta
 
         randomise_selected(
             context,
@@ -103,15 +101,16 @@ def randomise_camera_transform_per_frame(dummy):
 
     return
 
-
 # --------------------------------------------------
 # Randomise_selected function:
+
 def rand_num(min, max):
     return uniform(min, max)
 
 
-def randomise_selected(
-    context,  # seed, delta,
+
+def randomize_selected(
+    context,
     loc,
     loc_x_range,
     loc_y_range,
@@ -136,13 +135,10 @@ def randomise_selected(
         _description_
     """
 
-    # for obj in context.selected_objects:
-    # pdb.set_trace()
     if loc:
         rand_x = rand_num(loc_x_range[0], loc_x_range[1])
         rand_y = rand_num(loc_y_range[0], loc_y_range[1])
         rand_z = rand_num(loc_z_range[0], loc_z_range[1])
-        # pdb.set_trace()
 
         if delta_on:
             bpy.data.objects["Camera"].delta_location = Vector(
@@ -186,13 +182,17 @@ def randomise_selected(
         uniform(0.0, 0.0), uniform(0.0, 0.0), uniform(0.0, 0.0)
 
 
-# --------------------------------------------------
-# Register and unregister functions:
+# ---------------------
+# Classes to register
+# ---------------------
 list_classes_to_register = [
     ApplyRandomTransform,
 ]
 
 
+# -----------------------------------------
+# Register and unregister functions
+# ------------------------------------------
 def register():
     """This is run when the add-on is enabled"""
 
