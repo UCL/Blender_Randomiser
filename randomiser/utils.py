@@ -83,12 +83,6 @@ def get_material_nodes_to_randomise_indep(
         if nd.type != "GROUP":
             list_material_nodes_indep.append(nd)
 
-    # ensure list_material_nodes_in_groups is unique
-    # TODO: what if two groups have a node with the same name??
-    # --it will work if nodegroups have different names!
-    # maybe assume geometry node groups will start/end with Geometry?
-    # list_material_nodes_in_groups = list(set(list_material_nodes_in_groups))
-
     # find input nodes that startwith random
     # in any of those groups
     # excluding 'Group' nodes
@@ -133,12 +127,6 @@ def get_material_nodes_to_randomise_group(
             list_material_nodes_in_groups.extend(
                 nd.node_tree.nodes
             )  # nodes inside groups
-
-    # ensure list_material_nodes_in_groups is unique
-    # TODO: what if two groups have a node with the same name??
-    # --it will work if nodegroups have different names!
-    # maybe assume geometry node groups will start/end with Geometry?
-    # list_material_nodes_in_groups = list(set(list_material_nodes_in_groups))
 
     # find input nodes that startwith random
     # in any of those groups
