@@ -347,9 +347,9 @@ class SubSubPanelGroupNodes(TemplatePanel, bpy.types.Panel):
         )
 
 
-# -----------------------------------
+# -------------------------------------------
 # Subpanel for the 'randomise-all' operator
-# ----------------------------------
+# -------------------------------------------
 class SubPanelRandomMaterialOperator(TemplatePanel, bpy.types.Panel):
     bl_idname = "NODE_MATERIAL_PT_subpanel_operator"
     bl_parent_id = "NODE_MATERIAL_PT_mainpanel"  # use its bl_idname

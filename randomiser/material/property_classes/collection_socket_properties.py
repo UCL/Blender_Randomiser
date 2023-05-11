@@ -229,6 +229,9 @@ class ColSocketProperties(bpy.types.PropertyGroup):
     # ---------------
 
 
+# -----------------------------------------
+# Register and unregister functions
+# ------------------------------------------
 def register():
     bpy.utils.register_class(ColSocketProperties)
 
