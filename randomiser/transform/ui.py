@@ -35,7 +35,7 @@ class PanelAddRandomTransform(bpy.types.Panel):
         # Create a simple row.
         # Create an row where the buttons are aligned to each other.
         layout.label(text=" Randomise position:")
-        row = layout.row()  # row = layout.row(align=True)
+        row = layout.row()
         row.prop(
             context.scene.randomise_camera_props,
             "camera_pos_x_min",
