@@ -41,9 +41,7 @@ def draw_sockets_list(
 ):
     # Define UI fields for every socket property
     # NOTE: if I don't sort the input nodes, everytime one of the nodes is
-    # selected in the graph it moves to the bottom of the panel (?).
-    # TODO: sort by date of creation? ---I didn't find an easy way to do it
-    # layout = self.layout
+    # selected in the graph it moves to the bottom of the panel.
     list_input_nodes_sorted = sorted(list_input_nodes, key=lambda x: x.name)
     for i_n, nd in enumerate(list_input_nodes_sorted):
         row = layout.row()
@@ -59,9 +57,6 @@ def draw_sockets_list(
             col5 = row_split.column(align=True)
 
             # input node name
-            # node_label = nd.name
-            # if nd.id_data.name in bpy.data.node_groups:
-            #     node_label = nd.id_data.name + "_" + node_label
             col1.label(text=nd.name)
             col1.alignment = "CENTER"
 
@@ -78,9 +73,6 @@ def draw_sockets_list(
             row.separator(factor=1.0)  # add empty row before each node
             row = layout.row()
 
-            # node_label = nd.name
-            # if nd.id_data.name in bpy.data.node_groups:
-            #     node_label = nd.id_data.name + "_" + node_label
             row.label(text=nd.name)
 
         # add sockets for this node in the subseq rows
@@ -111,7 +103,6 @@ def draw_sockets_list(
             if nd.id_data.name in bpy.data.node_groups:
                 socket_id = nd.id_data.name + "_" + socket_id
 
-            # for m_str, col in zip(["min", "max"], [col3, col4]):
             # if socket is a color: format min/max as a color picker
             # and an array (color picker doesn't include alpha value)
             if type(sckt) == bpy.types.NodeSocketColor:
@@ -223,10 +214,6 @@ class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
             subpanel_material.name
         )
 
-        # list_input_nodes = sorted(
-        #     list_input_nodes, key=lambda x: x.name
-        # )
-
         draw_sockets_list(
             cs,
             self.layout,
@@ -262,24 +249,27 @@ class SubSubPanelGroupNodes(TemplatePanel, bpy.types.Panel):
         if cs.socket_props_per_material.update_materials_collection:
             print("Collection of materials updated")
 
-        # get material of parent subpanel
-        subpanel_material_str = cs.socket_props_per_material.collection[
+        # get material of parent subpanel and add to class
+        cls.subpanel_material_str = cs.socket_props_per_material.collection[
             cls.subpanel_material_idx  # can I access this here?
         ].name
 
-        # get list of *group nodes names* for this material
+        # get list of *group nodes names* for this material and add to class
         # exclude groups with no nodes to randomise inside!
         # TODO: is it better to add to cls somewhere else? (not sure where...)
-        list_nodes2rand_in_groups = (
-            utils.get_material_nodes_to_randomise_group(subpanel_material_str)
-        )
-        # list of group_nodes_names with nodes to randomise
-        # (only show group nodes in panel if they have nodes to randomise)
-        list_group_nodes_names_this_material = sorted(
-            list(set([k.id_data.name for k in list_nodes2rand_in_groups]))
+        cls.list_nodes2rand_in_groups = (
+            utils.get_material_nodes_to_randomise_group(
+                cls.subpanel_material_str
+            )
         )
 
-        # add group node name to cls
+        # list of group nodes names with nodes to randomise
+        # (only show group nodes in panel if they have nodes to randomise)
+        list_group_nodes_names_this_material = sorted(
+            list(set([k.id_data.name for k in cls.list_nodes2rand_in_groups]))
+        )
+
+        # add group node name to subsubpanel class
         if cls.subsubpanel_group_node_idx < len(
             list_group_nodes_names_this_material
         ):
@@ -287,10 +277,10 @@ class SubSubPanelGroupNodes(TemplatePanel, bpy.types.Panel):
                 cls.subsubpanel_group_node_idx
             ]
         # else:
-        #     cls.group_node_name = ''
+        #     cls.group_node_name = '' # not needed
 
-        # only display this sub-subpanel if its idx is < total group nodes for
-        # this material
+        # only display this sub-subpanel if its index is < total group nodes
+        # for this material
         return cls.subsubpanel_group_node_idx < len(
             list_group_nodes_names_this_material
         )
@@ -306,43 +296,29 @@ class SubSubPanelGroupNodes(TemplatePanel, bpy.types.Panel):
     def draw(self, context):
         # get name of the material for this subpanel
         cs = context.scene
-        subpanel_material = cs.socket_props_per_material.collection[
-            self.subpanel_material_idx
-        ]
 
         # then force an update in the sockets per material
-        # subpanel_material_name = subpanel_material.name
         # TODO: do I need this? it should update when drawing the subpanel
         if cs.socket_props_per_material.collection[
-            subpanel_material.name
+            self.subpanel_material_str
         ].update_sockets_collection:
             print("Collection of sockets updated")
 
         # get (updated) collection of socket properties
         # for the current material
         sockets_props_collection = cs.socket_props_per_material.collection[
-            subpanel_material.name
+            self.subpanel_material_str
         ].collection
 
         # Get list of input nodes to randomise
         # for this subpanel's material
         # only nodes inside groups!
-        list_nodes_in_groups = utils.get_material_nodes_to_randomise_group(
-            subpanel_material.name
-        )
-
         # keep only nodes inside this group!
         list_input_nodes = [
             nd
-            for nd in list_nodes_in_groups
+            for nd in self.list_nodes2rand_in_groups
             if nd.id_data.name == self.group_node_name
         ]
-
-        # # sort by name
-        # list_input_nodes = sorted(
-        #     list_input_nodes,
-        #     key=lambda x: x.name,
-        # )
 
         draw_sockets_list(
             cs,

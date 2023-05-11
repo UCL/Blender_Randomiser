@@ -183,7 +183,6 @@ class ColSocketProperties(bpy.types.PropertyGroup):
 
     # --------------------------------
     # candidate sockets for this material
-    # TODO : can I use decorator instead?
     @property
     def candidate_sockets(self):  # getter method
         """Get function for the candidate_sockets property
@@ -210,12 +209,9 @@ class ColSocketProperties(bpy.types.PropertyGroup):
         list_input_nodes = utils.get_material_nodes_to_randomise_all(self.name)
 
         # list of sockets
-        # TODO: should we exclude unlinked ones here instead?
         list_sockets = [out for nd in list_input_nodes for out in nd.outputs]
 
         return list_sockets
-
-    # ---------------
 
 
 # -----------------------------------------
