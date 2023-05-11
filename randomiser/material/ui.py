@@ -39,10 +39,8 @@ class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
 
     """
 
-    bl_idname = (
-        "NODE_MATERIAL_PT_subpanel"  # what is this for? --internal reference?
-    )
-    bl_parent_id = "NODE_MATERIAL_PT_mainpanel"  # use bl_idname
+    bl_idname = "NODE_MATERIAL_PT_subpanel"
+    bl_parent_id = "NODE_MATERIAL_PT_mainpanel"
     bl_label = ""  # title of the panel displayed to the user
     # bl_options = {"DEFAULT_CLOSED"}
     # https://docs.blender.org/api/master/bpy.types.Panel.html#bpy.types.Panel.bl_options
@@ -110,11 +108,17 @@ class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
 
         # Define UI fields for every socket property
         # NOTE: if I don't sort the input nodes, everytime one of the nodes is
-        # selected in the graph it moves to the bottom of the panel (?).
-        # TODO: sort by date of creation? ---I didn't find an easy way to do it
+        # selected in the graph it moves to the bottom of the panel.
+        # TODO: sort by date of creation instead?
+        # ---I didn't find an easy way to do this
         layout = self.layout
         for i_n, nd in enumerate(
-            sorted(list_input_nodes, key=lambda x: x.name)
+            sorted(
+                list_input_nodes,
+                key=lambda x: x.name
+                if x.id_data.name not in bpy.data.node_groups
+                else x.id_data.name + "_" + x.name,
+            )
         ):
             row = layout.row()
 
@@ -129,7 +133,10 @@ class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
                 col5 = row_split.column(align=True)
 
                 # input node name
-                col1.label(text=nd.name)
+                node_label = nd.name
+                if nd.id_data.name in bpy.data.node_groups:
+                    node_label = nd.id_data.name + "_" + node_label
+                col1.label(text=node_label)
                 col1.alignment = "CENTER"
 
                 # min label
@@ -144,7 +151,11 @@ class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
             else:
                 row.separator(factor=1.0)  # add empty row before each node
                 row = layout.row()
-                row.label(text=nd.name)
+
+                node_label = nd.name
+                if nd.id_data.name in bpy.data.node_groups:
+                    node_label = nd.id_data.name + "_" + node_label
+                row.label(text=node_label)
 
             # add sockets for this node in the subseq rows
             for sckt in nd.outputs:
@@ -171,10 +182,14 @@ class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
 
                 # socket min and max columns
                 socket_id = nd.name + "_" + sckt.name
-                for m_str, col in zip(["min", "max"], [col3, col4]):
-                    # if socket is a color: format min/max as a color picker
-                    # and an array (color picker doesn't include alpha value)
-                    if type(sckt) == bpy.types.NodeSocketColor:
+                if nd.id_data.name in bpy.data.node_groups:
+                    socket_id = nd.id_data.name + "_" + socket_id
+
+                # for m_str, col in zip(["min", "max"], [col3, col4]):
+                # if socket is a color: format min/max as a color picker
+                # and an array (color picker doesn't include alpha value)
+                if type(sckt) == bpy.types.NodeSocketColor:
+                    for m_str, col in zip(["min", "max"], [col3, col4]):
                         # color picker
                         col.template_color_picker(
                             sockets_props_collection[socket_id],
@@ -191,8 +206,9 @@ class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
                                 text=cl,
                                 index=j,
                             )
-                    # if socket is not color type: format as a regular property
-                    else:
+                # if socket is not color type: format as a regular property
+                else:
+                    for m_str, col in zip(["min", "max"], [col3, col4]):
                         col.prop(
                             sockets_props_collection[socket_id],
                             m_str + "_" + cs.socket_type_to_attr[type(sckt)],
@@ -212,7 +228,7 @@ class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
 # ----------------------------------
 class SubPanelRandomMaterialOperator(TemplatePanel, bpy.types.Panel):
     bl_idname = "NODE_MATERIAL_PT_subpanel_operator"
-    bl_parent_id = "NODE_MATERIAL_PT_mainpanel"  # use its bl_idname
+    bl_parent_id = "NODE_MATERIAL_PT_mainpanel"
     bl_label = ""  # title of the panel displayed to the user
     bl_options = {"HIDE_HEADER"}
 
@@ -244,7 +260,7 @@ for i in range(config.MAX_NUMBER_OF_SUBPANELS):
         (
             SubPanelRandomMaterialNodes,
             bpy.types.Panel,
-        ),  # parent classes (is Panel req?)
+        ),  # parent classes (Q FOR REVIEW: is Panel req?)
         {
             "bl_idname": f"NODE_MATERIAL_PT_subpanel_{i}",
             "subpanel_material_idx": i,
