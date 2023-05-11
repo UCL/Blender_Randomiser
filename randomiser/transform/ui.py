@@ -21,6 +21,101 @@ class PanelAddRandomTransform(bpy.types.Panel):
         return context.object is not None
 
     def draw(self, context):
+        layout = self.layout
+
+        # Create a simple row.
+        # Create an row where the buttons are aligned to each other.
+        row = layout.row()  # row = layout.row(align=True)
+        row.label(text=" Randomise camera position:")
+        row.label(text="min")
+        row.label(text="max")
+
+        row = layout.row()  # row = layout.row(align=True)
+        row.label(text="x_position")
+        row.prop(
+            context.scene.randomise_camera_props,
+            "camera_pos_x_min",
+            icon_only=True,
+        )
+
+        row.prop(
+            context.scene.randomise_camera_props,
+            "camera_pos_x_max",
+            icon_only=True,
+        )
+
+        row = layout.row()
+        row.label(text="y_position")
+        row.prop(
+            context.scene.randomise_camera_props,
+            "camera_pos_y_min",
+            icon_only=True,
+        )
+
+        row.prop(
+            context.scene.randomise_camera_props,
+            "camera_pos_y_max",
+            icon_only=True,
+        )
+
+        row = layout.row()
+        row.label(text="z_position")
+        row.prop(
+            context.scene.randomise_camera_props,
+            "camera_pos_z_min",
+            icon_only=True,
+        )
+
+        row.prop(
+            context.scene.randomise_camera_props,
+            "camera_pos_z_max",
+            icon_only=True,
+        )
+
+        # Rotation part of panel
+        layout.label(text=" Randomise camera rotation:")
+        row = layout.row()  # row = layout.row(align=True)
+        row.label(text="x_rotation")
+        row.prop(
+            context.scene.randomise_camera_props,
+            "camera_rot_x_min",
+            icon_only=True,
+        )
+
+        row.prop(
+            context.scene.randomise_camera_props,
+            "camera_rot_x_max",
+            icon_only=True,
+        )
+
+        row = layout.row()
+        row.label(text="y_rotation")
+        row.prop(
+            context.scene.randomise_camera_props,
+            "camera_rot_y_min",
+            icon_only=True,
+        )
+
+        row.prop(
+            context.scene.randomise_camera_props,
+            "camera_rot_y_max",
+            icon_only=True,
+        )
+
+        row = layout.row()
+        row.label(text="x_rotation")
+        row.prop(
+            context.scene.randomise_camera_props,
+            "camera_rot_z_min",
+            icon_only=True,
+        )
+
+        row.prop(
+            context.scene.randomise_camera_props,
+            "camera_rot_z_max",
+            icon_only=True,
+        )
+
         col = self.layout.column()
         row = col.row()
         row.prop(
@@ -29,123 +124,6 @@ class PanelAddRandomTransform(bpy.types.Panel):
         )
 
         col.operator("opr.apply_random_transform", text="Randomize")
-
-        layout = self.layout
-
-        # Create a simple row.
-        # Create an row where the buttons are aligned to each other.
-        layout.label(text=" Randomise camera position:")
-        row = layout.row()  # row = layout.row(align=True)
-        row.prop(
-            context.scene.randomise_camera_props,
-            "camera_pos_x_min",
-            icon_only=True,
-        )
-        row.label(text="x_min")
-
-        row.prop(
-            context.scene.randomise_camera_props,
-            "camera_pos_x_max",
-            icon_only=True,
-        )
-        row.label(text="x_max")
-
-        row = layout.row()
-        row.prop(
-            context.scene.randomise_camera_props,
-            "camera_pos_y_min",
-            icon_only=True,
-        )
-        row.label(text="y_min")
-
-        row.prop(
-            context.scene.randomise_camera_props,
-            "camera_pos_y_max",
-            icon_only=True,
-        )
-        row.label(text="y_max")
-
-        row = layout.row()
-        row.prop(
-            context.scene.randomise_camera_props,
-            "camera_pos_z_min",
-            icon_only=True,
-        )
-        row.label(text="z_min")
-
-        row.prop(
-            context.scene.randomise_camera_props,
-            "camera_pos_z_max",
-            icon_only=True,
-        )
-        row.label(text="z_max")
-
-        # Rotation part of panel
-        layout.label(text=" Randomise camera rotation:")
-        row = layout.row()  # row = layout.row(align=True)
-        row.prop(
-            context.scene.randomise_camera_props,
-            "camera_rot_x_min",
-            icon_only=True,
-        )
-        row.label(text="x_min")
-
-        row.prop(
-            context.scene.randomise_camera_props,
-            "camera_rot_x_max",
-            icon_only=True,
-        )
-        row.label(text="x_max")
-
-        row = layout.row()
-        row.prop(
-            context.scene.randomise_camera_props,
-            "camera_rot_y_min",
-            icon_only=True,
-        )
-        row.label(text="y_min")
-
-        row.prop(
-            context.scene.randomise_camera_props,
-            "camera_rot_y_max",
-            icon_only=True,
-        )
-        row.label(text="y_max")
-
-        row = layout.row()
-        row.prop(
-            context.scene.randomise_camera_props,
-            "camera_rot_z_min",
-            icon_only=True,
-        )
-        row.label(text="z_min")
-
-        row.prop(
-            context.scene.randomise_camera_props,
-            "camera_rot_z_max",
-            icon_only=True,
-        )
-        row.label(text="z_max")
-
-        # Seed
-        row = self.layout.row(align=True)
-        split = row.split()
-        left_col = split.column(align=True)
-        right_col = split.column(align=True)
-
-        # put the toggle on the left col
-        left_col_row = left_col.row(align=True)
-        left_col_row.alignment = "RIGHT"  # alignment first!
-        left_col_row.prop(
-            context.scene.randomise_camera_props, "seed_toggle", icon_only=True
-        )
-        left_col_row.label(text="Set random seed")
-
-        # put field in right col
-        right_col.enabled = (
-            context.scene.randomise_camera_props.seed_toggle
-        )  # only disable the next part of the row
-        right_col.prop(context.scene.randomise_camera_props, "seed")
 
 
 # --------------------------------------------------
