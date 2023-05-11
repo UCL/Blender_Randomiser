@@ -275,14 +275,24 @@ class SubSubPanelGroupNodes(TemplatePanel, bpy.types.Panel):
         )
         # list of group_nodes_names with nodes to randomise
         # (only show group nodes in panel if they have nodes to randomise)
-        cls.list_group_nodes_names_to_show = sorted(
+        list_group_nodes_names_this_material = sorted(
             list(set([k.id_data.name for k in list_nodes2rand_in_groups]))
         )
+
+        # add group node name to cls
+        if cls.subsubpanel_group_node_idx < len(
+            list_group_nodes_names_this_material
+        ):
+            cls.group_node_name = list_group_nodes_names_this_material[
+                cls.subsubpanel_group_node_idx
+            ]
+        # else:
+        #     cls.group_node_name = ''
 
         # only display this sub-subpanel if its idx is < total group nodes for
         # this material
         return cls.subsubpanel_group_node_idx < len(
-            cls.list_group_nodes_names_to_show
+            list_group_nodes_names_this_material
         )
 
     def draw_header(self, context):
@@ -291,11 +301,7 @@ class SubSubPanelGroupNodes(TemplatePanel, bpy.types.Panel):
         layout.use_property_decorate = False  # No animation.
 
         # show name of the group node
-        layout.label(
-            text=self.list_group_nodes_names_to_show[
-                self.subsubpanel_group_node_idx
-            ]
-        )
+        layout.label(text=self.group_node_name)
 
     def draw(self, context):
         # get name of the material for this subpanel
@@ -320,9 +326,17 @@ class SubSubPanelGroupNodes(TemplatePanel, bpy.types.Panel):
 
         # Get list of input nodes to randomise
         # for this subpanel's material
-        list_input_nodes = utils.get_material_nodes_to_randomise_group(
+        # only nodes inside groups!
+        list_nodes_in_groups = utils.get_material_nodes_to_randomise_group(
             subpanel_material.name
         )
+
+        # keep only nodes inside this group!
+        list_input_nodes = [
+            nd
+            for nd in list_nodes_in_groups
+            if nd.id_data.name == self.group_node_name
+        ]
 
         # # sort by name
         # list_input_nodes = sorted(
