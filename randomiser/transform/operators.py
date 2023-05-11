@@ -76,14 +76,13 @@ class ApplyRandomTransform(bpy.types.Operator):
         rot_z_range = [rot_z_min, rot_z_max]
 
         delta_on = context.scene.randomise_camera_props.bool_delta
-        
+
         rand_posx = context.scene.randomise_camera_props.bool_rand_posx
         rand_posy = context.scene.randomise_camera_props.bool_rand_posy
         rand_posz = context.scene.randomise_camera_props.bool_rand_posz
         rand_rotx = context.scene.randomise_camera_props.bool_rand_rotx
         rand_roty = context.scene.randomise_camera_props.bool_rand_roty
         rand_rotz = context.scene.randomise_camera_props.bool_rand_rotz
-
 
         randomize_selected(
             context,
@@ -158,7 +157,6 @@ def randomize_selected(
             rand_z = rand_num(loc_z_range[0], loc_z_range[1])
         else:
             rand_z = uniform(0.0, 0.0)
-
 
         if delta_on:
             bpy.data.objects["Camera"].delta_location = Vector(
