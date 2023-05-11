@@ -218,9 +218,7 @@ class ColSocketProperties(bpy.types.PropertyGroup):
         # - with no input sockets
         # - their name starts with random
         # - and they can be independent or inside a node group
-        list_input_nodes = utils.get_material_input_nodes_to_randomise_all(
-            self.name
-        )
+        list_input_nodes = utils.get_material_nodes_to_randomise_all(self.name)
 
         # list of sockets
         # TODO: should we exclude unlinked ones here instead?

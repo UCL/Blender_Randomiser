@@ -2,14 +2,13 @@ import bpy
 
 
 def get_nodes_to_randomise_from_list(
-    list_candidate_nodes, node2randomise_prefix="random"
+    list_candidate_nodes: list, node2randomise_prefix: str = "random"
 ):
     """Get list of nodes to randomise from list.
 
+    Input nodes are defined as nodes with no input sockets.
     The nodes to randomise are input nodes whose name starts
     with 'node2randomise_prefix' (case insensitive).
-
-    Input nodes are defined as nodes with no input sockets.
 
     The 'artificial' nodes that show up inside a node group, usually named
     'Group input' or 'Group output' are excluded from the search.
@@ -27,7 +26,7 @@ def get_nodes_to_randomise_from_list(
         list of the input nodes to randomise
     """
 
-    # ensure list_material_nodes_in_groups is unique
+    # ensure list_candidate_nodes is unique
     # TODO: what if two groups have a node with the same name??
     # --it will work if nodegroups have different names!
     # maybe assume geometry node groups will start/end with Geometry?
@@ -51,8 +50,8 @@ def get_nodes_to_randomise_from_list(
     return list_input_nodes
 
 
-def get_material_input_nodes_to_randomise_indep(
-    material_str="Material", node2randomise_prefix="random"
+def get_material_nodes_to_randomise_indep(
+    material_str: str = "Material", node2randomise_prefix: str = "random"
 ):
     """Get list of *independent* input nodes to randomise for a given material.
 
@@ -100,8 +99,8 @@ def get_material_input_nodes_to_randomise_indep(
     return list_input_nodes
 
 
-def get_material_input_nodes_to_randomise_group(
-    material_str="Material", node2randomise_prefix="random"
+def get_material_nodes_to_randomise_group(
+    material_str: str = "Material", node2randomise_prefix: str = "random"
 ):
     """Get list of *group* input nodes to randomise for a given material.
 
@@ -151,8 +150,8 @@ def get_material_input_nodes_to_randomise_group(
     return list_input_nodes
 
 
-def get_material_input_nodes_to_randomise_all(
-    material_str="Material", node2randomise_prefix="random"
+def get_material_nodes_to_randomise_all(
+    material_str: str = "Material", node2randomise_prefix: str = "random"
 ):
     """Get list of all input nodes to randomise for a given material.
 
@@ -180,11 +179,11 @@ def get_material_input_nodes_to_randomise_all(
     # find input nodes that startwith random
     # in any of those groups
     # excluding 'Group' nodes
-    list_indep_input_nodes = get_material_input_nodes_to_randomise_indep(
+    list_indep_input_nodes = get_material_nodes_to_randomise_indep(
         material_str, node2randomise_prefix
     )
 
-    list_group_input_nodes = get_material_input_nodes_to_randomise_group(
+    list_group_input_nodes = get_material_nodes_to_randomise_group(
         material_str, node2randomise_prefix
     )
 
