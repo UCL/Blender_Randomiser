@@ -6,8 +6,9 @@ from mathutils import Vector
 
 
 # -------------------------------
-## Operators
-class ApplyRandomTransform(bpy.types.Operator):  # ---check types
+# Operator
+# -------------------------------
+class ApplyRandomTransform(bpy.types.Operator):
     # docstring shows as a tooltip for menu items and buttons.
     """Randomise the position and orientation of the camera
 
@@ -31,8 +32,6 @@ class ApplyRandomTransform(bpy.types.Operator):  # ---check types
         # check the context here
         return context.object is not None
 
-    # -------------------------------
-    ### Execute fn
     def execute(self, context):
         """Execute the randomiser operator
 
@@ -75,13 +74,16 @@ class ApplyRandomTransform(bpy.types.Operator):  # ---check types
         rot_z_min = context.scene.randomise_camera_props.camera_rot_z_min[0]
         rot_z_max = context.scene.randomise_camera_props.camera_rot_z_max[0]
         rot_z_range = [rot_z_min, rot_z_max]
+
         delta_on = context.scene.randomise_camera_props.bool_delta
+        
         rand_posx = context.scene.randomise_camera_props.bool_rand_posx
         rand_posy = context.scene.randomise_camera_props.bool_rand_posy
         rand_posz = context.scene.randomise_camera_props.bool_rand_posz
         rand_rotx = context.scene.randomise_camera_props.bool_rand_rotx
         rand_roty = context.scene.randomise_camera_props.bool_rand_roty
         rand_rotz = context.scene.randomise_camera_props.bool_rand_rotz
+
 
         randomize_selected(
             context,
@@ -105,14 +107,12 @@ class ApplyRandomTransform(bpy.types.Operator):  # ---check types
         return {"FINISHED"}
 
 
-# --------------------------------------------------
-# Randomise_selected function:
 def rand_num(min, max):
     return uniform(min, max)
 
 
 def randomize_selected(
-    context,  # seed, delta,
+    context,
     loc,
     loc_x_range,
     loc_y_range,
@@ -143,8 +143,6 @@ def randomize_selected(
         _description_
     """
 
-    # for obj in context.selected_objects:
-    # pdb.set_trace()
     if loc:
         if rand_posx:
             rand_x = rand_num(loc_x_range[0], loc_x_range[1])
@@ -160,6 +158,7 @@ def randomize_selected(
             rand_z = rand_num(loc_z_range[0], loc_z_range[1])
         else:
             rand_z = uniform(0.0, 0.0)
+
 
         if delta_on:
             bpy.data.objects["Camera"].delta_location = Vector(
@@ -215,13 +214,17 @@ def randomize_selected(
         uniform(0.0, 0.0), uniform(0.0, 0.0), uniform(0.0, 0.0)
 
 
-# --------------------------------------------------
-# Register and unregister functions:
+# ---------------------
+# Classes to register
+# ---------------------
 list_classes_to_register = [
     ApplyRandomTransform,
 ]
 
 
+# -----------------------------------------
+# Register and unregister functions
+# ------------------------------------------
 def register():
     """This is run when the add-on is enabled"""
 

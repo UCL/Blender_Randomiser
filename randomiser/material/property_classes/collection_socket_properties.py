@@ -2,6 +2,7 @@ import re
 
 import bpy
 
+from ... import utils
 from .socket_properties import SocketProperties
 
 
@@ -15,9 +16,19 @@ def compute_sockets_sets(self):
     )
 
     # set of sockets in graph *for this material* !
-    self.set_sckt_names_in_graph = set(
-        sck.node.name + "_" + sck.name for sck in self.candidate_sockets
-    )
+    list_sckt_names_in_graph = []
+    for sck in self.candidate_sockets:
+        # if socket comes from a node inside a group
+        # (TODO is there a better way to check whether the node is in a group?)
+        if sck.node.id_data.name in bpy.data.node_groups:
+            list_sckt_names_in_graph.append(
+                sck.node.id_data.name + "_" + sck.node.name + "_" + sck.name
+            )
+        # if socket comes from an independent node
+        else:
+            list_sckt_names_in_graph.append(sck.node.name + "_" + sck.name)
+
+    self.set_sckt_names_in_graph = set(list_sckt_names_in_graph)
 
     # set of sockets that are just in one of the two groups
     self.set_of_sckt_names_in_one_only = (
@@ -99,17 +110,21 @@ def set_update_collection(self, value):
                 sckt_prop.bool_randomise = True
 
                 # ---------------------------
+                # TODO: review - is this too hacky?
                 # get socket object for this socket name
                 # NOTE: my definition of socket name
                 # (node.name + _ + socket.name)
-                sckt = [
-                    s
-                    for s in self.candidate_sockets
-                    if s.node.name + "_" + s.name == sckt_name
-                ][0]
+                for s in self.candidate_sockets:
+                    # build socket id from scratch
+                    socket_id = s.node.name + "_" + s.name
+                    if s.node.id_data.name in bpy.data.node_groups:
+                        socket_id = s.node.id_data.name + "_" + socket_id
+
+                    if socket_id == sckt_name:
+                        sckt = s
+                        break
 
                 # add min/max values
-                # TODO: review - is this too hacky?
                 # for this socket type, get the name of the attribute
                 # holding the min/max properties
                 socket_attrib_str = bpy.context.scene.socket_type_to_attr[
@@ -128,7 +143,7 @@ def set_update_collection(self, value):
                     bpy.context.scene.socket_type_to_ini_min_max[type(sckt)]
                 )
 
-                # assign initial value ----only if
+                # assign initial value
                 for m_str in ["min", "max"]:
                     setattr(
                         sckt_prop,
@@ -187,16 +202,19 @@ class ColSocketProperties(bpy.types.PropertyGroup):
         list
             list of sockets in the input nodes in the graph
         """
-        list_input_nodes = [
-            nd
-            for nd in bpy.data.materials[self.name].node_tree.nodes
-            if len(nd.inputs) == 0
-            and nd.name.lower().startswith("random".lower())
-        ]
+        # get list of input nodes for this material
+        # input nodes are defined as those:
+        # - with no input sockets
+        # - their name starts with random
+        # - and they can be independent or inside a node group
+        list_input_nodes = utils.get_material_input_nodes_to_randomise(
+            self.name
+        )
 
         # list of sockets
         # TODO: should we exclude unlinked ones here instead?
         list_sockets = [out for nd in list_input_nodes for out in nd.outputs]
+
         return list_sockets
 
     # ---------------

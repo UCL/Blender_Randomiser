@@ -32,6 +32,7 @@ class PanelAddRandomTransform(bpy.types.Panel):
 
         row = layout.row()  # row = layout.row(align=True)
         row.label(text="x_position")
+
         row.prop(
             context.scene.randomise_camera_props,
             "camera_pos_x_min",
