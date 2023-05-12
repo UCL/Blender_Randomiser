@@ -106,10 +106,6 @@ class ApplyRandomTransform(bpy.types.Operator):
         return {"FINISHED"}
 
 
-def rand_num(min, max):
-    return uniform(min, max)
-
-
 def randomize_selected(
     context,
     loc,
@@ -143,27 +139,24 @@ def randomize_selected(
     """
 
     if loc:
-if delta_on:
-    value_str = 'delta_location'
-else:
-    value_str = 'location'
-
-if rand_posx:
-    getattr(context.scene.camera, value_str)[0] = rand_num(loc_x_range[0], loc_x_range[1])
-
-if rand_posy:
-    getattr(context.scene.camera, value_str)[1] = rand_num(loc_y_range[0], loc_y_range[1])
-
-if rand_posz:
-    getattr(context.scene.camera, value_str)[2] = rand_num(loc_z_range[0], loc_z_range[1])
-
         if delta_on:
-            bpy.data.objects["Camera"].delta_location = Vector(
-                [rand_x, rand_y, rand_z]
-            )
+            value_str = "delta_location"
         else:
-            bpy.data.objects["Camera"].location = Vector(
-                [rand_x, rand_y, rand_z]
+            value_str = "location"
+
+        if rand_posx:
+            getattr(context.scene.camera, value_str)[0] = uniform(
+                loc_x_range[0], loc_x_range[1]
+            )
+
+        if rand_posy:
+            getattr(context.scene.camera, value_str)[1] = uniform(
+                loc_y_range[0], loc_y_range[1]
+            )
+
+        if rand_posz:
+            getattr(context.scene.camera, value_str)[2] = uniform(
+                loc_z_range[0], loc_z_range[1]
             )
 
     else:  # otherwise the values change under us
@@ -171,17 +164,17 @@ if rand_posz:
 
     if rot:
         if rand_rotx:
-            rand_x = rand_num(rot_x_range[0], rot_x_range[1])
+            rand_x = uniform(rot_x_range[0], rot_x_range[1])
         else:
             rand_x = uniform(0.0, 0.0)
 
         if rand_roty:
-            rand_y = rand_num(rot_y_range[0], rot_y_range[1])
+            rand_y = uniform(rot_y_range[0], rot_y_range[1])
         else:
             rand_y = uniform(0.0, 0.0)
 
         if rand_rotz:
-            rand_z = rand_num(rot_z_range[0], rot_z_range[1])
+            rand_z = uniform(rot_z_range[0], rot_z_range[1])
         else:
             rand_z = uniform(0.0, 0.0)
 
