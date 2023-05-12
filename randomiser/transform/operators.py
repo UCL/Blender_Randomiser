@@ -143,20 +143,19 @@ def randomize_selected(
     """
 
     if loc:
-        if rand_posx:
-            rand_x = rand_num(loc_x_range[0], loc_x_range[1])
-        else:
-            rand_x = uniform(0.0, 0.0)
+if delta_on:
+    value_str = 'delta_location'
+else:
+    value_str = 'location'
 
-        if rand_posy:
-            rand_y = rand_num(loc_y_range[0], loc_y_range[1])
-        else:
-            rand_y = uniform(0.0, 0.0)
+if rand_posx:
+    getattr(context.scene.camera, value_str)[0] = rand_num(loc_x_range[0], loc_x_range[1])
 
-        if rand_posz:
-            rand_z = rand_num(loc_z_range[0], loc_z_range[1])
-        else:
-            rand_z = uniform(0.0, 0.0)
+if rand_posy:
+    getattr(context.scene.camera, value_str)[1] = rand_num(loc_y_range[0], loc_y_range[1])
+
+if rand_posz:
+    getattr(context.scene.camera, value_str)[2] = rand_num(loc_z_range[0], loc_z_range[1])
 
         if delta_on:
             bpy.data.objects["Camera"].delta_location = Vector(
