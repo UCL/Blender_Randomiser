@@ -2,6 +2,7 @@ from random import uniform
 
 import bpy
 import numpy as np
+from bpy.app.handlers import persistent
 from mathutils import Vector
 
 
@@ -23,8 +24,9 @@ class ApplyRandomTransform(bpy.types.Operator):
         _description_
     """
 
-    bl_idname = "opr.apply_random_transform"  # appended to bpy.ops.
-    bl_label = "Apply random transform to camera"
+    bl_idname = "camera.apply_random_transform"  # appended to bpy.ops.
+    bl_label = "Apply random transform to object"
+
     bl_options = {"REGISTER", "UNDO"}
 
     @classmethod
@@ -84,7 +86,7 @@ class ApplyRandomTransform(bpy.types.Operator):
         rand_roty = context.scene.randomise_camera_props.bool_rand_roty
         rand_rotz = context.scene.randomise_camera_props.bool_rand_rotz
 
-        randomize_selected(
+        randomise_selected(
             context,
             loc,
             loc_x_range,
@@ -106,7 +108,19 @@ class ApplyRandomTransform(bpy.types.Operator):
         return {"FINISHED"}
 
 
-def randomize_selected(
+=======
+@persistent
+def randomise_camera_transform_per_frame(dummy):
+    bpy.ops.camera.apply_random_transform("INVOKE_DEFAULT")
+
+    return
+
+
+# --------------------------------------------------
+# Randomise_selected function:
+
+
+def randomise_selected(
     context,
     loc,
     loc_x_range,
@@ -221,6 +235,10 @@ def register():
     for cls in list_classes_to_register:
         bpy.utils.register_class(cls)
 
+    bpy.app.handlers.frame_change_pre.append(
+        randomise_camera_transform_per_frame
+    )
+
     print("registered")
 
 
@@ -230,5 +248,9 @@ def unregister():
     """
     for cls in list_classes_to_register:
         bpy.utils.unregister_class(cls)
+
+    bpy.app.handlers.frame_change_pre.remove(
+        randomise_camera_transform_per_frame
+    )
 
     print("unregistered")
