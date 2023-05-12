@@ -249,7 +249,7 @@ class PanelAddRandomTransform(bpy.types.Panel):
         )
 
         # Randomise button
-        col.operator("opr.apply_random_transform", text="Randomise")
+        col.operator("camera.apply_random_transform", text="Randomise")
 
 
 # --------------------------------------------------
