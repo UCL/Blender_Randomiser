@@ -117,5 +117,6 @@ def unregister():
     bpy.utils.unregister_class(ColMaterials)
 
     # remove from bpy.context.scene...
-    if hasattr(bpy.types.Scene, "socket_props_per_material"):
-        delattr(bpy.types.Scene, "socket_props_per_material")
+    attr_to_remove = "socket_props_per_material"
+    if hasattr(bpy.types.Scene, attr_to_remove):
+        delattr(bpy.types.Scene, attr_to_remove)
