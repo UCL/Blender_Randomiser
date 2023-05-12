@@ -28,7 +28,7 @@ class PanelAddRandomTransform(bpy.types.Panel):
             "bool_delta",
         )
 
-        col.operator("opr.apply_random_transform", text="Randomize")
+        col.operator("camera.apply_random_transform", text="Randomize")
 
         layout = self.layout
 

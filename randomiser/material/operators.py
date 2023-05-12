@@ -1,5 +1,6 @@
 import bpy
 import numpy as np
+from bpy.app.handlers import persistent
 
 from . import config
 
@@ -186,6 +187,15 @@ class RandomiseAllMaterialNodes(bpy.types.Operator):
         return {"FINISHED"}
 
 
+# Without persistent, the function is removed from the handlers' list
+#  once executed
+@persistent
+def randomise_material_nodes_per_frame(dummy):
+    bpy.ops.node.randomise_all_sockets("INVOKE_DEFAULT")
+
+    return
+
+
 # -------------------------------
 # Operator: view graph for material
 # -------------------------------
@@ -338,10 +348,20 @@ for i in range(config.MAX_NUMBER_OF_SUBPANELS):
 def register():
     for cls in list_classes_to_register:
         bpy.utils.register_class(cls)
+
+    bpy.app.handlers.frame_change_pre.append(
+        randomise_material_nodes_per_frame
+    )
+
     print("material operators registered")
 
 
 def unregister():
     for cls in list_classes_to_register:
         bpy.utils.unregister_class(cls)
+
+    bpy.app.handlers.frame_change_pre.remove(
+        randomise_material_nodes_per_frame
+    )
+
     print("material operators unregistered")
