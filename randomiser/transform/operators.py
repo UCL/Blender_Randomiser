@@ -108,7 +108,6 @@ class ApplyRandomTransform(bpy.types.Operator):
         return {"FINISHED"}
 
 
-=======
 @persistent
 def randomise_camera_transform_per_frame(dummy):
     bpy.ops.camera.apply_random_transform("INVOKE_DEFAULT")
