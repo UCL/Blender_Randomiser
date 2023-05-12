@@ -1,11 +1,16 @@
 import bpy
 
+from ... import utils
 from ...material.property_classes.socket_properties import SocketProperties
 
 # -----------------------
 # SocketProperties
 # ---------------------
 # Should work as is?
+
+# -----------------------------------------------------------------
+# Setter / getter methods for update_sockets_collection attribute
+# ----------------------------------------------------------------
 
 
 # ----------------------------------------------
@@ -62,13 +67,12 @@ class ColGeomSocketProperties(bpy.types.PropertyGroup):
         # - their name starts with random
         # - and they can be independent or
         # inside a node group #---- I think I can change this
-        # list_input_nodes = utils.get_material_nodes_to_randomise_all(
-        # self.name)
-        # #---- instead: get for this node group
+        list_input_nodes = utils.get_geometry_nodes_to_randomise(
+            self.name  # name of the node group
+        )
 
         # # list of sockets
-        # list_sockets = [out for nd in list_input_nodes for out in nd.outputs]
-        list_sockets = ["a", "b", "c"]
+        list_sockets = [out for nd in list_input_nodes for out in nd.outputs]
 
         return list_sockets
 
