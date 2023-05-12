@@ -191,7 +191,7 @@ class RandomiseAllMaterialNodes(bpy.types.Operator):
 #  once executed
 @persistent
 def randomise_material_nodes_per_frame(dummy):
-    bpy.ops.node.randomise_socket("INVOKE_DEFAULT")
+    bpy.ops.node.randomise_all_sockets("INVOKE_DEFAULT")
 
     return
 
