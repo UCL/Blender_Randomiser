@@ -30,6 +30,114 @@ class MainPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
         column.label(text="Select material to see available sockets.")
 
 
+# ---------------------------------------------------
+# Common layout for list of sockets to randomise
+# ----------------------------------------------------
+def draw_sockets_list(
+    cs,
+    layout,
+    list_input_nodes,
+    sockets_props_collection,
+):
+    # Define UI fields for every socket property
+    # NOTE: if I don't sort the input nodes, everytime one of the nodes is
+    # selected in the graph it moves to the bottom of the panel.
+    list_input_nodes_sorted = sorted(list_input_nodes, key=lambda x: x.name)
+    for i_n, nd in enumerate(list_input_nodes_sorted):
+        row = layout.row()
+
+        # if first node: add labels for
+        # name, min, max and randomisation toggle
+        if i_n == 0:
+            row_split = row.split()
+            col1 = row_split.column(align=True)
+            col2 = row_split.column(align=True)
+            col3 = row_split.column(align=True)
+            col4 = row_split.column(align=True)
+            col5 = row_split.column(align=True)
+
+            # input node name
+            col1.label(text=nd.name)
+            col1.alignment = "CENTER"
+
+            # min label
+            col3.alignment = "CENTER"
+            col3.label(text="min")
+
+            # max label
+            col4.alignment = "CENTER"
+            col4.label(text="max")
+
+        # if not first node: add just node name
+        else:
+            row.separator(factor=1.0)  # add empty row before each node
+            row = layout.row()
+
+            row.label(text=nd.name)
+
+        # add sockets for this node in the subseq rows
+        for sckt in nd.outputs:
+            # split row in 5 columns
+            row = layout.row()
+            row_split = row.split()
+            col1 = row_split.column(align=True)
+            col2 = row_split.column(align=True)
+            col3 = row_split.column(align=True)
+            col4 = row_split.column(align=True)
+            col5 = row_split.column(align=True)
+
+            # socket name
+            col1.alignment = "RIGHT"
+            col1.label(text=sckt.name)
+
+            # socket current value
+            col2.prop(
+                sckt,
+                "default_value",
+                icon_only=True,
+            )
+            col2.enabled = False  # current value is not editable
+
+            # socket min and max columns
+            socket_id = nd.name + "_" + sckt.name
+            if nd.id_data.name in bpy.data.node_groups:
+                socket_id = nd.id_data.name + "_" + socket_id
+
+            # if socket is a color: format min/max as a color picker
+            # and an array (color picker doesn't include alpha value)
+            if type(sckt) == bpy.types.NodeSocketColor:
+                for m_str, col in zip(["min", "max"], [col3, col4]):
+                    # color picker
+                    col.template_color_picker(
+                        sockets_props_collection[socket_id],
+                        m_str + "_" + cs.socket_type_to_attr[type(sckt)],
+                    )
+                    # array
+                    for j, cl in enumerate(["R", "G", "B", "alpha"]):
+                        col.prop(
+                            sockets_props_collection[socket_id],
+                            m_str + "_" + cs.socket_type_to_attr[type(sckt)],
+                            icon_only=False,
+                            text=cl,
+                            index=j,
+                        )
+            # if socket is not color type: format as a regular property
+            else:
+                for m_str, col in zip(["min", "max"], [col3, col4]):
+                    col.prop(
+                        sockets_props_collection[socket_id],
+                        m_str + "_" + cs.socket_type_to_attr[type(sckt)],
+                        icon_only=True,
+                    )
+
+            # randomisation toggle
+            col5.prop(
+                sockets_props_collection[socket_id],
+                "bool_randomise",
+                icon_only=True,
+            )
+
+
 # ------------------------------
 # Subpanel for each material
 # -----------------------------
@@ -87,12 +195,6 @@ class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
             self.subpanel_material_idx
         ]
 
-        # Get list of input nodes to randomise
-        # for this subpanel's material
-        list_input_nodes = utils.get_material_input_nodes_to_randomise(
-            subpanel_material.name
-        )
-
         # then force an update in the sockets per material
         # subpanel_material_name = subpanel_material.name
         if cs.socket_props_per_material.collection[
@@ -106,126 +208,129 @@ class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
             subpanel_material.name
         ].collection
 
-        # Define UI fields for every socket property
-        # NOTE: if I don't sort the input nodes, everytime one of the nodes is
-        # selected in the graph it moves to the bottom of the panel.
-        # TODO: sort by date of creation instead?
-        # ---I didn't find an easy way to do this
-        layout = self.layout
-        for i_n, nd in enumerate(
-            sorted(
-                list_input_nodes,
-                key=lambda x: x.name
-                if x.id_data.name not in bpy.data.node_groups
-                else x.id_data.name + "_" + x.name,
-            )
-        ):
-            row = layout.row()
+        # Get list of input nodes to randomise
+        # for this subpanel's material
+        list_input_nodes = utils.get_material_nodes_to_randomise_indep(
+            subpanel_material.name
+        )
 
-            # if first node: add labels for
-            # name, min, max and randomisation toggle
-            if i_n == 0:
-                row_split = row.split()
-                col1 = row_split.column(align=True)
-                col2 = row_split.column(align=True)
-                col3 = row_split.column(align=True)
-                col4 = row_split.column(align=True)
-                col5 = row_split.column(align=True)
-
-                # input node name
-                node_label = nd.name
-                if nd.id_data.name in bpy.data.node_groups:
-                    node_label = nd.id_data.name + "_" + node_label
-                col1.label(text=node_label)
-                col1.alignment = "CENTER"
-
-                # min label
-                col3.alignment = "CENTER"
-                col3.label(text="min")
-
-                # max label
-                col4.alignment = "CENTER"
-                col4.label(text="max")
-
-            # if not first node: add just node name
-            else:
-                row.separator(factor=1.0)  # add empty row before each node
-                row = layout.row()
-
-                node_label = nd.name
-                if nd.id_data.name in bpy.data.node_groups:
-                    node_label = nd.id_data.name + "_" + node_label
-                row.label(text=node_label)
-
-            # add sockets for this node in the subseq rows
-            for sckt in nd.outputs:
-                # split row in 5 columns
-                row = layout.row()
-                row_split = row.split()
-                col1 = row_split.column(align=True)
-                col2 = row_split.column(align=True)
-                col3 = row_split.column(align=True)
-                col4 = row_split.column(align=True)
-                col5 = row_split.column(align=True)
-
-                # socket name
-                col1.alignment = "RIGHT"
-                col1.label(text=sckt.name)
-
-                # socket current value
-                col2.prop(
-                    sckt,
-                    "default_value",
-                    icon_only=True,
-                )
-                col2.enabled = False  # current value is not editable
-
-                # socket min and max columns
-                socket_id = nd.name + "_" + sckt.name
-                if nd.id_data.name in bpy.data.node_groups:
-                    socket_id = nd.id_data.name + "_" + socket_id
-
-                # for m_str, col in zip(["min", "max"], [col3, col4]):
-                # if socket is a color: format min/max as a color picker
-                # and an array (color picker doesn't include alpha value)
-                if type(sckt) == bpy.types.NodeSocketColor:
-                    for m_str, col in zip(["min", "max"], [col3, col4]):
-                        # color picker
-                        col.template_color_picker(
-                            sockets_props_collection[socket_id],
-                            m_str + "_" + cs.socket_type_to_attr[type(sckt)],
-                        )
-                        # array
-                        for j, cl in enumerate(["R", "G", "B", "alpha"]):
-                            col.prop(
-                                sockets_props_collection[socket_id],
-                                m_str
-                                + "_"
-                                + cs.socket_type_to_attr[type(sckt)],
-                                icon_only=False,
-                                text=cl,
-                                index=j,
-                            )
-                # if socket is not color type: format as a regular property
-                else:
-                    for m_str, col in zip(["min", "max"], [col3, col4]):
-                        col.prop(
-                            sockets_props_collection[socket_id],
-                            m_str + "_" + cs.socket_type_to_attr[type(sckt)],
-                            icon_only=True,
-                        )
-
-                # randomisation toggle
-                col5.prop(
-                    sockets_props_collection[socket_id],
-                    "bool_randomise",
-                    icon_only=True,
-                )
+        draw_sockets_list(
+            cs,
+            self.layout,
+            list_input_nodes,
+            sockets_props_collection,
+        )
 
 
 # -----------------------------------
-# Subpanel for randomise-all operator
+# Subsubpanel for node groups
 # ----------------------------------
+class SubSubPanelGroupNodes(TemplatePanel, bpy.types.Panel):
+    """Class defining the panel for randomising
+    material node properties
+
+    """
+
+    bl_idname = "NODE_MATERIAL_PT_subsubpanel"
+    bl_parent_id = "NODE_MATERIAL_PT_subpanel"  # use bl_idname
+    bl_label = ""
+    bl_options = {"DEFAULT_CLOSED"}
+
+    @classmethod
+    def poll(cls, context):
+        # force an update on the materials collection first
+        # the '.update_collection' attribute
+        # triggers the get function that checks if an update is
+        # required. If it is, the collection of sockets is updated
+        # and returns TRUE
+        # TODO: is this required here? (I am already updating when the parent
+        # subpanel is drawn)
+        cs = context.scene
+        if cs.socket_props_per_material.update_materials_collection:
+            print("Collection of materials updated")
+
+        # get material of parent subpanel and add to class
+        cls.subpanel_material_str = cs.socket_props_per_material.collection[
+            cls.subpanel_material_idx  # can I access this here?
+        ].name
+
+        # get list of *group nodes names* for this material and add to class
+        # exclude groups with no nodes to randomise inside!
+        # TODO: is it better to add to cls somewhere else? (not sure where...)
+        cls.list_nodes2rand_in_groups = (
+            utils.get_material_nodes_to_randomise_group(
+                cls.subpanel_material_str
+            )
+        )
+
+        # list of group nodes names with nodes to randomise
+        # (only show group nodes in panel if they have nodes to randomise)
+        list_group_nodes_names_this_material = sorted(
+            list(set([k.id_data.name for k in cls.list_nodes2rand_in_groups]))
+        )
+
+        # add group node name to subsubpanel class
+        if cls.subsubpanel_group_node_idx < len(
+            list_group_nodes_names_this_material
+        ):
+            cls.group_node_name = list_group_nodes_names_this_material[
+                cls.subsubpanel_group_node_idx
+            ]
+        # else:
+        #     cls.group_node_name = '' # not needed
+
+        # only display this sub-subpanel if its index is < total group nodes
+        # for this material
+        return cls.subsubpanel_group_node_idx < len(
+            list_group_nodes_names_this_material
+        )
+
+    def draw_header(self, context):
+        layout = self.layout
+        layout.use_property_split = True
+        layout.use_property_decorate = False  # No animation.
+
+        # show name of the group node
+        layout.label(text=self.group_node_name)
+
+    def draw(self, context):
+        # get name of the material for this subpanel
+        cs = context.scene
+
+        # then force an update in the sockets per material
+        # TODO: do I need this? it should update when drawing the subpanel
+        if cs.socket_props_per_material.collection[
+            self.subpanel_material_str
+        ].update_sockets_collection:
+            print("Collection of sockets updated")
+
+        # get (updated) collection of socket properties
+        # for the current material
+        sockets_props_collection = cs.socket_props_per_material.collection[
+            self.subpanel_material_str
+        ].collection
+
+        # Get list of input nodes to randomise
+        # for this subpanel's material
+        # only nodes inside groups!
+        # keep only nodes inside this group!
+        list_input_nodes = [
+            nd
+            for nd in self.list_nodes2rand_in_groups
+            if nd.id_data.name == self.group_node_name
+        ]
+
+        draw_sockets_list(
+            cs,
+            self.layout,
+            list_input_nodes,
+            sockets_props_collection,
+        )
+
+
+# -------------------------------------------
+# Subpanel for the 'randomise-all' operator
+# -------------------------------------------
 class SubPanelRandomMaterialOperator(TemplatePanel, bpy.types.Panel):
     bl_idname = "NODE_MATERIAL_PT_subpanel_operator"
     bl_parent_id = "NODE_MATERIAL_PT_mainpanel"
@@ -248,13 +353,20 @@ class SubPanelRandomMaterialOperator(TemplatePanel, bpy.types.Panel):
 # Classes to register
 # ---------------------
 
-# main panel
+# Main panel
 list_classes_to_register = [
     MainPanelRandomMaterialNodes,
 ]
 
-# subpanels per material (defined dynamically)
+# Subpanels per material, and subsubpanels per group node.
+# Define a subpanel class for each material (defined dynamically)
+# NOTE: because we don't know the number of materials that will be
+# defiend a priori, we define n=MAX_NUMBER_OF_SUBPANELS classes and
+# assign an index to each of them. We will only display the subpanels
+# whose index is < len(list_of_materials). We apply the same startegy
+# for the subsubpanels
 for i in range(config.MAX_NUMBER_OF_SUBPANELS):
+    # define subpanel class for material i
     subpanel_class_i = type(
         f"NODE_MATERIAL_PT_subpanel_{i}",
         (
@@ -266,11 +378,32 @@ for i in range(config.MAX_NUMBER_OF_SUBPANELS):
             "subpanel_material_idx": i,
         },
     )
+    # append to list of classes to register
     list_classes_to_register.append(subpanel_class_i)  # type: ignore
 
-# subpanel with operator
-# (add the last one to the list,
-# render it at the bottom)
+    # define n=MAX_NUMBER_OF_SUBSUBPANELS subsubpanel classes
+    # for each material i
+    for k in range(config.MAX_NUMBER_OF_SUBSUBPANELS):
+        subsubpanel_class_k = type(
+            f"NODE_MATERIAL_PT_subpanel_{i}_subsubpanel_{k}",
+            (
+                SubSubPanelGroupNodes,
+                bpy.types.Panel,
+            ),
+            {
+                "bl_idname": f"NODE_MATERIAL_PT_subsubpanel_{i}_{k}",
+                "bl_parent_id": f"NODE_MATERIAL_PT_subpanel_{i}",
+                "subpanel_material_idx": i,
+                "subsubpanel_group_node_idx": k,
+            },
+        )
+
+        # append to list of classes to register
+        list_classes_to_register.append(subsubpanel_class_k)  # type: ignore
+
+# Subpanel with operator
+# NOTE: we need to add it as the last one to the list,
+# to render it at the bottom
 list_classes_to_register.append(SubPanelRandomMaterialOperator)
 
 
