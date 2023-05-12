@@ -2,6 +2,7 @@ from random import uniform
 
 import bpy
 import numpy as np
+from bpy.app.handlers import persistent
 from mathutils import Vector
 
 
@@ -23,8 +24,9 @@ class ApplyRandomTransform(bpy.types.Operator):
         _description_
     """
 
-    bl_idname = "opr.apply_random_transform"  # appended to bpy.ops.
-    bl_label = "Apply random transform to camera"
+    bl_idname = "camera.apply_random_transform"  # appended to bpy.ops.
+    bl_label = "Apply random transform to object"
+
     bl_options = {"REGISTER", "UNDO"}
 
     @classmethod
@@ -77,7 +79,14 @@ class ApplyRandomTransform(bpy.types.Operator):
 
         delta_on = context.scene.randomise_camera_props.bool_delta
 
-        randomize_selected(
+        rand_posx = context.scene.randomise_camera_props.bool_rand_posx
+        rand_posy = context.scene.randomise_camera_props.bool_rand_posy
+        rand_posz = context.scene.randomise_camera_props.bool_rand_posz
+        rand_rotx = context.scene.randomise_camera_props.bool_rand_rotx
+        rand_roty = context.scene.randomise_camera_props.bool_rand_roty
+        rand_rotz = context.scene.randomise_camera_props.bool_rand_rotz
+
+        randomise_selected(
             context,
             loc,
             loc_x_range,
@@ -88,16 +97,29 @@ class ApplyRandomTransform(bpy.types.Operator):
             rot_y_range,
             rot_z_range,
             delta_on,
+            rand_posx,
+            rand_posy,
+            rand_posz,
+            rand_rotx,
+            rand_roty,
+            rand_rotz,
         )
 
         return {"FINISHED"}
 
 
-def rand_num(min, max):
-    return uniform(min, max)
+@persistent
+def randomise_camera_transform_per_frame(dummy):
+    bpy.ops.camera.apply_random_transform("INVOKE_DEFAULT")
+
+    return
 
 
-def randomize_selected(
+# --------------------------------------------------
+# Randomise_selected function:
+
+
+def randomise_selected(
     context,
     loc,
     loc_x_range,
@@ -108,6 +130,12 @@ def randomize_selected(
     rot_y_range,
     rot_z_range,
     delta_on,
+    rand_posx,
+    rand_posy,
+    rand_posz,
+    rand_rotx,
+    rand_roty,
+    rand_rotz,
 ):
     """Generate random numbers between the range for x/y/z
     directions in location and rotation
@@ -124,26 +152,45 @@ def randomize_selected(
     """
 
     if loc:
-        rand_x = rand_num(loc_x_range[0], loc_x_range[1])
-        rand_y = rand_num(loc_y_range[0], loc_y_range[1])
-        rand_z = rand_num(loc_z_range[0], loc_z_range[1])
-
         if delta_on:
-            bpy.data.objects["Camera"].delta_location = Vector(
-                [rand_x, rand_y, rand_z]
-            )
+            value_str = "delta_location"
         else:
-            bpy.data.objects["Camera"].location = Vector(
-                [rand_x, rand_y, rand_z]
+            value_str = "location"
+
+        if rand_posx:
+            getattr(context.scene.camera, value_str)[0] = uniform(
+                loc_x_range[0], loc_x_range[1]
+            )
+
+        if rand_posy:
+            getattr(context.scene.camera, value_str)[1] = uniform(
+                loc_y_range[0], loc_y_range[1]
+            )
+
+        if rand_posz:
+            getattr(context.scene.camera, value_str)[2] = uniform(
+                loc_z_range[0], loc_z_range[1]
             )
 
     else:  # otherwise the values change under us
         uniform(0.0, 0.0), uniform(0.0, 0.0), uniform(0.0, 0.0)
 
     if rot:
-        rand_x = rand_num(rot_x_range[0], rot_x_range[1])
-        rand_y = rand_num(rot_y_range[0], rot_y_range[1])
-        rand_z = rand_num(rot_z_range[0], rot_z_range[1])
+        if rand_rotx:
+            rand_x = uniform(rot_x_range[0], rot_x_range[1])
+        else:
+            rand_x = uniform(0.0, 0.0)
+
+        if rand_roty:
+            rand_y = uniform(rot_y_range[0], rot_y_range[1])
+        else:
+            rand_y = uniform(0.0, 0.0)
+
+        if rand_rotz:
+            rand_z = uniform(rot_z_range[0], rot_z_range[1])
+        else:
+            rand_z = uniform(0.0, 0.0)
+
         vec = Vector([rand_x, rand_y, rand_z])
         deg2rad = np.pi / 180
 
@@ -187,6 +234,10 @@ def register():
     for cls in list_classes_to_register:
         bpy.utils.register_class(cls)
 
+    bpy.app.handlers.frame_change_pre.append(
+        randomise_camera_transform_per_frame
+    )
+
     print("transform operators registered")
 
 
@@ -196,5 +247,9 @@ def unregister():
     """
     for cls in list_classes_to_register:
         bpy.utils.unregister_class(cls)
+
+    bpy.app.handlers.frame_change_pre.remove(
+        randomise_camera_transform_per_frame
+    )
 
     print("transform operators unregistered")
