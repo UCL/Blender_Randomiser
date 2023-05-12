@@ -21,6 +21,226 @@ class PanelAddRandomTransform(bpy.types.Panel):
         return context.object is not None
 
     def draw(self, context):
+        layout = self.layout
+
+        # Create a simple row.
+        # Create an row where the buttons are aligned to each other.
+        row = layout.row()
+        row_split = row.split()
+        col1 = row_split.column(align=True)
+        col2 = row_split.column(align=True)
+        col3 = row_split.column(align=True)
+        col4 = row_split.column(align=True)
+        col5 = row_split.column(align=True)
+
+        col1.label(text=" Randomise camera position:")
+        col2.label(text="")
+        col3.label(text="min")
+        col4.label(text="max")
+        col5.label(text="")
+
+        ###################
+        # Camera positon
+        row = layout.row()  # row = layout.row(align=True)
+        row.label(text="x")
+
+        row_split = row.split()
+        col1 = row_split.column(align=True)
+        col2 = row_split.column(align=True)
+        col3 = row_split.column(align=True)
+        col4 = row_split.column(align=True)
+
+        if context.scene.randomise_camera_props.bool_delta:
+            value_str = "delta_location"
+        else:
+            value_str = "location"
+
+        col1.prop(context.scene.camera, value_str, icon_only=True, index=0)
+        col1.enabled = False
+
+        col2.prop(
+            context.scene.randomise_camera_props,
+            "camera_pos_x_min",
+            icon_only=True,
+        )
+
+        col3.prop(
+            context.scene.randomise_camera_props,
+            "camera_pos_x_max",
+            icon_only=True,
+        )
+
+        col4.prop(
+            context.scene.randomise_camera_props,
+            "bool_rand_posx",
+            icon_only=True,
+        )
+
+        # ------------------------------------
+        # Camera position y
+        row = layout.row()
+        row.label(text="y")
+
+        row_split = row.split()
+        col1 = row_split.column(align=True)
+        col2 = row_split.column(align=True)
+        col3 = row_split.column(align=True)
+        col4 = row_split.column(align=True)
+
+        # Camera positon y
+        col1.prop(context.scene.camera, value_str, icon_only=True, index=1)
+        col1.enabled = False
+
+        col2.prop(
+            context.scene.randomise_camera_props,
+            "camera_pos_y_min",
+            icon_only=True,
+        )
+
+        col3.prop(
+            context.scene.randomise_camera_props,
+            "camera_pos_y_max",
+            icon_only=True,
+        )
+
+        col4.prop(
+            context.scene.randomise_camera_props,
+            "bool_rand_posy",
+            icon_only=True,
+        )
+
+        row = layout.row()
+        row.label(text="z")
+
+        # Camera position z
+        row_split = row.split()
+        col1 = row_split.column(align=True)
+        col2 = row_split.column(align=True)
+        col3 = row_split.column(align=True)
+        col4 = row_split.column(align=True)
+
+        # Camera positon y
+        col1.prop(context.scene.camera, value_str, icon_only=True, index=2)
+        col1.enabled = False
+
+        col2.prop(
+            context.scene.randomise_camera_props,
+            "camera_pos_z_min",
+            icon_only=True,
+        )
+
+        col3.prop(
+            context.scene.randomise_camera_props,
+            "camera_pos_z_max",
+            icon_only=True,
+        )
+
+        col4.prop(
+            context.scene.randomise_camera_props,
+            "bool_rand_posz",
+            icon_only=True,
+        )
+
+        #########################
+        # Rotation part of panel
+        layout.label(text=" Randomise camera rotation:")
+        row = layout.row()  # row = layout.row(align=True)
+        row.label(text="x")
+
+        row_split = row.split()
+        col1 = row_split.column(align=True)
+        col2 = row_split.column(align=True)
+        col3 = row_split.column(align=True)
+        col4 = row_split.column(align=True)
+
+        # Camera rotation x
+        if context.scene.randomise_camera_props.bool_delta:
+            value_str = "delta_rotation_euler"
+        else:
+            value_str = "rotation_euler"
+
+        col1.prop(context.scene.camera, value_str, icon_only=True, index=0)
+        col1.enabled = False
+
+        col2.prop(
+            context.scene.randomise_camera_props,
+            "camera_rot_x_min",
+            icon_only=True,
+        )
+
+        col3.prop(
+            context.scene.randomise_camera_props,
+            "camera_rot_x_max",
+            icon_only=True,
+        )
+
+        col4.prop(
+            context.scene.randomise_camera_props,
+            "bool_rand_rotx",
+            icon_only=True,
+        )
+
+        # Camera rotation y
+        row = layout.row()
+        row.label(text="y")
+        row_split = row.split()
+        col1 = row_split.column(align=True)
+        col2 = row_split.column(align=True)
+        col3 = row_split.column(align=True)
+        col4 = row_split.column(align=True)
+
+        col1.prop(context.scene.camera, value_str, icon_only=True, index=1)
+        col1.enabled = False
+
+        col2.prop(
+            context.scene.randomise_camera_props,
+            "camera_rot_y_min",
+            icon_only=True,
+        )
+
+        col3.prop(
+            context.scene.randomise_camera_props,
+            "camera_rot_y_max",
+            icon_only=True,
+        )
+
+        col4.prop(
+            context.scene.randomise_camera_props,
+            "bool_rand_roty",
+            icon_only=True,
+        )
+
+        # Camera rotation z
+        row = layout.row()
+        row.label(text="z")
+        row_split = row.split()
+        col1 = row_split.column(align=True)
+        col2 = row_split.column(align=True)
+        col3 = row_split.column(align=True)
+        col4 = row_split.column(align=True)
+
+        col1.prop(context.scene.camera, value_str, icon_only=True, index=2)
+        col1.enabled = False
+
+        col2.prop(
+            context.scene.randomise_camera_props,
+            "camera_rot_z_min",
+            icon_only=True,
+        )
+
+        col3.prop(
+            context.scene.randomise_camera_props,
+            "camera_rot_z_max",
+            icon_only=True,
+        )
+
+        col4.prop(
+            context.scene.randomise_camera_props,
+            "bool_rand_rotz",
+            icon_only=True,
+        )
+
+        # Bool delta
         col = self.layout.column()
         row = col.row()
         row.prop(
@@ -28,101 +248,8 @@ class PanelAddRandomTransform(bpy.types.Panel):
             "bool_delta",
         )
 
-        col.operator("camera.apply_random_transform", text="Randomize")
-
-        layout = self.layout
-
-        # Create a simple row.
-        # Create an row where the buttons are aligned to each other.
-        layout.label(text=" Randomise position:")
-        row = layout.row()
-        row.prop(
-            context.scene.randomise_camera_props,
-            "camera_pos_x_min",
-        )
-        row.prop(
-            context.scene.randomise_camera_props,
-            "camera_pos_x_max",
-        )
-
-        row = layout.row()
-        row.prop(
-            context.scene.randomise_camera_props,
-            "camera_pos_y_min",
-        )
-        row.prop(
-            context.scene.randomise_camera_props,
-            "camera_pos_y_max",
-        )
-
-        row = layout.row()
-        row.prop(
-            context.scene.randomise_camera_props,
-            "camera_pos_z_min",
-        )
-        row.prop(
-            context.scene.randomise_camera_props,
-            "camera_pos_z_max",
-        )
-
-        # Create two columns, by using a split layout.
-        split = layout.split()
-
-        # First column
-        col = split.column()
-        col.label(text="Rotation x:")
-        col.prop(
-            context.scene.randomise_camera_props,
-            "camera_rot_x_min",
-        )
-        col.prop(
-            context.scene.randomise_camera_props,
-            "camera_rot_x_max",
-        )
-
-        # Second column, aligned
-        col = split.column(align=True)
-        col.label(text="Rotation y:")
-        col.prop(
-            context.scene.randomise_camera_props,
-            "camera_rot_y_min",
-        )
-        col.prop(
-            context.scene.randomise_camera_props,
-            "camera_rot_y_max",
-        )
-
-        # Third column, aligned
-        col = split.column(align=True)
-        col.label(text="Rotation z:")
-        col.prop(
-            context.scene.randomise_camera_props,
-            "camera_rot_z_min",
-        )
-        col.prop(
-            context.scene.randomise_camera_props,
-            "camera_rot_z_max",
-        )
-
-        # Seed
-        row = self.layout.row(align=True)
-        split = row.split()
-        left_col = split.column(align=True)
-        right_col = split.column(align=True)
-
-        # put the toggle on the left col
-        left_col_row = left_col.row(align=True)
-        left_col_row.alignment = "RIGHT"
-        left_col_row.prop(
-            context.scene.randomise_camera_props, "seed_toggle", icon_only=True
-        )
-        left_col_row.label(text="Set random seed")
-
-        # put field in right col
-        right_col.enabled = (
-            context.scene.randomise_camera_props.seed_toggle
-        )  # only disable the next part of the row
-        right_col.prop(context.scene.randomise_camera_props, "seed")
+        # Randomise button
+        col.operator("camera.apply_random_transform", text="Randomise")
 
 
 # --------------------------------------------------
