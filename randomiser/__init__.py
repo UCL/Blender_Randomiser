@@ -1,4 +1,4 @@
-from . import material, transform
+from . import material, transform, seed
 
 bl_info = {
     "name": "Randomisations panel",
@@ -16,12 +16,14 @@ bl_info = {
 
 
 def register():
+    seed.register()
     transform.register()
     material.register()
     # geometry.register()
 
 
 def unregister():
+    seed.unregister()
     transform.unregister()
     material.unregister()
     # geometry.unregister()

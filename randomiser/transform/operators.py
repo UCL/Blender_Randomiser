@@ -238,7 +238,7 @@ def register():
         randomise_camera_transform_per_frame
     )
 
-    print("registered")
+    print("transform operators registered")
 
 
 def unregister():
@@ -252,4 +252,4 @@ def unregister():
         randomise_camera_transform_per_frame
     )
 
-    print("unregistered")
+    print("transform operators unregistered")

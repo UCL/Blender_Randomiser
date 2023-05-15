@@ -102,9 +102,9 @@ def main():
         print(f'"{Path(p).stem}" installed from source script and enabled')
 
     if args.seed is not None:
-        bpy.context.scene.randomise_camera_props.seed = args.seed[0]
+        bpy.context.scene.seed_properties.seed = args.seed[0]
         seed(args.seed[0])
-        bpy.context.scene.randomise_camera_props.seed_toggle = True
+        bpy.context.scene.seed_properties.seed_toggle = True
 
 
 if __name__ == "__main__":

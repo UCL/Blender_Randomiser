@@ -265,7 +265,7 @@ def register():
     for cls in list_classes_to_register:
         bpy.utils.register_class(cls)
 
-    print("registered")
+    print("transform UI registered")
 
 
 def unregister():
@@ -275,4 +275,4 @@ def unregister():
     for cls in list_classes_to_register:
         bpy.utils.unregister_class(cls)
 
-    print("unregistered")
+    print("transform UI unregistered")
