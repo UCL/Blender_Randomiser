@@ -14,16 +14,9 @@ class PropertiesUserDefined(bpy.types.PropertyGroup):
 
     """
 
-    user_defined_prop = bpy.props.StringProperty(
-        name="Type property to randomise", options={"TEXTEDIT_UPDATE"}
-    )
+    user_defined_prop = bpy.props.StringProperty()
 
     user_defined: user_defined_prop  # type: ignore
-
-    reverse_order_prop = bpy.props.BoolProperty(
-        default=False, name="Reverse Order"
-    )
-    reverse_order: reverse_order_prop  # type: ignore
 
 
 # ------------------------------------
@@ -41,13 +34,14 @@ def register():
         bpy.utils.register_class(cls)
 
         # Custom scene properties
-        # bpy.types.Scene.custom = bpy.types.CollectionProperty
-        # (type=PropertiesUserDefined)
-        # bpy.types.Scene.custom_index = bpy.props.StringProperty()
-
-        bpy.types.Scene.user_defined = bpy.props.PointerProperty(
+        bpy.types.Scene.custom = bpy.props.CollectionProperty(
             type=PropertiesUserDefined
         )
+        bpy.types.Scene.custom_index = bpy.props.IntProperty()
+
+        # bpy.types.Scene.custom = bpy.props.PointerProperty(
+        #     type=PropertiesUserDefined
+        # )
 
     print("user defined properties registered")
 
@@ -59,9 +53,9 @@ def unregister():
     for cls in list_classes_to_register:
         bpy.utils.unregister_class(cls)
 
-    del bpy.types.Scene.user_defined
+    # del bpy.types.Scene.user_defined
 
-    # del bpy.types.Scene.custom
-    # del bpy.types.Scene.custom_index
+    del bpy.types.Scene.custom
+    del bpy.types.Scene.custom_index
 
     print("user defined unregistered")

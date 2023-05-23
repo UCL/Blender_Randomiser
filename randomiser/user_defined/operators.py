@@ -31,10 +31,10 @@ class CUSTOM_OT_actions(bpy.types.Operator):
             if self.action == "DOWN" and idx < len(scn.custom) - 1:
                 scn.custom[idx + 1].name
                 scn.custom.move(idx, idx + 1)
-                scn.custom_index += 1
+                scn.custom += 1
                 info = 'Item "%s" moved to position %d' % (
                     item.name,
-                    scn.custom_index + 1,
+                    scn.custom + 1,
                 )
                 self.report({"INFO"}, info)
 
@@ -72,9 +72,10 @@ class CUSTOM_OT_printItems(bpy.types.Operator):
     bl_description = "Print all items and their properties to the console"
     bl_options = {"REGISTER", "UNDO"}
 
-    # reverse_order: bpy.props.BoolProperty(
-    #     default=False,
-    #     name="Reverse Order")
+    reverse_order_prop = bpy.props.BoolProperty(
+        default=False, name="Reverse Order"
+    )
+    reverse_order: reverse_order_prop  # type: ignore
 
     @classmethod
     def poll(cls, context):
@@ -83,12 +84,12 @@ class CUSTOM_OT_printItems(bpy.types.Operator):
     def execute(self, context):
         scn = context.scene
         if self.reverse_order:
-            for i in range(scn.custom_index, -1, -1):
+            for i in range(scn.custom, -1, -1):
                 item = scn.custom[i]
-                print("Name:", item.name, "-", "ID:", item.id)
+                print("Name:", item.name, "-", "ID:", item.user_defined)
         else:
             for item in scn.custom:
-                print("Name:", item.name, "-", "ID", item.id)
+                print("Name:", item.name, "-", "ID", item.user_defined)
         return {"FINISHED"}
 
 
