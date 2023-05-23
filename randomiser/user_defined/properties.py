@@ -1,29 +1,36 @@
 import bpy
 
+# class CUSTOM_colorCollection(PropertyGroup):
+#     #name: StringProperty() -> Instantiated by default
+#     id: IntProperty()
+
 
 # ---------------------------
 # Properties
-class PropertiesRandomSeed(bpy.types.PropertyGroup):
+class PropertiesUserDefined(bpy.types.PropertyGroup):
     """
     Class holding the set of properties
     for the random seed
 
     """
 
-    seed_toggle_prop = bpy.props.BoolProperty(
-        name="Set random seed", default=False
+    user_defined_prop = bpy.props.StringProperty(
+        name="Type property to randomise", options={"TEXTEDIT_UPDATE"}
     )
-    seed_toggle: seed_toggle_prop  # type: ignore
 
-    seed_prop = bpy.props.IntProperty(name="Seed", default=42)
-    seed: seed_prop  # type: ignore
+    user_defined: user_defined_prop  # type: ignore
+
+    reverse_order_prop = bpy.props.BoolProperty(
+        default=False, name="Reverse Order"
+    )
+    reverse_order: reverse_order_prop  # type: ignore
 
 
 # ------------------------------------
 # Register / unregister classes
 # ------------------------------------
 list_classes_to_register = [
-    PropertiesRandomSeed,
+    PropertiesUserDefined,
 ]
 
 
@@ -33,11 +40,16 @@ def register():
     for cls in list_classes_to_register:
         bpy.utils.register_class(cls)
 
-        bpy.types.Scene.seed_properties = bpy.props.PointerProperty(
-            type=PropertiesRandomSeed
+        # Custom scene properties
+        # bpy.types.Scene.custom = bpy.types.CollectionProperty
+        # (type=PropertiesUserDefined)
+        # bpy.types.Scene.custom_index = bpy.props.StringProperty()
+
+        bpy.types.Scene.user_defined = bpy.props.PointerProperty(
+            type=PropertiesUserDefined
         )
 
-    print("seed properties registered")
+    print("user defined properties registered")
 
 
 def unregister():
@@ -47,6 +59,9 @@ def unregister():
     for cls in list_classes_to_register:
         bpy.utils.unregister_class(cls)
 
-    del bpy.types.Scene.seed_properties
+    del bpy.types.Scene.user_defined
 
-    print("seed properties unregistered")
+    # del bpy.types.Scene.custom
+    # del bpy.types.Scene.custom_index
+
+    print("user defined unregistered")
