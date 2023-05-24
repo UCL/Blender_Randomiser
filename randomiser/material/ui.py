@@ -372,7 +372,7 @@ class SubPanelRandomMaterialOperator(TemplatePanel, bpy.types.Panel):
     def draw(self, context):
         column = self.layout.column(align=True)
         column.operator(
-            "node.randomise_all_sockets",
+            "node.randomise_all_material_sockets",
             text="Randomise",
         )
 
