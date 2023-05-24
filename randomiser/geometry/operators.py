@@ -172,7 +172,9 @@ class RandomiseAllGeometryNodes(bpy.types.Operator):
 
                 # if socket type is boolean
                 if type(sckt) == bpy.types.NodeSocketBool:
-                    sckt.default_value = random.choice([True, False])
+                    sckt.default_value = random.choice(
+                        [bool(list(m_val)[0]) for m_val in [min_val, max_val]]
+                    )  # 1d only
                     # Faster: bool(random.getrandbits(1))F
                     # https://stackoverflow.com/questions/6824681/get-a-random-boolean-in-python
 

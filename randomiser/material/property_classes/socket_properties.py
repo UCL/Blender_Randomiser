@@ -218,15 +218,13 @@ class SocketProperties(bpy.types.PropertyGroup):
 
     # ----------------------------
     # bool_1d
-    bool_1d_str = "bool_1d"
+    # bool_1d_str = "bool_1d"
     min_bool_1d: bpy.props.BoolVectorProperty(  # type: ignore
         size=1,
-        default=(True,),  # update=constrain_min_closure(bool_1d_str)
     )
 
     max_bool_1d: bpy.props.BoolVectorProperty(  # type: ignore
         size=1,
-        default=(False,),  # update=constrain_max_closure(bool_1d_str)
     )
 
     # ---------------------
