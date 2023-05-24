@@ -184,7 +184,7 @@ class ColGeomSocketProperties(bpy.types.PropertyGroup):
 
         We define candidate sockets as the set of output sockets
         in input nodes, in the graph for the currently active
-        material. Input nodes are nodes with only output sockets
+        node group. Input nodes are nodes with only output sockets
         (i.e., no input sockets).
 
         It returns a list of sockets that are candidates for
@@ -196,19 +196,20 @@ class ColGeomSocketProperties(bpy.types.PropertyGroup):
         list
             list of sockets in the input nodes in the graph
         """
-        # get list of input nodes for this material
+        # get list of input nodes for this node group
         # input nodes are defined as those:
         # - with no input sockets
         # - their name starts with random
-        # - and they can be independent or
-        # inside a node group #---- I think I can change this
-        list_input_nodes = utils.get_geometry_nodes_to_randomise(
-            self.name  # name of the node group
+        # list_input_nodes = utils.get_geometry_nodes_to_randomise(
+        #     self.name  # name of the node group
+        # )
+        list_input_nodes = utils.get_nodes_to_randomise_from_list(
+            bpy.data.node_groups[self.name].nodes
         )
 
         # # list of sockets
-        # exclude sockets of type Geometry as these are not candidates
-        # for randomisation
+        # exclude sockets of type Geometry (input/output nodes)
+        # as these are not candidates for randomisation
         list_sockets = [
             out
             for nd in list_input_nodes
