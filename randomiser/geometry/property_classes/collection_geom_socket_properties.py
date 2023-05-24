@@ -119,34 +119,32 @@ def set_update_collection(self, value):
                         break
 
                 # add min/max values if socket is not of type boolean
-                if type(sckt) != bpy.types.NodeSocketBool:
-                    # for this socket type, get the name of the attribute
-                    # holding the min/max properties
-                    socket_attrib_str = bpy.context.scene.socket_type_to_attr[
-                        type(sckt)
-                    ]
-                    # for the shape of the array from the attribute name:
-                    # extract last number between '_' and 'd/D' in the
-                    # attribute name
-                    n_dim = int(
-                        re.findall(r"_(\d+)(?:d|D)", socket_attrib_str)[-1]
-                    )
-                    # ---------------------------
+                # if type(sckt) != bpy.types.NodeSocketBool:
+                # for this socket type, get the name of the attribute
+                # holding the min/max properties
+                socket_attrib_str = bpy.context.scene.socket_type_to_attr[
+                    type(sckt)
+                ]
+                # for the shape of the array from the attribute name:
+                # extract last number between '_' and 'd/D' in the
+                # attribute name
+                n_dim = int(
+                    re.findall(r"_(\d+)(?:d|D)", socket_attrib_str)[-1]
+                )
+                # ---------------------------
 
-                    # get dict with initial min/max values for this socket type
-                    ini_min_max_values = (
-                        bpy.context.scene.socket_type_to_ini_min_max[
-                            type(sckt)
-                        ]
-                    )
+                # get dict with initial min/max values for this socket type
+                ini_min_max_values = (
+                    bpy.context.scene.socket_type_to_ini_min_max[type(sckt)]
+                )
 
-                    # assign initial value
-                    for m_str in ["min", "max"]:
-                        setattr(
-                            sckt_prop,
-                            m_str + "_" + socket_attrib_str,
-                            (ini_min_max_values[m_str],) * n_dim,
-                        )
+                # assign initial value
+                for m_str in ["min", "max"]:
+                    setattr(
+                        sckt_prop,
+                        m_str + "_" + socket_attrib_str,
+                        (ini_min_max_values[m_str],) * n_dim,
+                    )
 
 
 # ----------------------------------------------
@@ -204,9 +202,7 @@ class ColGeomSocketProperties(bpy.types.PropertyGroup):
         # list_input_nodes = utils.get_geometry_nodes_to_randomise(
         #     self.name  # name of the node group
         # )
-        list_input_nodes = utils.get_nodes_to_randomise_from_list(
-            bpy.data.node_groups[self.name].nodes
-        )
+        list_input_nodes = utils.get_geometry_nodes_to_randomise(self.name)
 
         # # list of sockets
         # exclude sockets of type Geometry (input/output nodes)
