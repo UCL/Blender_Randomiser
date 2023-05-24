@@ -127,6 +127,17 @@ def draw_sockets_list(
                             text=cl,
                             index=j,
                         )
+            # if socket is Boolean: add non-editable labels
+            elif type(sckt) == bpy.types.NodeSocketBool:
+                col3.label(text="True")
+                col4.label(text="False")
+
+                # for m_str, col in zip(["min", "max"], [col3, col4]):
+                #     col.prop(
+                #         sockets_props_collection[socket_id],
+                #         m_str + "_" + cs.socket_type_to_attr[type(sckt)],
+                #         icon_only=True,
+                #     )
             # if socket is not color type: format as a regular property
             else:
                 for m_str, col in zip(["min", "max"], [col3, col4]):
