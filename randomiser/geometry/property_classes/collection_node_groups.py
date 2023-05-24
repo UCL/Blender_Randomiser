@@ -11,9 +11,7 @@ def compute_node_groups_sets(self):
     self.set_node_groups_in_collection = set(gr.name for gr in self.collection)
 
     # set of node groups in Blender data structure
-    self.set_node_groups_in_data = set(
-        gr.name for gr in self.candidate_geom_node_groups
-    )
+    self.set_node_groups_in_data = set(gr.name for gr in self.candidate_gngs)
 
     # set of node groups in one only
     self.set_node_groups_in_one_only = (
@@ -71,7 +69,7 @@ class ColGeomNodeGroups(bpy.types.PropertyGroup):
     )
 
     # autopopulate collection of geometry node groups
-    update_geom_node_groups_collection: bpy.props.BoolProperty(  # type: ignore
+    update_gngs_collection: bpy.props.BoolProperty(  # type: ignore
         default=False,
         get=get_update_node_groups_collection,
         set=set_update_node_groups_collection,
@@ -79,7 +77,7 @@ class ColGeomNodeGroups(bpy.types.PropertyGroup):
 
     # candidate geometry node groups
     @property
-    def candidate_geom_node_groups(self):  # getter method
+    def candidate_gngs(self):  # getter method
         # self is the collection of node groups
         list_node_groups = [
             nd for nd in bpy.data.node_groups if nd.type == "GEOMETRY"
@@ -97,7 +95,7 @@ def register():
 
     # make available via bpy.context.scene...
     bprop = bpy.props
-    bpy.types.Scene.socket_props_per_geom_nodegroup = bprop.PointerProperty(
+    bpy.types.Scene.socket_props_per_gng = bprop.PointerProperty(
         type=ColGeomNodeGroups
     )
 
@@ -106,6 +104,6 @@ def unregister():
     bpy.utils.unregister_class(ColGeomNodeGroups)
 
     # remove from bpy.context.scene...
-    attr_to_remove = "socket_props_per_geom_nodegroup"
+    attr_to_remove = "socket_props_per_gng"
     if hasattr(bpy.types.Scene, attr_to_remove):
         delattr(bpy.types.Scene, attr_to_remove)
