@@ -111,6 +111,27 @@ class SubPanelRandomGeometryNodes(TemplatePanel):
         )
 
 
+# -------------------------------------------
+# Subpanel for the 'randomise-all' operator
+# -------------------------------------------
+class SubPanelRandomGeometryOperator(TemplatePanel):
+    bl_idname = "NODE_GEOMETRY_PT_subpanel_operator"
+    bl_parent_id = "NODE_GEOMETRY_PT_mainpanel"
+    bl_label = ""  # title of the panel displayed to the user
+    bl_options = {"HIDE_HEADER"}
+
+    @classmethod
+    def poll(cls, context):
+        return context.object is not None
+
+    def draw(self, context):
+        column = self.layout.column(align=True)
+        column.operator(
+            "node.randomise_all_geometry_sockets",
+            text="Randomise",
+        )
+
+
 # -----------------------
 # Classes to register
 # ---------------------
@@ -142,6 +163,12 @@ for i in range(config.MAX_NUMBER_OF_SUBPANELS):
     )
     # append to list of classes to register
     list_classes_to_register.append(subpanel_class_i)  # type: ignore
+
+
+# Subpanel with operator
+# NOTE: we need to add it as the last one to the list,
+# to render it at the bottom
+list_classes_to_register.append(SubPanelRandomGeometryOperator)
 
 
 # -----------------------------------------
