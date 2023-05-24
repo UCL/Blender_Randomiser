@@ -31,8 +31,8 @@ MAP_SOCKET_TYPE_TO_INI_MIN_MAX = {
     bpy.types.NodeSocketVector: {"min": -np.inf, "max": np.inf},
     bpy.types.NodeSocketColor: {"min": 0.0, "max": 1.0},
     bpy.types.NodeSocketInt: {
-        "min": int(0),
-        "max": int(1000),
+        "min": int(-1000),  # -2147483648
+        "max": int(1000),  # 2147483647
     },  # ---- not sure this will work?
     bpy.types.NodeSocketBool: {"min": True, "max": False},
 }

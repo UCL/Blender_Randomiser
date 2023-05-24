@@ -5,8 +5,7 @@ https://blender.stackexchange.com/questions/185693/how-can-i-control-the-number-
 """
 import bpy
 
-from .. import utils
-from . import config
+from .. import config, utils
 
 
 # ----------------------
@@ -105,7 +104,9 @@ def draw_sockets_list(
 
             # socket min and max columns
             socket_id = nd.name + "_" + sckt.name
-            if nd.id_data.name in bpy.data.node_groups:
+            if (nd.id_data.name in bpy.data.node_groups) and (
+                bpy.data.node_groups[nd.id_data.name].type != "GEOMETRY"
+            ):  # only for SHADER groups
                 socket_id = nd.id_data.name + "_" + socket_id
 
             # if socket is a color: format min/max as a color picker
@@ -218,6 +219,17 @@ class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
         list_input_nodes = utils.get_material_nodes_to_randomise_indep(
             subpanel_material.name
         )
+
+        # TODO
+        # get nodes from sockets instead?
+        # list_parent_nodes_str = [
+        #     sckt.name.split('_')[0] for sckt in sockets_props_collection
+        # ]
+
+        # list_input_nodes = [
+        #     bpy.data.node_groups[subpanel_gng.name].nodes[nd_str]
+        #     for nd_str in list_parent_nodes_str
+        # ]
 
         draw_sockets_list(
             cs,

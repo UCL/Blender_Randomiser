@@ -188,7 +188,7 @@ def get_geometry_nodes_to_randomise(
         [
             nd
             for nd in bpy.data.node_groups[node_group_str].nodes
-            if nd.type != "GROUP"
+            if nd.type != "GROUP"  # exclude groups inside of groups
         ]
     )
 

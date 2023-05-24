@@ -172,8 +172,8 @@ class ColGeomSocketProperties(bpy.types.PropertyGroup):
     # 'dummy' attribute to update collection of socket properties
     update_sockets_collection: bpy.props.BoolProperty(  # type: ignore
         default=False,
-        get=get_update_collection,  # <-------------
-        set=set_update_collection,  # <------------
+        get=get_update_collection,
+        set=set_update_collection,
     )
 
     # candidate sockets for this node group
@@ -205,13 +205,23 @@ class ColGeomSocketProperties(bpy.types.PropertyGroup):
         list_input_nodes = utils.get_geometry_nodes_to_randomise(self.name)
 
         # # list of sockets
-        # exclude sockets of type Geometry (input/output nodes)
+        # exclude
+        # - sockets of type Geometry (input/output nodes)
+        # - sockets that receive one of the available materials
+        # - sockets that receive one of the available objects
+        # - sockets that input a string
         # as these are not candidates for randomisation
         list_sockets = [
             out
             for nd in list_input_nodes
             for out in nd.outputs
-            if type(out) != bpy.types.NodeSocketGeometry
+            if type(out)
+            not in [
+                bpy.types.NodeSocketGeometry,
+                bpy.types.NodeSocketMaterial,
+                bpy.types.NodeSocketObject,
+                bpy.types.NodeSocketString,
+            ]
         ]
 
         return list_sockets

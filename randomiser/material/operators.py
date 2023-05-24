@@ -2,7 +2,7 @@ import bpy
 import numpy as np
 from bpy.app.handlers import persistent
 
-from . import config
+from .. import config
 
 
 # --------------------------------------------
