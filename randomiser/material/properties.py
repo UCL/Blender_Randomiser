@@ -18,6 +18,7 @@ MAP_SOCKET_TYPE_TO_ATTR = {
     bpy.types.NodeSocketFloat: "float_1d",
     bpy.types.NodeSocketVector: "float_3d",
     bpy.types.NodeSocketColor: "rgba_4d",  # "float_4d",
+    bpy.types.NodeSocketInt: "int_1d",
 }
 
 # NOTE: if the property is a float vector of size (1,n)
@@ -28,6 +29,10 @@ MAP_SOCKET_TYPE_TO_INI_MIN_MAX = {
     bpy.types.NodeSocketFloat: {"min": -np.inf, "max": np.inf},
     bpy.types.NodeSocketVector: {"min": -np.inf, "max": np.inf},
     bpy.types.NodeSocketColor: {"min": 0.0, "max": 1.0},
+    bpy.types.NodeSocketInt: {
+        "min": int(0),
+        "max": int(1000),
+    },  # ---- not sure this will work?
 }
 
 
