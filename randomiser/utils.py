@@ -77,15 +77,13 @@ def get_material_nodes_to_randomise_indep(
     """
 
     # list of nodes for current material
-    # split into those belonging to a group or not
+    # not belonging to a group
     list_material_nodes_indep = []
     for nd in bpy.data.materials[material_str].node_tree.nodes:
         if nd.type != "GROUP":
             list_material_nodes_indep.append(nd)
 
     # find input nodes that startwith random
-    # in any of those groups
-    # excluding 'Group' nodes
     list_input_nodes = get_nodes_to_randomise_from_list(
         list_material_nodes_indep
     )
@@ -176,3 +174,22 @@ def get_material_nodes_to_randomise_all(
     )
 
     return list_indep_input_nodes + list_group_input_nodes
+
+
+def get_geometry_nodes_to_randomise(
+    node_group_str: str = "Geometry Nodes",
+    node2randomise_prefix: str = "random",
+):
+    # find input nodes that startwith random
+    # excluding 'Group Inpuyt/Output' nodes,
+    # and any nested Group nodes! (these are included in bpy.data.node_groups
+    # of type 'GEOMETRY')
+    list_input_nodes = get_nodes_to_randomise_from_list(
+        [
+            nd
+            for nd in bpy.data.node_groups[node_group_str].nodes
+            if nd.type != "GROUP"
+        ]
+    )
+
+    return list_input_nodes
