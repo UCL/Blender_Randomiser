@@ -1,8 +1,11 @@
 import bpy
 
+from . import config
+
 
 def get_nodes_to_randomise_from_list(
-    list_candidate_nodes: list, node2randomise_prefix: str = "random"
+    list_candidate_nodes: list,
+    node2randomise_prefix: str = config.DEFAULT_RANDOM_KEYWORD,
 ):
     """Get list of nodes to randomise from list.
 
@@ -51,7 +54,8 @@ def get_nodes_to_randomise_from_list(
 
 
 def get_material_nodes_to_randomise_indep(
-    material_str: str = "Material", node2randomise_prefix: str = "random"
+    material_str: str = "Material",
+    node2randomise_prefix: str = config.DEFAULT_RANDOM_KEYWORD,
 ):
     """Get list of *independent* input nodes to randomise for a given material.
 
@@ -92,7 +96,8 @@ def get_material_nodes_to_randomise_indep(
 
 
 def get_material_nodes_to_randomise_group(
-    material_str: str = "Material", node2randomise_prefix: str = "random"
+    material_str: str = "Material",
+    node2randomise_prefix: str = config.DEFAULT_RANDOM_KEYWORD,
 ):
     """Get list of *group* input nodes to randomise for a given material.
 
@@ -137,7 +142,8 @@ def get_material_nodes_to_randomise_group(
 
 
 def get_material_nodes_to_randomise_all(
-    material_str: str = "Material", node2randomise_prefix: str = "random"
+    material_str: str = "Material",
+    node2randomise_prefix: str = config.DEFAULT_RANDOM_KEYWORD,
 ):
     """Get list of all input nodes to randomise for a given material.
 
@@ -178,7 +184,7 @@ def get_material_nodes_to_randomise_all(
 
 def get_geometry_nodes_to_randomise(
     node_group_str: str = "Geometry Nodes",
-    node2randomise_prefix: str = "random",
+    node2randomise_prefix: str = config.DEFAULT_RANDOM_KEYWORD,
 ):
     # find input nodes that startwith random
     # excluding 'Group Inpuyt/Output' nodes,
@@ -189,7 +195,8 @@ def get_geometry_nodes_to_randomise(
             nd
             for nd in bpy.data.node_groups[node_group_str].nodes
             if nd.type != "GROUP"  # exclude groups inside of groups
-        ]
+        ],
+        node2randomise_prefix,
     )
 
     return list_input_nodes
