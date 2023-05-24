@@ -64,12 +64,12 @@ class SubPanelRandomGeometryNodes(TemplatePanel):
         layout.use_property_decorate = False  # No animation.
 
         # For now: view graph button on top of material name
-        layout.label(text=subpanel_gng.name)
-        # layout.operator(
-        #     f"node.view_graph_for_material_{self.subpanel_material_idx}",
-        #     text=subpanel_gng.name,
-        #     emboss=True,
-        # )
+        # layout.label(text=subpanel_gng.name)
+        layout.operator(
+            f"node.view_graph_for_gng_{self.subpanel_gng_idx}",
+            text=subpanel_gng.name,
+            emboss=True,
+        )
 
     def draw(self, context):
         # name of the GNG for this panel

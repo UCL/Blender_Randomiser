@@ -4,6 +4,8 @@ import bpy
 import numpy as np
 from bpy.app.handlers import persistent
 
+from .. import config
+
 
 # --------------------------------------------
 # Operator Randomise selected sockets
@@ -223,6 +225,123 @@ def randomise_geometry_nodes_per_frame(dummy):
 # -------------------------------
 # Operator: view graph per GNG
 # -------------------------------
+class ViewNodeGraphOneGNG(bpy.types.Operator):
+    """Show node graph for the Geometry Node Group
+
+    Parameters
+    ----------
+    bpy : _type_
+        _description_
+
+    Returns
+    -------
+    _type_
+        _description_
+    """
+
+    # metadata
+    bl_idname = (
+        "gng.view_graph"  # this is appended to bpy.ops.
+        # NOTE: it will be overwritten
+    )
+    bl_label = "View node graph for this Geometry node group"
+    bl_options = {"REGISTER", "UNDO"}
+
+    @classmethod
+    def poll(cls, context):
+        # used to check if the operator can run.
+        cs = context.scene
+        subpanel_gng = cs.socket_props_per_gng.collection[cls.subpanel_gng_idx]
+
+        # the GNG must be a Geometry node group
+        return subpanel_gng.name in [
+            gr.name for gr in bpy.data.node_groups if gr.type == "GEOMETRY"
+        ]
+
+    def invoke(self, context, event):
+        """Initialise parmeters before executing
+
+        The invoke() function runs before executing the operator.
+        Here, we
+        - add the list of input nodes and collection of socket properties to
+          the operator self,
+        - unselect the randomisation toggle of the sockets of input nodes if
+          they are not linked to any other node
+
+        Parameters
+        ----------
+        context : bpy_types.Context
+            the context from which the operator is executed
+        event : _type_
+            _description_
+
+        Returns
+        -------
+        _type_
+            _description_
+        """
+        # add list of socket properties to operator self
+        # (this list should have been updated already, when drawing the panel)
+        cs = context.scene
+        subpanel_gng = cs.socket_props_per_gng.collection[
+            self.subpanel_gng_idx
+        ]
+        self.subpanel_gng_name = subpanel_gng.name
+
+        return self.execute(context)
+
+    def execute(self, context):
+        """Execute 'view graph' operator
+
+        Show the node graph for this material.
+
+        We change the view by changing the 'slot'. If we change the
+        active material only, the slot in view is 'overwritten' with
+        the active material every time.
+
+        It may be the case that a material is not assigned to any slot.
+        In that case, if the view-graph button is clicked, a new
+        slot is added for that material.
+
+        Parameters
+        ----------
+        context : _type_
+            _description_
+
+        Returns
+        -------
+        _type_
+            _description_
+        """
+        # cob = context.object
+
+        # # get the subpanel's material slot index
+        # # returns -1 if there is no slot for that material
+        # slot_idx_for_subpanel_gng = cob.material_slots.find(
+        #     self.subpanel_material_name
+        # )
+
+        # # change active slot shown in graph
+        # # NOTE: switching slot switches the active material too
+        # if (
+        #     slot_idx_for_subpanel_material == -1
+        # ):  # if no slot for this material
+        #     bpy.ops.object.material_slot_add()  # add a new slot
+        #     cob.active_material_index = len(cob.material_slots) - 1
+        # else:
+        #     cob.active_material_index = slot_idx_for_subpanel_material
+
+        # # check if the subpanel's material is the active one
+        # # (when I switch slot the material switches too)
+        # if (
+        #     bpy.data.materials[self.subpanel_material_name]
+        #     != cob.active_material
+        # ):
+        #     cob.active_material = bpy.data.materials[
+        #         self.subpanel_material_name
+        #     ]
+
+        return {"FINISHED"}
 
 
 # ---------------------
@@ -230,7 +349,20 @@ def randomise_geometry_nodes_per_frame(dummy):
 # ---------------------
 list_classes_to_register = [RandomiseAllGeometryNodes]
 
-# one view graph operator per nodegroup!
+for i in range(config.MAX_NUMBER_OF_SUBPANELS):
+    operator_i = type(
+        f"ViewNodeGraphOneGNG_subpanel_{i}",
+        (
+            ViewNodeGraphOneGNG,
+            bpy.types.Operator,
+        ),
+        {
+            "bl_idname": f"node.view_graph_for_gng_{i}",
+            "bl_label": "",
+            "subpanel_gng_idx": i,
+        },
+    )
+    list_classes_to_register.append(operator_i)  # type: ignore
 
 
 # -----------------------------------------
@@ -255,5 +387,4 @@ def unregister():
         randomise_geometry_nodes_per_frame
     )
 
-    print("geometry operators unregistered")
     print("geometry operators unregistered")
