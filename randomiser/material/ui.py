@@ -21,13 +21,18 @@ class TemplatePanel(bpy.types.Panel):
 # ----------------------
 # Main panel
 # ---------------------
-class MainPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
+class MainPanelRandomMaterialNodes(TemplatePanel):  # , bpy.types.Panel):
     bl_idname = "NODE_MATERIAL_PT_mainpanel"
     bl_label = "Randomise MATERIAL"
 
     def draw(self, context):
         column = self.layout.column(align=True)
-        column.label(text="Select material to see available sockets.")
+        column.label(
+            text=(
+                "Click on a material's name"
+                "to display its graph on the Shader Editor"
+            )
+        )
 
 
 # ---------------------------------------------------
@@ -150,7 +155,7 @@ class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
     bl_idname = "NODE_MATERIAL_PT_subpanel"
     bl_parent_id = "NODE_MATERIAL_PT_mainpanel"
     bl_label = ""  # title of the panel displayed to the user
-    # bl_options = {"DEFAULT_CLOSED"}
+    bl_options = {"DEFAULT_CLOSED"}
     # https://docs.blender.org/api/master/bpy.types.Panel.html#bpy.types.Panel.bl_options
 
     @classmethod

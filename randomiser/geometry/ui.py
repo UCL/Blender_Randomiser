@@ -2,16 +2,13 @@ import bpy
 
 # from .. import utils
 # from . import config
+from ..material.ui import TemplatePanel
 
 
 # ----------------------
 # Main panel
 # ---------------------
-class MainPanelRandomGeometryNodes(bpy.types.Panel):
-    bl_space_type = "NODE_EDITOR"
-    bl_region_type = "UI"
-    bl_category = "Randomiser"  # this shows up as the tab name
-
+class MainPanelRandomGeometryNodes(TemplatePanel):
     bl_idname = "NODE_GEOMETRY_PT_mainpanel"
     bl_label = "Randomise GEOMETRY"
 
@@ -20,10 +17,28 @@ class MainPanelRandomGeometryNodes(bpy.types.Panel):
         return context.object is not None
 
     def draw(self, context):
-        self.layout.label(text="Hello World")
-        # pass
-        # column = self.layout.column(align=True)
-        # column.label(text="Select material to see available sockets.")
+        column = self.layout.column(align=True)
+        column.label(
+            text=(
+                "Click on a node group to display its graph"
+                "on the Geometry Node Editor"
+            )
+        )
+
+
+# ------------------------------
+# Subpanel for each node group
+# -----------------------------
+# class SubPanelRandomGeometryNodes(TemplatePanel):
+#     @classmethod
+#     def poll():
+#         pass
+
+#     def draw_header(self, context: Context):
+#         return super().draw_header(context)
+
+#     def draw(self, context: Context):
+#         return super().draw(context)
 
 
 # -----------------------
@@ -34,6 +49,8 @@ class MainPanelRandomGeometryNodes(bpy.types.Panel):
 list_classes_to_register = [
     MainPanelRandomGeometryNodes,
 ]
+
+# Subpanel for each node group
 
 
 # -----------------------------------------
