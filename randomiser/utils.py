@@ -176,3 +176,53 @@ def get_material_nodes_to_randomise_all(
     )
 
     return list_indep_input_nodes + list_group_input_nodes
+
+
+def get_custom_props_to_randomise_from_list(
+    list_candidate_custom_props: list,
+    custom_props2randomise_prefix: str = "bpy.",
+):
+    """Get list of nodes to randomise from list.
+
+    Input nodes are defined as nodes with no input sockets.
+    The nodes to randomise are input nodes whose name starts
+    with 'node2randomise_prefix' (case insensitive).
+
+    The 'artificial' nodes that show up inside a node group, usually named
+    'Group input' or 'Group output' are excluded from the search.
+
+    Parameters
+    ----------
+    list_candidate_nodes : list
+        list of the candidate nodes to randomise
+    node2randomise_prefix : str, optional
+        prefix that identifies the nodes to randomise, by default 'random'
+
+    Returns
+    -------
+    list
+        list of the input nodes to randomise
+    """
+
+    # ensure list_candidate_nodes is unique
+    # TODO: what if two groups have a node with the same name??
+    # --it will work if nodegroups have different names!
+    # maybe assume geometry node groups will start/end with Geometry?
+    list_candidate_custom_props = list(set(list_candidate_custom_props))
+
+    # find input nodes that startwith random
+    # in any of those groups
+    # excluding 'Group' nodes
+    list_custom_props = [
+        nd
+        for nd in list_candidate_custom_props
+        if len(nd.inputs) == 0
+        and nd.name.lower().startswith(custom_props2randomise_prefix.lower())
+        # and nd.type
+        # not in [
+        #     "GROUP_INPUT",
+        #     "GROUP_OUTPUT",
+        # ]  # exclude 'Group' artificial nodes
+    ]
+
+    return list_custom_props

@@ -1,4 +1,4 @@
-from . import material, transform, seed, user_defined
+from . import material, transform, seed, user_defined, custom_props
 
 bl_info = {
     "name": "Randomisations panel",
@@ -19,7 +19,8 @@ def register():
     seed.register()
     transform.register()
     material.register()
-    user_defined.register()
+    # custom_prop.register()
+    # user_defined.register()
     # geometry.register()
 
 
@@ -27,7 +28,8 @@ def unregister():
     seed.unregister()
     transform.unregister()
     material.unregister()
-    user_defined.unregister()
+    # custom_prop.unregister()
+    # user_defined.unregister()
     # geometry.unregister()
 
 
