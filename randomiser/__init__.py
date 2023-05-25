@@ -17,18 +17,18 @@ bl_info = {
 
 def register():
     seed.register()
-    transform.register()
-    material.register()
-    # custom_prop.register()
+    # transform.register()
+    # material.register()
+    custom_props.register()
     # user_defined.register()
     # geometry.register()
 
 
 def unregister():
     seed.unregister()
-    transform.unregister()
-    material.unregister()
-    # custom_prop.unregister()
+    # transform.unregister()
+    # material.unregister()
+    custom_props.unregister()
     # user_defined.unregister()
     # geometry.unregister()
 
