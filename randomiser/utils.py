@@ -50,6 +50,46 @@ def get_nodes_to_randomise_from_list(
     return list_input_nodes
 
 
+def get_custom_props_to_randomise_indep(list_candidate_nodes: list):
+    # list of nodes for current material
+    # split into those belonging to a group or not
+    list_custom_props_indep = []
+    for nd in bpy.types.Scene.custom_list:
+        # if nd.type != "PROP":
+        list_custom_props_indep.append(nd)
+
+    return list_custom_props_indep
+
+
+def add_custom_prop_to_custom_list(context):
+    # list of nodes for current material
+    # split into those belonging to a group or not
+    custom_string = context.scene.custom_list.custom_string
+    # if custom_input.type == "PROP":
+
+    print("custom_string = ", custom_string)
+
+    newCustomItem = context.scene.custom_list.add()
+    newCustomItem.custom_string = "test1"
+
+    print("custom_string [idx] = ", context.scene.custom_list[0].custom_string)
+
+    # list_custom_props_indep =
+    new_input = getattr(context.scene.custom_props, "custom_input")
+
+    print("custom_input = ", new_input)
+
+    # list_custom_props
+
+    # list_custom_props.append(
+    # getattr(bpy.types.Scene.custom_props, "custom_input"))
+    # for nd in bpy.types.Scene.custom_list:
+    #     if nd.type != "PROP":
+    #         list_custom_props_indep.append(nd)
+
+    # return list_custom_props_indep
+
+
 def get_material_nodes_to_randomise_indep(
     material_str: str = "Material", node2randomise_prefix: str = "random"
 ):

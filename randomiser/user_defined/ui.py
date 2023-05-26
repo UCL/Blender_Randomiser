@@ -1,7 +1,8 @@
 import bpy
 
 from .. import utils
-from . import config
+
+# from . import config
 
 
 # ----------------------
@@ -233,7 +234,7 @@ list_classes_to_register = [
 # assign an index to each of them. We will only display the subpanels
 # whose index is < len(list_of_materials). We apply the same startegy
 # for the subsubpanels
-for i in range(config.MAX_NUMBER_OF_SUBPANELS):
+for i in range(100):  # config.MAX_NUMBER_OF_SUBPANELS):
     # define subpanel class for material i
     subpanel_class_i = type(
         f"NODE_MATERIAL_PT_subpanel_{i}",
