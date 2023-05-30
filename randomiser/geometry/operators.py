@@ -250,6 +250,8 @@ class ViewNodeGraphOneGNG(bpy.types.Operator):
     @classmethod
     def poll(cls, context):
         # used to check if the operator can run.
+        # the geometry is linked to a specific object...
+        # so only node groups relevant to a specific object should show?
         cs = context.scene
         subpanel_gng = cs.socket_props_per_gng.collection[cls.subpanel_gng_idx]
 
@@ -293,15 +295,14 @@ class ViewNodeGraphOneGNG(bpy.types.Operator):
     def execute(self, context):
         """Execute 'view graph' operator
 
-        Show the node graph for this material.
+        It shows the node graph for the geometry node group.
 
-        We change the view by changing the 'slot'. If we change the
-        active material only, the slot in view is 'overwritten' with
-        the active material every time.
+        In practice, we change the graph view by changing the active modifier.
+        This implies that a geometry node tree is linked to a modifier.
 
-        It may be the case that a material is not assigned to any slot.
-        In that case, if the view-graph button is clicked, a new
-        slot is added for that material.
+        It may be the case that a geometry node tree is not assigned
+        to any modifier. In that case, if the view-graph button is clicked,
+        a new modifier is added for that geometry node tree.
 
         Parameters
         ----------
@@ -313,7 +314,69 @@ class ViewNodeGraphOneGNG(bpy.types.Operator):
         _type_
             _description_
         """
-        # cob = context.object
+        cob = context.object
+
+        # find the modifier linked to this GNG
+        # mod.node_group => node group linked to the modifier
+        # a modifier may be linkable to a GNG or not!
+        # (it may not have node_group attr)
+        subpanel_modifier = ""
+        for mod in cob.modifiers:
+            if (
+                hasattr(mod, "node_group")
+                and (hasattr(mod.node_group, "name"))
+                and (self.subpanel_gng_name == mod.node_group.name)
+            ):
+                subpanel_modifier = mod
+                break
+
+        # if there is a modifier linked to this GNG: set that
+        # modifier as active (this will change the displayed graph)
+        # TODO: else: assign to a modifier
+        if subpanel_modifier:
+            bpy.ops.object.modifier_set_active(modifier=subpanel_modifier.name)
+
+        # if there is no modifier linked to this GNG and
+        # is a Geometry node tree
+        # Q: does this only happen if the node group is
+        # not a geometry node tree?
+        # (can I have a geometry node tree that is not linked to a modifier?)
+        # ---yes, for example when you unlink or make a copy
+        else:
+            # create a new modifier with a new geometry node group
+            bpy.ops.node.new_geometry_nodes_modifier()  # will be active
+            new_modifier = bpy.context.object.modifiers.active
+
+            # remove the newly create node group
+            bpy.data.node_groups.remove(new_modifier.node_group)
+
+            # assign the desired node group to this modifier
+            new_modifier.node_group = bpy.data.node_groups[
+                self.subpanel_gng_name
+            ]
+
+            # select that node group ---> self.subpanel_gng_name
+            # select node under the cursor:  bpy.ops.node.select(
+            # context.selected_nodes
+            # context.active_node = bpy.data.node_groups[
+            # self.subpanel_gng_name]
+
+            # find location of node
+            # only of node, rather than group? :?
+            # bpy.data.node_groups['Geometry Nodes'].nodes['Group'].location
+
+            # bpy.ops.node.select(
+            #     deselect_all=True,
+            #     select_passthrough=True,
+            #     location=node_location
+            # )
+
+            # print(context.selected_nodes)
+
+        # else: if its a 'simple' node group
+        # toggle edit mode
+        # bpy.ops.node.group_edit(exit=False)
+        # print('No modifiers linked to this GNG')
 
         # # get the subpanel's material slot index
         # # returns -1 if there is no slot for that material
