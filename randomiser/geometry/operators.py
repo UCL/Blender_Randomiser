@@ -380,13 +380,11 @@ class ViewNodeGraphOneGNG(bpy.types.Operator):
                 exit=True
             )  # without this the button for a geometry node tree is a toggle
             bpy.ops.object.modifier_set_active(modifier=subpanel_modifier.name)
+            bpy.ops.node.select_all(action="DESELECT")
 
         # if there is no modifier linked to this GNG
         # and the node group exists inside another node group...
-        # TODO: maybe instead
-        # ---> it is a node group with a parent node group linked
-        # to a modifier?
-        # maybe: else, link the parent node group to a modifier and toggle?
+        # set parent modifier as active and centre on selected node?
         elif not subpanel_modifier and (
             self.subpanel_gng_name in map_inner_node_groups_to_parent
         ):
@@ -406,23 +404,27 @@ class ViewNodeGraphOneGNG(bpy.types.Operator):
                     parent_modifier = mod
                     break
             bpy.ops.object.modifier_set_active(modifier=parent_modifier.name)
+            bpy.ops.node.group_edit(exit=True)  # REVIEW: do I need this
 
             # select the desired node group
             # bpy.ops.node.select_all(action='DESELECT')
-            # bpy.ops.node.group_edit(exit=True)
-            # for nd in bpy.data.node_groups[parent_node_tree].nodes:
-            #     # nd.select = False
+            for nd in bpy.data.node_groups[parent_node_tree].nodes:
+                nd.select = False
 
-            #     if hasattr(nd, 'node_tree') and (
-            #         hasattr(nd.node_tree, 'name')
-            #      ) and nd.node_tree.name == self.subpanel_gng_name:
-            #         nd.select = True
-            #         print(
-            #             'Press tab to toggle the view of '
-            #             f'the node group "{nd.node_tree.name}"')
-            #         # toggle edit mode
-            #         # bpy.ops.node.group_edit(exit=False)
-            #         break
+            for nd in bpy.data.node_groups[parent_node_tree].nodes:
+                if hasattr(nd, "node_tree") and (
+                    nd.node_tree.name == self.subpanel_gng_name
+                ):
+                    nd.select = True
+                    bpy.data.node_groups[parent_node_tree].nodes.active = nd
+                    bpy.ops.node.view_selected()
+                    # this is not working properly....context override?
+                    print(
+                        "Press Tab to edit the selected node group "
+                        f'"{nd.node_tree.name}"'
+                    )
+
+                    break
 
         # if there is no modifier linked to this GNG
         # and/or it is a node group *with* node groups inside
