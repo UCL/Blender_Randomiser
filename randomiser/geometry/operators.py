@@ -250,15 +250,50 @@ class ViewNodeGraphOneGNG(bpy.types.Operator):
     @classmethod
     def poll(cls, context):
         # used to check if the operator can run.
+
+        # TODO: display only for the relevant object?
         # the geometry is linked to a specific object...
         # so only node groups relevant to a specific object should show?
         cs = context.scene
-        subpanel_gng = cs.socket_props_per_gng.collection[cls.subpanel_gng_idx]
+        cob = context.object
 
-        # the GNG must be a Geometry node group
-        return subpanel_gng.name in [
-            gr.name for gr in bpy.data.node_groups if gr.type == "GEOMETRY"
+        subpanel_gng = cs.socket_props_per_gng.collection[cls.subpanel_gng_idx]
+        node_groups_linked_to_modifiers_of_active_object = [
+            mod.node_group
+            for mod in cob.modifiers
+            if hasattr(mod, "node_group") and hasattr(mod.node_group, "name")
         ]
+        node_groups_linked_to_modifiers_of_active_object_names = [
+            ng.name for ng in node_groups_linked_to_modifiers_of_active_object
+        ]
+
+        # list of node groups inside any geometry node trees
+        node_groups_inside_node_groups_linked_to_modifiers = [
+            nd.node_tree.name
+            for gr in node_groups_linked_to_modifiers_of_active_object
+            for nd in gr.nodes
+            if nd.type == "GROUP"
+        ]
+
+        # the GNG must be a Geometry node group, and either
+        # - must be linked to a modifier of the currently active object
+        # - must be a node group inside a node group linked to a modifier of
+        # the currently active object
+        # TODO: extend the second condition to infinite levels deep?
+        display_operator = subpanel_gng.name in [
+            gr.name for gr in bpy.data.node_groups if gr.type == "GEOMETRY"
+        ] and (
+            (
+                subpanel_gng.name
+                in node_groups_linked_to_modifiers_of_active_object_names
+            )
+            or (
+                subpanel_gng.name
+                in node_groups_inside_node_groups_linked_to_modifiers
+            )
+        )
+
+        return display_operator
 
     def invoke(self, context, event):
         """Initialise parmeters before executing
@@ -295,14 +330,15 @@ class ViewNodeGraphOneGNG(bpy.types.Operator):
     def execute(self, context):
         """Execute 'view graph' operator
 
-        It shows the node graph for the geometry node group.
+        It shows the node graph for the geometry node group shown in the label.
 
         In practice, we change the graph view by changing the active modifier.
-        This implies that a geometry node tree is linked to a modifier.
+        Note as well that a modifier is defined for an object.
 
         It may be the case that a geometry node tree is not assigned
         to any modifier. In that case, if the view-graph button is clicked,
-        a new modifier is added for that geometry node tree.
+        a new modifier is added for that geometry node tree and for the
+        currently active material.
 
         Parameters
         ----------
@@ -316,10 +352,17 @@ class ViewNodeGraphOneGNG(bpy.types.Operator):
         """
         cob = context.object
 
-        # find the modifier linked to this GNG
-        # mod.node_group => node group linked to the modifier
-        # a modifier may be linkable to a GNG or not!
-        # (it may not have node_group attr)
+        # get list of node groups inside a node group
+        # TODO: do this recursively
+        map_inner_node_groups_to_parent = {
+            nd.node_tree.name: gr.name
+            for gr in bpy.data.node_groups
+            if gr.type == "GEOMETRY"
+            for nd in gr.nodes
+            if nd.type == "GROUP"
+        }
+
+        # find the modifier linked to this GNG, if exists
         subpanel_modifier = ""
         for mod in cob.modifiers:
             if (
@@ -332,77 +375,67 @@ class ViewNodeGraphOneGNG(bpy.types.Operator):
 
         # if there is a modifier linked to this GNG: set that
         # modifier as active (this will change the displayed graph)
-        # TODO: else: assign to a modifier
         if subpanel_modifier:
+            bpy.ops.node.group_edit(
+                exit=True
+            )  # without this the button for a geometry node tree is a toggle
             bpy.ops.object.modifier_set_active(modifier=subpanel_modifier.name)
 
-        # if there is no modifier linked to this GNG and
-        # is a Geometry node tree
-        # Q: does this only happen if the node group is
-        # not a geometry node tree?
-        # (can I have a geometry node tree that is not linked to a modifier?)
-        # ---yes, for example when you unlink or make a copy
-        else:
-            # create a new modifier with a new geometry node group
-            bpy.ops.node.new_geometry_nodes_modifier()  # will be active
-            new_modifier = bpy.context.object.modifiers.active
+        # if there is no modifier linked to this GNG
+        # and the node group exists inside another node group...
+        # TODO: maybe instead
+        # ---> it is a node group with a parent node group linked
+        # to a modifier?
+        # maybe: else, link the parent node group to a modifier and toggle?
+        elif not subpanel_modifier and (
+            self.subpanel_gng_name in map_inner_node_groups_to_parent
+        ):
+            # find the modifier linked to the parent and set as active
+            # NOTE: if the parent is not linked to a modifier,
+            # the operator is disabled
+            parent_node_tree = map_inner_node_groups_to_parent[
+                self.subpanel_gng_name
+            ]
+            parent_modifier = ""
+            for mod in cob.modifiers:
+                if (
+                    hasattr(mod, "node_group")
+                    and (hasattr(mod.node_group, "name"))
+                    and (parent_node_tree == mod.node_group.name)
+                ):
+                    parent_modifier = mod
+                    break
+            bpy.ops.object.modifier_set_active(modifier=parent_modifier.name)
 
-            # remove the newly create node group
-            bpy.data.node_groups.remove(new_modifier.node_group)
+            # select the desired node group
+            # bpy.ops.node.select_all(action='DESELECT')
+            # bpy.ops.node.group_edit(exit=True)
+            # for nd in bpy.data.node_groups[parent_node_tree].nodes:
+            #     # nd.select = False
+
+            #     if hasattr(nd, 'node_tree') and (
+            #         hasattr(nd.node_tree, 'name')
+            #      ) and nd.node_tree.name == self.subpanel_gng_name:
+            #         nd.select = True
+            #         print(
+            #             'Press tab to toggle the view of '
+            #             f'the node group "{nd.node_tree.name}"')
+            #         # toggle edit mode
+            #         # bpy.ops.node.group_edit(exit=False)
+            #         break
+
+        # if there is no modifier linked to this GNG
+        # and/or it is a node group *with* node groups inside
+        # (a node with a node tree)
+        else:
+            # Add a new 'Geometry nodes group' modifier
+            bpy.ops.object.modifier_add(type="NODES")
+            new_modifier = bpy.context.object.modifiers.active
 
             # assign the desired node group to this modifier
             new_modifier.node_group = bpy.data.node_groups[
                 self.subpanel_gng_name
             ]
-
-            # select that node group ---> self.subpanel_gng_name
-            # select node under the cursor:  bpy.ops.node.select(
-            # context.selected_nodes
-            # context.active_node = bpy.data.node_groups[
-            # self.subpanel_gng_name]
-
-            # find location of node
-            # only of node, rather than group? :?
-            # bpy.data.node_groups['Geometry Nodes'].nodes['Group'].location
-
-            # bpy.ops.node.select(
-            #     deselect_all=True,
-            #     select_passthrough=True,
-            #     location=node_location
-            # )
-
-            # print(context.selected_nodes)
-
-        # else: if its a 'simple' node group
-        # toggle edit mode
-        # bpy.ops.node.group_edit(exit=False)
-        # print('No modifiers linked to this GNG')
-
-        # # get the subpanel's material slot index
-        # # returns -1 if there is no slot for that material
-        # slot_idx_for_subpanel_gng = cob.material_slots.find(
-        #     self.subpanel_material_name
-        # )
-
-        # # change active slot shown in graph
-        # # NOTE: switching slot switches the active material too
-        # if (
-        #     slot_idx_for_subpanel_material == -1
-        # ):  # if no slot for this material
-        #     bpy.ops.object.material_slot_add()  # add a new slot
-        #     cob.active_material_index = len(cob.material_slots) - 1
-        # else:
-        #     cob.active_material_index = slot_idx_for_subpanel_material
-
-        # # check if the subpanel's material is the active one
-        # # (when I switch slot the material switches too)
-        # if (
-        #     bpy.data.materials[self.subpanel_material_name]
-        #     != cob.active_material
-        # ):
-        #     cob.active_material = bpy.data.materials[
-        #         self.subpanel_material_name
-        #     ]
 
         return {"FINISHED"}
 
