@@ -316,3 +316,21 @@ def get_inner_node_groups(
     }
 
     return map_node_group_to_root_node_group
+
+
+def get_selectable_node_for_node_group(geometry_node_group):
+    parent_node_group = get_parent_of_geometry_node_group(geometry_node_group)
+
+    selectable_node = None
+    if parent_node_group is not None:
+        for nd in parent_node_group.nodes:
+            if (
+                nd.type == "GROUP"
+                and (hasattr(nd, "node_tree"))
+                and (hasattr(nd.node_tree, "name"))
+                and (nd.node_tree.name == geometry_node_group.name)
+            ):
+                selectable_node = nd
+                break
+
+    return selectable_node

@@ -347,16 +347,6 @@ class ViewNodeGraphOneGNG(bpy.types.Operator):
         """
         cob = context.object
 
-        # get list of node groups inside a node group
-        # TODO: do this recursively
-        map_inner_node_groups_to_parent = {
-            nd.node_tree.name: gr.name
-            for gr in bpy.data.node_groups
-            if gr.type == "GEOMETRY"
-            for nd in gr.nodes
-            if nd.type == "GROUP"
-        }
-
         # find the modifier linked to this GNG, if exists
         subpanel_modifier = ""
         for mod in cob.modifiers:
@@ -368,64 +358,80 @@ class ViewNodeGraphOneGNG(bpy.types.Operator):
                 subpanel_modifier = mod
                 break
 
+        # get dict of inner geometry node groups
+        list_gngs = [
+            gr for gr in bpy.data.node_groups if gr.type == "GEOMETRY"
+        ]
+        map_inner_node_groups_to_root_parent = utils.get_inner_node_groups(
+            list_gngs
+        )
+
         # if there is a modifier linked to this GNG: set that
         # modifier as active (this will change the displayed graph)
         if subpanel_modifier:
-            bpy.ops.node.group_edit(
-                exit=True
-            )  # without this the button for a geometry node tree is a toggle
             bpy.ops.object.modifier_set_active(modifier=subpanel_modifier.name)
             bpy.ops.node.select_all(action="DESELECT")
 
+            # ensure top level
+            for i in range(100):  # max level
+                bpy.ops.node.group_edit(exit=True)
+            # this goes one level up (with exit=True)....
+            # I would like to do this until the name of the subpanel
+            # matches the tip of the graph?
+
         # if there is no modifier linked to this GNG
-        # and the node group exists inside another node group...
-        # set parent modifier as active and centre on selected node?
+        # but the node group is an inner node group
+        # set parent modifier as active and navigate to node
         elif not subpanel_modifier and (
-            self.subpanel_gng_name in map_inner_node_groups_to_parent
+            self.subpanel_gng_name
+            in [gr.name for gr in map_inner_node_groups_to_root_parent.keys()]
         ):
-            # find the modifier linked to the parent and set as active
+            # find the modifier linked to the (root) parent and set as active
             # NOTE: if the parent is not linked to a modifier,
             # the operator is disabled
-            parent_node_tree = map_inner_node_groups_to_parent[
-                self.subpanel_gng_name
+            root_parent_node_group = map_inner_node_groups_to_root_parent[
+                bpy.data.node_groups[self.subpanel_gng_name]
             ]
             parent_modifier = ""
             for mod in cob.modifiers:
                 if (
                     hasattr(mod, "node_group")
                     and (hasattr(mod.node_group, "name"))
-                    and (parent_node_tree == mod.node_group.name)
+                    and (root_parent_node_group.name == mod.node_group.name)
                 ):
                     parent_modifier = mod
                     break
+
             bpy.ops.object.modifier_set_active(modifier=parent_modifier.name)
-            bpy.ops.node.group_edit(exit=True)  # REVIEW: do I need this
+            bpy.ops.node.select_all(action="DESELECT")
 
-            # select the desired node group
-            # bpy.ops.node.select_all(action='DESELECT')
-            for nd in bpy.data.node_groups[parent_node_tree].nodes:
-                nd.select = False
+            # navigate to the selected node group
+            # ensure top level
+            for i in range(100):  # max level
+                bpy.ops.node.group_edit(exit=True)
 
-            for nd in bpy.data.node_groups[parent_node_tree].nodes:
-                if hasattr(nd, "node_tree") and (
-                    nd.node_tree.name == self.subpanel_gng_name
-                ):
-                    nd.select = True
-                    bpy.data.node_groups[parent_node_tree].nodes.active = nd
-                    bpy.ops.node.view_selected()
-                    # this is not working properly....context override?
-                    print(
-                        "Press Tab to edit the selected node group "
-                        f'"{nd.node_tree.name}"'
-                    )
+            # compute parent
+            parent_node_group = utils.get_parent_of_geometry_node_group(
+                bpy.data.node_groups[self.subpanel_gng_name]
+            )
+            # go one level down
+            bpy.ops.node.group_edit(exit=False)
 
-                    break
+            while parent_node_group != root_parent_node_group:
+                # update parent
+                parent_node_group = utils.get_parent_of_geometry_node_group(
+                    parent_node_group
+                )
+
+                # go one level down
+                bpy.ops.node.group_edit(exit=False)
 
         # if there is no modifier linked to this GNG
-        # and/or it is a node group *with* node groups inside
-        # (a node with a node tree)
+        # and the node group is not an inner node group:
+        # then create a new modifier and link the node group to it
         else:
             # Add a new 'Geometry nodes group' modifier
+            # (will set it as active)
             bpy.ops.object.modifier_add(type="NODES")
             new_modifier = bpy.context.object.modifiers.active
 
