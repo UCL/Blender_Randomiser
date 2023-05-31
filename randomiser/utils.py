@@ -200,3 +200,119 @@ def get_geometry_nodes_to_randomise(
     )
 
     return list_input_nodes
+
+
+def get_gngs_linked_to_modifiers(object):
+    """Get geometry node groups that are linked to
+    modifiers of the object
+
+    Parameters
+    ----------
+    object : _type_
+        _description_
+
+    Returns
+    -------
+    _type_
+        _description_
+    """
+    # Shader node groups cannot be linked to modifiers
+    # So all node groups will be geometry node groups
+
+    node_groups_linked_to_modifiers_of_object = [
+        mod.node_group
+        for mod in object.modifiers
+        if hasattr(mod, "node_group") and hasattr(mod.node_group, "name")
+    ]
+
+    return node_groups_linked_to_modifiers_of_object
+
+
+def get_parent_of_geometry_node_group(
+    node_group,
+):
+    """Get immediate parent of geometry node group.
+
+    Returns the node tree that the input geometry node group is
+    inside of.
+
+    If the input geometry node group has no parent (i.e., is a root node)
+    it return None for the parent
+
+    Parameters
+    ----------
+    node_group : _type_
+        _description_
+
+    Returns
+    -------
+    _type_
+        _description_
+    """
+
+    list_all_gngs = [
+        gr for gr in bpy.data.node_groups if gr.type == "GEOMETRY"
+    ]
+
+    parent_gng = None
+    if node_group is not None:
+        for gr in list_all_gngs:
+            for nd in gr.nodes:
+                if (
+                    (hasattr(nd, "node_tree"))
+                    and (hasattr(nd.node_tree, "name"))
+                    and (nd.node_tree.name == node_group.name)
+                ):
+                    parent_gng = gr
+                    break
+
+    return parent_gng  # immediate parent
+
+
+def get_root_of_geometry_node_group(geometry_node_group):
+    """Get root parent of input geometry node group
+
+    It returns the root parent (i.e., the parent node group whose
+    parent is None), for the input geometry node group
+
+    Parameters
+    ----------
+    geometry_node_group : _type_
+        _description_
+
+    Returns
+    -------
+    _type_
+        _description_
+    """
+    parent = get_parent_of_geometry_node_group(geometry_node_group)
+    while get_parent_of_geometry_node_group(parent) is not None:
+        parent = get_parent_of_geometry_node_group(parent)
+
+    return parent
+
+
+def get_inner_node_groups(
+    list_candidate_root_node_groups,
+):
+    """Get node groups whose root parents are in the
+    input list
+
+    Parameters
+    ----------
+    list_candidate_root_node_groups : _type_
+        _description_
+    """
+
+    list_node_groups = [
+        gr for gr in bpy.data.node_groups if gr.type == "GEOMETRY"
+    ]
+
+    map_node_group_to_root_node_group = {
+        gr: get_root_of_geometry_node_group(gr)
+        for gr in list_node_groups
+        if get_root_of_geometry_node_group(gr)
+        in list_candidate_root_node_groups
+    }
+
+    return map_node_group_to_root_node_group

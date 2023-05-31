@@ -4,7 +4,7 @@ import bpy
 import numpy as np
 from bpy.app.handlers import persistent
 
-from .. import config
+from .. import config, utils
 
 
 # --------------------------------------------
@@ -250,46 +250,41 @@ class ViewNodeGraphOneGNG(bpy.types.Operator):
     @classmethod
     def poll(cls, context):
         # used to check if the operator can run.
-
-        # TODO: display only for the relevant object?
-        # the geometry is linked to a specific object...
-        # so only node groups relevant to a specific object should show?
+        # only node groups relevant to a specific object should
+        # as enabled
         cs = context.scene
         cob = context.object
 
+        # geometry node group of this subpanel
         subpanel_gng = cs.socket_props_per_gng.collection[cls.subpanel_gng_idx]
-        node_groups_linked_to_modifiers_of_active_object = [
-            mod.node_group
-            for mod in cob.modifiers
-            if hasattr(mod, "node_group") and hasattr(mod.node_group, "name")
-        ]
-        node_groups_linked_to_modifiers_of_active_object_names = [
-            ng.name for ng in node_groups_linked_to_modifiers_of_active_object
+
+        # get list of node groups linked to modifiers of the active object
+        list_gngs_in_modifiers = utils.get_gngs_linked_to_modifiers(cob)
+        list_gngs_in_modifiers_names = [
+            ng.name for ng in list_gngs_in_modifiers
         ]
 
-        # list of node groups inside any geometry node trees
-        node_groups_inside_node_groups_linked_to_modifiers = [
-            nd.node_tree.name
-            for gr in node_groups_linked_to_modifiers_of_active_object
-            for nd in gr.nodes
-            if nd.type == "GROUP"
+        # get list of geometry node groups whose root parent
+        # is a modfier-linked node group
+        map_node_group_to_root_node_group = utils.get_inner_node_groups(
+            list_gngs_in_modifiers,
+        )
+
+        # get list of geometry node groups
+        list_gngs = [
+            gr.name for gr in bpy.data.node_groups if gr.type == "GEOMETRY"
         ]
 
         # the GNG must be a Geometry node group, and either
         # - must be linked to a modifier of the currently active object
         # - must be a node group inside a node group linked to a modifier of
-        # the currently active object
-        # TODO: extend the second condition to infinite levels deep?
-        display_operator = subpanel_gng.name in [
-            gr.name for gr in bpy.data.node_groups if gr.type == "GEOMETRY"
-        ] and (
-            (
-                subpanel_gng.name
-                in node_groups_linked_to_modifiers_of_active_object_names
-            )
+        # the currently active object (the inner node group can be
+        # any levels deep)
+        display_operator = (subpanel_gng.name in list_gngs) and (
+            (subpanel_gng.name in list_gngs_in_modifiers_names)
             or (
                 subpanel_gng.name
-                in node_groups_inside_node_groups_linked_to_modifiers
+                in [gr.name for gr in map_node_group_to_root_node_group.keys()]
             )
         )
 
