@@ -338,17 +338,48 @@ def get_selectable_node_for_node_group(geometry_node_group):
     return selectable_node
 
 
-# def get_path_to_gng():
-#     ### compute list of parents nodes of this subpanel's GNG
-#     # in reverse order
-#     parent = get_parent_of_gng(
-#         bpy.data.node_groups[self.subpanel_gng_name]
-#     )
-#     path_to_gng = [parent]
-#     while get_parent_of_gng(parent) is not None:
-#         parent = get_parent_of_gng(parent)
-#         path_to_gng.append(parent)
+def get_path_to_gng(gng):
+    ### compute list of parents nodes of this subpanel's GNG
+    # in reverse order
+    # inclusive
+    parent = get_parent_of_gng(gng)
+    if parent is None:
+        path_to_gng = []
+    else:
+        path_to_gng = [parent]
+        while get_parent_of_gng(parent) is not None:
+            parent = get_parent_of_gng(parent)
+            path_to_gng.append(parent)
 
-#     path_to_gng.reverse()
-#     path_to_gng.append(bpy.data.node_groups[self.subpanel_gng_name])
-#     print(path_to_gng)
+        path_to_gng.reverse()
+
+    path_to_gng.append(gng)
+    return path_to_gng
+
+
+def get_max_depth(root_parent_node_group):
+    map_inner_gngs_of_modifier = get_map_inner_gngs([root_parent_node_group])
+    max_depth = max([v[1] for k, v in map_inner_gngs_of_modifier.items()])
+
+    return max_depth
+
+
+def get_modifier_linked_to_gng(gng_name, context_active_object):
+    subpanel_modifier = ""
+    for mod in context_active_object.modifiers:
+        if (
+            hasattr(mod, "node_group")
+            and (hasattr(mod.node_group, "name"))
+            and (gng_name == mod.node_group.name)
+        ):
+            subpanel_modifier = mod
+            break
+    return subpanel_modifier
+
+
+def set_gngs_graph_to_top_level(root_parent_node_group):
+    max_depth = get_max_depth(root_parent_node_group)
+    for i in range(max_depth):  # max level
+        bpy.ops.node.group_edit(exit=True)  # go up
+
+    return
