@@ -266,7 +266,7 @@ class ViewNodeGraphOneGNG(bpy.types.Operator):
 
         # get list of geometry node groups whose root parent
         # is a modfier-linked node group
-        map_node_group_to_root_node_group = utils.get_inner_node_groups(
+        map_node_group_to_root_node_group = utils.get_map_inner_gngs(
             list_gngs_in_modifiers,
         )
 
@@ -362,7 +362,7 @@ class ViewNodeGraphOneGNG(bpy.types.Operator):
         list_gngs = [
             gr for gr in bpy.data.node_groups if gr.type == "GEOMETRY"
         ]
-        map_inner_node_groups_to_root_parent = utils.get_inner_node_groups(
+        map_inner_node_groups_to_root_parent = utils.get_map_inner_gngs(
             list_gngs
         )
 
@@ -370,18 +370,23 @@ class ViewNodeGraphOneGNG(bpy.types.Operator):
         # modifier as active (this will change the displayed graph)
         if subpanel_modifier:
             bpy.ops.object.modifier_set_active(modifier=subpanel_modifier.name)
-            bpy.ops.node.select_all(action="DESELECT")
 
             # ensure top level
-            for i in range(100):  # max level
+            map_inner_gngs_of_modifier = utils.get_map_inner_gngs(
+                [bpy.data.node_groups[self.subpanel_gng_name]]
+            )
+            max_depth = max(
+                [v[1] for k, v in map_inner_gngs_of_modifier.items()]
+            )
+            # print(f'max depth for {self.subpanel_gng_name}: {max_depth}')
+            for i in range(max_depth):  # max level
                 bpy.ops.node.group_edit(exit=True)
-            # this goes one level up (with exit=True)....
-            # I would like to do this until the name of the subpanel
-            # matches the tip of the graph?
 
-        # if there is no modifier linked to this GNG
-        # but the node group is an inner node group
-        # set parent modifier as active and navigate to node
+            bpy.ops.node.select_all(action="DESELECT")
+
+        # if there is no modifier linked to this GNG,
+        # but the node group is an inner node group:
+        # set root parent modifier as active and navigate to node
         elif not subpanel_modifier and (
             self.subpanel_gng_name
             in [gr.name for gr in map_inner_node_groups_to_root_parent.keys()]
@@ -391,7 +396,7 @@ class ViewNodeGraphOneGNG(bpy.types.Operator):
             # the operator is disabled
             root_parent_node_group = map_inner_node_groups_to_root_parent[
                 bpy.data.node_groups[self.subpanel_gng_name]
-            ]
+            ][0]
             parent_modifier = ""
             for mod in cob.modifiers:
                 if (
@@ -401,27 +406,59 @@ class ViewNodeGraphOneGNG(bpy.types.Operator):
                 ):
                     parent_modifier = mod
                     break
-
             bpy.ops.object.modifier_set_active(modifier=parent_modifier.name)
-            bpy.ops.node.select_all(action="DESELECT")
+            # bpy.ops.node.select_all(action="DESELECT")
 
-            # navigate to the selected node group
-            # ensure top level
-            for i in range(100):  # max level
-                bpy.ops.node.group_edit(exit=True)
+            # ensure we are at top level
+            map_inner_gngs_of_modifier = utils.get_map_inner_gngs(
+                [root_parent_node_group]
+            )
+            max_depth = max(
+                [v[1] for k, v in map_inner_gngs_of_modifier.items()]
+            )
+            # print(max_depth)
+            for i in range(max_depth):  # max level
+                bpy.ops.node.group_edit(exit=True)  # go up
 
-            # compute parent
-            parent_node_group = utils.get_parent_of_geometry_node_group(
+            ### compute list of parents nodes of this subpanel's GNG
+            # in reverse order
+            parent = utils.get_parent_of_gng(
                 bpy.data.node_groups[self.subpanel_gng_name]
             )
-            # go one level down
-            bpy.ops.node.group_edit(exit=False)
+            path_to_gng = [parent]
+            while utils.get_parent_of_gng(parent) is not None:
+                parent = utils.get_parent_of_gng(parent)
+                path_to_gng.append(parent)
 
-            while parent_node_group != root_parent_node_group:
-                # update parent
-                parent_node_group = utils.get_parent_of_geometry_node_group(
-                    parent_node_group
+            path_to_gng.reverse()
+            path_to_gng.append(bpy.data.node_groups[self.subpanel_gng_name])
+            print(path_to_gng)
+
+            # ### navigate to the selected node group
+            for i, gng_step in enumerate(path_to_gng[1:]):
+                # select parent node ---> do I need to set it as active?
+                bpy.ops.node.select_all(action="DESELECT")
+
+                selectable_gng = utils.get_selectable_node_for_node_group(
+                    gng_step
                 )
+                selectable_gng.select = True
+                # print(f'selectable: {selectable_gng}')
+
+                # set parent node as active
+                if path_to_gng[i] == root_parent_node_group:
+                    root_parent_node_group.nodes.active = selectable_gng
+                else:
+                    selectable_parent_gng = (
+                        utils.get_selectable_node_for_node_group(
+                            path_to_gng[i]
+                        )
+                    )
+                    selectable_parent_gng.node_tree.nodes.active = (
+                        selectable_gng
+                    )
+
+                # print(f'active: {context.active_node}')
 
                 # go one level down
                 bpy.ops.node.group_edit(exit=False)

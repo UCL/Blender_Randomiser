@@ -228,7 +228,7 @@ def get_gngs_linked_to_modifiers(object):
     return node_groups_linked_to_modifiers_of_object
 
 
-def get_parent_of_geometry_node_group(
+def get_parent_of_gng(
     node_group,
 ):
     """Get immediate parent of geometry node group.
@@ -269,7 +269,7 @@ def get_parent_of_geometry_node_group(
     return parent_gng  # immediate parent
 
 
-def get_root_of_geometry_node_group(geometry_node_group):
+def get_root_of_gng(geometry_node_group):
     """Get root parent of input geometry node group
 
     It returns the root parent (i.e., the parent node group whose
@@ -285,17 +285,20 @@ def get_root_of_geometry_node_group(geometry_node_group):
     _type_
         _description_
     """
-    parent = get_parent_of_geometry_node_group(geometry_node_group)
-    while get_parent_of_geometry_node_group(parent) is not None:
-        parent = get_parent_of_geometry_node_group(parent)
+    parent = get_parent_of_gng(geometry_node_group)
+    c = 1
+    while get_parent_of_gng(parent) is not None:
+        c += 1
+        parent = get_parent_of_gng(parent)
 
-    return parent
+    return (parent, c)
 
 
-def get_inner_node_groups(
+def get_map_inner_gngs(
     list_candidate_root_node_groups,
 ):
-    """Get node groups whose root parents are in the
+    """Get map of node groups to root parent node groups,
+    for node groups whose root parents are in the
     input list
 
     Parameters
@@ -309,17 +312,16 @@ def get_inner_node_groups(
     ]
 
     map_node_group_to_root_node_group = {
-        gr: get_root_of_geometry_node_group(gr)
+        gr: get_root_of_gng(gr)  # tuple
         for gr in list_node_groups
-        if get_root_of_geometry_node_group(gr)
-        in list_candidate_root_node_groups
+        if get_root_of_gng(gr)[0] in list_candidate_root_node_groups
     }
 
     return map_node_group_to_root_node_group
 
 
 def get_selectable_node_for_node_group(geometry_node_group):
-    parent_node_group = get_parent_of_geometry_node_group(geometry_node_group)
+    parent_node_group = get_parent_of_gng(geometry_node_group)
 
     selectable_node = None
     if parent_node_group is not None:
@@ -334,3 +336,19 @@ def get_selectable_node_for_node_group(geometry_node_group):
                 break
 
     return selectable_node
+
+
+# def get_path_to_gng():
+#     ### compute list of parents nodes of this subpanel's GNG
+#     # in reverse order
+#     parent = get_parent_of_gng(
+#         bpy.data.node_groups[self.subpanel_gng_name]
+#     )
+#     path_to_gng = [parent]
+#     while get_parent_of_gng(parent) is not None:
+#         parent = get_parent_of_gng(parent)
+#         path_to_gng.append(parent)
+
+#     path_to_gng.reverse()
+#     path_to_gng.append(bpy.data.node_groups[self.subpanel_gng_name])
+#     print(path_to_gng)
