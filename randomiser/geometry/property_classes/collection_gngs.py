@@ -1,5 +1,6 @@
 import bpy
 
+from ... import config
 from .collection_geom_socket_properties import ColGeomSocketProperties
 
 
@@ -131,10 +132,35 @@ class ColGeomNodeGroups(bpy.types.PropertyGroup):
     # candidate geometry node groups
     @property
     def candidate_gngs(self):  # getter method
+        """Return list of geometry node groups
+        with nodes that start with the random keyword inside them
+
+        Returns
+        -------
+        _type_
+            _description_
+        """
         # self is the collection of node groups
         list_node_groups = [
-            nd for nd in bpy.data.node_groups if nd.type == "GEOMETRY"
+            nd
+            for nd in bpy.data.node_groups
+            if nd.type == "GEOMETRY"
+            and (
+                any(
+                    [
+                        ni.name.lower().startswith(
+                            config.DEFAULT_RANDOM_KEYWORD
+                        )
+                        for ni in nd.nodes
+                    ]
+                )
+            )
         ]
+        # # sort by name
+        # list_node_groups = sorted(
+        #     list_materials,
+        #     key=lambda mat: mat.name.lower()
+        # )
         return list_node_groups
 
 
