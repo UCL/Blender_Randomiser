@@ -30,14 +30,10 @@ def get_nodes_to_randomise_from_list(
     """
 
     # ensure list_candidate_nodes is unique
-    # TODO: what if two groups have a node with the same name??
-    # --it will work if nodegroups have different names!
-    # maybe assume geometry node groups will start/end with Geometry?
     list_candidate_nodes = list(set(list_candidate_nodes))
 
-    # find input nodes that startwith random
-    # in any of those groups
-    # excluding 'Group' nodes
+    # find input nodes that start with the random keyword
+    # excluding 'Group' artificial nodes
     list_input_nodes = [
         nd
         for nd in list_candidate_nodes
@@ -47,7 +43,7 @@ def get_nodes_to_randomise_from_list(
         not in [
             "GROUP_INPUT",
             "GROUP_OUTPUT",
-        ]  # exclude 'Group' artificial nodes
+        ]
     ]
 
     return list_input_nodes
@@ -186,10 +182,11 @@ def get_geometry_nodes_to_randomise(
     node_group_str: str = "Geometry Nodes",
     node2randomise_prefix: str = config.DEFAULT_RANDOM_KEYWORD,
 ):
-    # find input nodes that startwith random
+    # find input nodes that start with random
     # excluding 'Group Inpuyt/Output' nodes,
-    # and any nested Group nodes! (these are included in bpy.data.node_groups
-    # of type 'GEOMETRY')
+    # and any nested Group nodes
+    # NOTE: nested Group nodes are included in bpy.data.node_groups
+    # of type 'GEOMETRY'
     list_input_nodes = get_nodes_to_randomise_from_list(
         [
             nd
@@ -206,6 +203,9 @@ def get_gngs_linked_to_modifiers(object):
     """Get geometry node groups that are linked to
     modifiers of the object
 
+    NOTE: Shader node groups cannot be linked to modifiers,
+    So all node groups will be geometry node groups
+
     Parameters
     ----------
     object : _type_
@@ -216,8 +216,6 @@ def get_gngs_linked_to_modifiers(object):
     _type_
         _description_
     """
-    # Shader node groups cannot be linked to modifiers
-    # So all node groups will be geometry node groups
 
     node_groups_linked_to_modifiers_of_object = [
         mod.node_group
@@ -236,8 +234,8 @@ def get_parent_of_gng(
     Returns the node tree that the input geometry node group is
     inside of.
 
-    If the input geometry node group has no parent (i.e., is a root node)
-    it return None for the parent
+    If the input geometry node group has no parent (i.e., it is a root node)
+    this function will return None for its parent
 
     Parameters
     ----------
@@ -286,7 +284,7 @@ def get_root_of_gng(geometry_node_group):
         _description_
     """
     parent = get_parent_of_gng(geometry_node_group)
-    c = 1
+    c = 1  # TODO: should this be 0?
     while get_parent_of_gng(parent) is not None:
         c += 1
         parent = get_parent_of_gng(parent)
@@ -297,9 +295,12 @@ def get_root_of_gng(geometry_node_group):
 def get_map_inner_gngs(
     list_candidate_root_node_groups,
 ):
-    """Get map of node groups to root parent node groups,
-    for node groups whose root parents are in the
-    input list
+    """Compute dictionary that maps inner node groups to a tuple made of
+    - the inner node group's root parent node group,
+    - the inner node group's depth
+
+    The dictionary is computed for inner node groups whose root parents
+    are in the input list
 
     Parameters
     ----------
@@ -321,6 +322,22 @@ def get_map_inner_gngs(
 
 
 def get_selectable_node_for_node_group(geometry_node_group):
+    """Get node associated to a (inner) geometry node group
+    that allows for it to be selected
+
+    An inner geometry node group will have a node associated with it
+    in the parent node tree. That node can be selected and set as active.
+
+    Parameters
+    ----------
+    geometry_node_group : _type_
+        _description_
+
+    Returns
+    -------
+    _type_
+        _description_
+    """
     parent_node_group = get_parent_of_gng(geometry_node_group)
 
     selectable_node = None
@@ -339,9 +356,24 @@ def get_selectable_node_for_node_group(geometry_node_group):
 
 
 def get_path_to_gng(gng):
-    ### compute list of parents nodes of this subpanel's GNG
-    # in reverse order
-    # inclusive
+    """Compute path of parent geometry group nodes up
+    to the input geometry group node
+
+    Both the root parent node group and the input
+    geometry group node are included
+
+    Parameters
+    ----------
+    gng : _type_
+        inner geometry group need of which we want to
+        obtain the path
+
+    Returns
+    -------
+    path_to_gng: list
+        a list of parent geometry group nodes up to the input one
+    """
+
     parent = get_parent_of_gng(gng)
     if parent is None:
         path_to_gng = []
@@ -358,6 +390,24 @@ def get_path_to_gng(gng):
 
 
 def get_max_depth(root_parent_node_group):
+    """Compute the maximum depth of any inner geometry group
+    for the given root parent node group
+
+    A root parent node group is a node group whose parent is
+    None
+
+    Parameters
+    ----------
+    root_parent_node_group : _type_
+        root parent node group of which we want to compute the
+        maximum depth
+
+    Returns
+    -------
+    max_depth : int
+        the depth of the innermost node group
+        for this root parent node group
+    """
     map_inner_gngs_of_modifier = get_map_inner_gngs([root_parent_node_group])
     max_depth = max([v[1] for k, v in map_inner_gngs_of_modifier.items()])
 
@@ -365,7 +415,26 @@ def get_max_depth(root_parent_node_group):
 
 
 def get_modifier_linked_to_gng(gng_name, context_active_object):
-    subpanel_modifier = ""
+    """Get the modifier of the currently active object
+    linked to the input geometry node group (GNG) name
+
+    If there are no modifiers in the currently active object
+    linked to the input GNG, it will return None.
+
+    Parameters
+    ----------
+    gng_name : str
+        name of the GNG of interest
+    context_active_object : _type_
+        currently active object
+
+    Returns
+    -------
+    subpanel_modifier
+        modifier of the currently active object of type
+        'Geometry nodes' linked to the input GNG
+    """
+    subpanel_modifier = None
     for mod in context_active_object.modifiers:
         if (
             hasattr(mod, "node_group")
@@ -378,8 +447,16 @@ def get_modifier_linked_to_gng(gng_name, context_active_object):
 
 
 def set_gngs_graph_to_top_level(root_parent_node_group):
+    """Reset the geometry nodes graph view to
+    the root parent geometry node group
+
+    Parameters
+    ----------
+    root_parent_node_group : _type_
+
+    """
     max_depth = get_max_depth(root_parent_node_group)
-    for i in range(max_depth):  # max level
-        bpy.ops.node.group_edit(exit=True)  # go up
+    for i in range(max_depth):
+        bpy.ops.node.group_edit(exit=True)  # with exit=True we go up one level
 
     return
