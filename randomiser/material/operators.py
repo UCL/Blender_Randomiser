@@ -1,3 +1,5 @@
+from random import uniform
+
 import bpy
 import numpy as np
 from bpy.app.handlers import persistent
@@ -138,9 +140,6 @@ class RandomiseAllMaterialNodes(bpy.types.Operator):
         """
         cs = context.scene
 
-        # Construct a numpy random number generator
-        rng = np.random.default_rng()
-
         # For every material with a subpanel
         for mat_str in self.list_subpanel_material_names:
             # get collection of socket properties for this material
@@ -189,7 +188,7 @@ class RandomiseAllMaterialNodes(bpy.types.Operator):
                     min_val = min_val_new
 
                 # assign randomised socket value
-                sckt.default_value = rng.uniform(low=min_val, high=max_val)
+                sckt.default_value = uniform(min_val, max_val)
 
         return {"FINISHED"}
 
