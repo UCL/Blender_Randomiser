@@ -295,7 +295,8 @@ def get_root_of_gng(geometry_node_group):
 def get_map_inner_gngs(
     list_candidate_root_node_groups,
 ):
-    """Compute dictionary that maps inner node groups to a tuple made of
+    """Compute dictionary that maps inner node groups of the
+    input root parent node groups, to a tuple made of
     - the inner node group's root parent node group,
     - the inner node group's depth
 
@@ -409,7 +410,9 @@ def get_max_depth(root_parent_node_group):
         for this root parent node group
     """
     map_inner_gngs_of_modifier = get_map_inner_gngs([root_parent_node_group])
-    max_depth = max([v[1] for k, v in map_inner_gngs_of_modifier.items()])
+    max_depth = 0
+    if map_inner_gngs_of_modifier:
+        max_depth = max([v[1] for k, v in map_inner_gngs_of_modifier.items()])
 
     return max_depth
 
