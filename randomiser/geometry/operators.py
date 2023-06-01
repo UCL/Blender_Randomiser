@@ -35,17 +35,33 @@ class RandomiseAllGeometryNodes(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        # operator can only run if there are geometry node groups
-        # in the collection
+        """Determine whether the operator can be executed.
+
+        The operator can only run if there are geometry node groups
+        in the collection. If it can't be executed, the
+        button will appear as disabled.
+
+
+        Parameters
+        ----------
+        context : _type_
+            _description_
+
+        Returns
+        -------
+        boolean
+            number of geometry node groups in the collection
+        """
+
         return len(context.scene.socket_props_per_gng.collection) > 0
 
     def invoke(self, context, event):
-        """Initialise parmeters before executing
+        """Initialise parmeters before executing the operator
 
         The invoke() function runs before executing the operator.
         Here, we
         - add the list of input nodes and collection of socket properties to
-          the operator self,
+          the operator (self), and
         - unselect the randomisation toggle of the sockets of input nodes if
           they are not linked to any other node
 
@@ -62,7 +78,8 @@ class RandomiseAllGeometryNodes(bpy.types.Operator):
             _description_
         """
         # add list of GNGs to operator self
-        # (this list should have been updated already, when drawing the panel)
+        # NOTE: this list should have been updated already,
+        # when drawing the panel
         cs = context.scene
         self.list_subpanel_gng_names = [
             gng.name for gng in cs.socket_props_per_gng.collection
@@ -93,12 +110,6 @@ class RandomiseAllGeometryNodes(bpy.types.Operator):
             for sckt in candidate_sockets:
                 # get socket identifier string
                 sckt_id = sckt.node.name + "_" + sckt.name
-
-                # if (sckt.node.id_data.name in bpy.data.node_groups) and (
-                #     bpy.data.node_groups[sckt.node.id_data.name].type
-                # != "GEOMETRY"
-                # ):  # only for SHADER groups
-                #     sckt_id = sckt.node.id_data.name + "_" + sckt_id
 
                 # if this socket is selected to randomise but it is unlinked:
                 # set randomisation toggle to False
@@ -141,13 +152,10 @@ class RandomiseAllGeometryNodes(bpy.types.Operator):
         """
         cs = context.scene
 
-        # Construct a numpy random number generator
-        # rng = np.random.default_rng()
-
         # For every GNG with a subpanel
         for gng_str in self.list_subpanel_gng_names:
             # get collection of socket properties for this material
-            # ATT socket properties do not include the actual socket object
+            # NOTE: socket properties do not include the actual socket object
             sockets_props_collection = cs.socket_props_per_gng.collection[
                 gng_str
             ].collection
@@ -172,12 +180,14 @@ class RandomiseAllGeometryNodes(bpy.types.Operator):
                     )
                 )
 
+                # set default value
                 # if socket type is boolean
                 if type(sckt) == bpy.types.NodeSocketBool:
                     sckt.default_value = random.choice(
                         [bool(list(m_val)[0]) for m_val in [min_val, max_val]]
                     )  # 1d only
-                    # Faster: bool(random.getrandbits(1))F
+                    # TODO: change for a faster option?
+                    # bool(random.getrandbits(1))F
                     # https://stackoverflow.com/questions/6824681/get-a-random-boolean-in-python
 
                 # if socket type is int
@@ -187,8 +197,7 @@ class RandomiseAllGeometryNodes(bpy.types.Operator):
                 # for all other socket types
                 else:
                     # if type of the socket is NodeSocketColor,
-                    # and max_val < min_val:
-                    # switch them before randomising
+                    # and max_val < min_val: switch them before randomising
                     # NOTE: these are not switched in the display panel
                     # (this is intended)
                     if (type(sckt) == bpy.types.NodeSocketColor) and any(
@@ -207,18 +216,17 @@ class RandomiseAllGeometryNodes(bpy.types.Operator):
                         min_val = min_val_new
 
                     # assign randomised socket value
-                    # print(random.uniform(min_val, max_val))
                     sckt.default_value = random.uniform(min_val, max_val)
 
         return {"FINISHED"}
 
 
-# Without persistent, the function is removed from the handlers' list
-#  once executed
+# NOTE: without the persistent decorator,
+# the function is removed from the handlers' list
+# after it is first executed
 @persistent
 def randomise_geometry_nodes_per_frame(dummy):
     bpy.ops.node.randomise_all_geometry_sockets("INVOKE_DEFAULT")
-
     return
 
 
@@ -226,7 +234,8 @@ def randomise_geometry_nodes_per_frame(dummy):
 # Operator: view graph per GNG
 # -------------------------------
 class ViewNodeGraphOneGNG(bpy.types.Operator):
-    """Show node graph for the Geometry Node Group
+    """Show node graph for the relevant
+    Geometry Node Group
 
     Parameters
     ----------
@@ -239,48 +248,75 @@ class ViewNodeGraphOneGNG(bpy.types.Operator):
         _description_
     """
 
-    # metadata
     bl_idname = (
         "gng.view_graph"  # this is appended to bpy.ops.
-        # NOTE: it will be overwritten
+        # NOTE: it will be overwritten for each instance of
+        # the operator
     )
     bl_label = "View node graph for this Geometry node group"
     bl_options = {"REGISTER", "UNDO"}
 
     @classmethod
     def poll(cls, context):
-        # used to check if the operator can run.
-        # only node groups relevant to a specific object should
-        # as enabled
+        """Determine whether the operator can be executed.
+
+        This operator can only run if:
+        - its geometry node group is of geometry type,
+        and either:
+        - the associated geometry node group is linked to a modifier
+          of the currently active object, or
+        - the associated geometry node group is an inner node and its
+          root parent is a geometry node group linked to a modifier
+          of the currently active object.
+
+        An inner node is a geometry node group defined inside
+        another geometry node group. The path of nodes to an inner
+        node is the list of group nodes that leads to the inner node.
+        Its root parent is the only parent node group in the path of nodes
+        without a parent.
+
+        If the operator can't be executed, the button will appear as disabled.
+
+        Parameters
+        ----------
+        context : _type_
+            _description_
+
+        Returns
+        -------
+        _type_
+            _description_
+        """
+
         cs = context.scene
         cob = context.object
 
-        # geometry node group of this subpanel
+        # get list of all GNGs
+        list_gngs = [
+            gr.name for gr in bpy.data.node_groups if gr.type == "GEOMETRY"
+        ]
+
+        # get geometry node group (GNG) of this subpanel
         subpanel_gng = cs.socket_props_per_gng.collection[cls.subpanel_gng_idx]
 
-        # get list of node groups linked to modifiers of the active object
+        # get list of GNGs linked to modifiers of the active object
         list_gngs_in_modifiers = utils.get_gngs_linked_to_modifiers(cob)
         list_gngs_in_modifiers_names = [
             ng.name for ng in list_gngs_in_modifiers
         ]
 
-        # get list of geometry node groups whose root parent
-        # is a modfier-linked node group
+        # get list of (inner) GNGs whose root parent is a modfier-linked
+        # GNG
         map_node_group_to_root_node_group = utils.get_map_inner_gngs(
             list_gngs_in_modifiers,
         )
 
-        # get list of geometry node groups
-        list_gngs = [
-            gr.name for gr in bpy.data.node_groups if gr.type == "GEOMETRY"
-        ]
-
-        # the GNG must be a Geometry node group, and either
-        # - must be linked to a modifier of the currently active object
-        # - must be a node group inside a node group linked to a modifier of
-        # the currently active object (the inner node group can be
-        # any levels deep)
-        display_operator = (subpanel_gng.name in list_gngs) and (
+        # define condition to enable the operator
+        display_operator = (
+            subpanel_gng.name
+            in list_gngs
+            # TODO: maybe this is not required here?
+        ) and (
             (subpanel_gng.name in list_gngs_in_modifiers_names)
             or (
                 subpanel_gng.name
@@ -291,14 +327,11 @@ class ViewNodeGraphOneGNG(bpy.types.Operator):
         return display_operator
 
     def invoke(self, context, event):
-        """Initialise parmeters before executing
+        """Initialise parmeters before executing the operator
 
         The invoke() function runs before executing the operator.
-        Here, we
-        - add the list of input nodes and collection of socket properties to
-          the operator self,
-        - unselect the randomisation toggle of the sockets of input nodes if
-          they are not linked to any other node
+        Here, we add the subpanel's geometry node group name to
+        the operator self
 
         Parameters
         ----------
@@ -312,8 +345,7 @@ class ViewNodeGraphOneGNG(bpy.types.Operator):
         _type_
             _description_
         """
-        # add list of socket properties to operator self
-        # (this list should have been updated already, when drawing the panel)
+
         cs = context.scene
         subpanel_gng = cs.socket_props_per_gng.collection[
             self.subpanel_gng_idx
@@ -323,17 +355,28 @@ class ViewNodeGraphOneGNG(bpy.types.Operator):
         return self.execute(context)
 
     def execute(self, context):
-        """Execute 'view graph' operator
+        """Execute the 'view graph' operator.
 
-        It shows the node graph for the geometry node group shown in the label.
+        It shows the graph for the geometry node group (GNG) shown in the
+        subpanel's header.
 
-        In practice, we change the graph view by changing the active modifier.
-        Note as well that a modifier is defined for an object.
+        If the GNG associated to the subpanel is linked to a modifier of the
+        active object, then that modifier is set to active and the graph
+        is automatically updated.
 
-        It may be the case that a geometry node tree is not assigned
-        to any modifier. In that case, if the view-graph button is clicked,
-        a new modifier is added for that geometry node tree and for the
-        currently active material.
+        If the GNG  associated to the subpanel is NOT linked to a modifier, but
+        it is an inner GNG of a modifier-linked GNG, then:
+        - the modifier of the root parent GNG is set as active, and the graph
+          is set to the root parent view
+        - the path to the inner GNG is computed
+        - the graph of the inner GNG is displayed, by recursively setting each
+          parent node as active and then executing the 'edit node' command.
+
+
+        If the GNG  associated to the subpanel is NOT linked to a modifier, and
+        it is NOT an inner GNG of a modifier-linked GNG, then a new modifier
+        will be added to the currently active material and this subpanel's GNG
+        will be linked to it
 
         Parameters
         ----------
@@ -345,6 +388,7 @@ class ViewNodeGraphOneGNG(bpy.types.Operator):
         _type_
             _description_
         """
+
         cob = context.object
 
         # find the modifier linked to this GNG, if exists
@@ -352,12 +396,11 @@ class ViewNodeGraphOneGNG(bpy.types.Operator):
             self.subpanel_gng_name, cob
         )
 
-        # get dict of inner geometry node groups
-        list_gngs = [
-            gr for gr in bpy.data.node_groups if gr.type == "GEOMETRY"
-        ]
+        # get dict of inner GNGs
+        # the dict maps inner GNGs to a tuple made of its root parent GNG
+        # and its depth
         map_inner_node_groups_to_root_parent = utils.get_map_inner_gngs(
-            list_gngs
+            [gr for gr in bpy.data.node_groups if gr.type == "GEOMETRY"]
         )
 
         # if there is a modifier linked to this GNG: set that
@@ -371,15 +414,16 @@ class ViewNodeGraphOneGNG(bpy.types.Operator):
             )
 
         # if there is no modifier linked to this GNG,
-        # but the node group is an inner node group:
-        # set root parent modifier as active and navigate to node
+        # but it is an inner GNG whose root parent is a modifier-linked GNG:
+        # set the modifier as active and navigate the graph to the
+        # inner GNG
         elif not subpanel_modifier and (
             self.subpanel_gng_name
             in [gr.name for gr in map_inner_node_groups_to_root_parent.keys()]
         ):
             # find the modifier linked to the (root) parent and set as active
-            # NOTE: if the parent is not linked to a modifier,
-            # the operator is disabled
+            # NOTE: if the root parent is not linked to a modifier,
+            # the operator will show as disabled
             root_parent_node_group = map_inner_node_groups_to_root_parent[
                 bpy.data.node_groups[self.subpanel_gng_name]
             ][0]
@@ -392,27 +436,30 @@ class ViewNodeGraphOneGNG(bpy.types.Operator):
                 modifier=root_parent_modifier.name
             )
 
-            ### ensure we are at top level in the graph
-            utils.set_gngs_graph_to_top_level(root_parent_node_group)
-
-            ### compute list of parents nodes of this subpanel's GNG
-            # in reverse order
+            # compute the path to this subpanel's GNG
+            # from the parent root GNG (both ends inclusive)
             path_to_gng = utils.get_path_to_gng(
                 bpy.data.node_groups[self.subpanel_gng_name]
             )
 
-            ### navigate to the selected node group
+            # ensure we are at the top level in the graph
+            # (top level = parent root GNG)
+            utils.set_gngs_graph_to_top_level(root_parent_node_group)
+
+            # navigate the graph to the desired GNG
+            # at every step: we set the target GNG as active and
+            # click 'edit group'
             for i, _ in enumerate(path_to_gng[:-1]):
-                # get target gng for this step and its parent
+                # get target GNG for this step and its parent
                 gng_parent = path_to_gng[i]
                 gng_target = path_to_gng[i + 1]
 
-                # get selectable target gng
+                # get selectable version of the target GNG
                 selectable_gng_target = (
                     utils.get_selectable_node_for_node_group(gng_target)
                 )
 
-                # set target gng as active
+                # set target GNG as active
                 if gng_parent == root_parent_node_group:
                     root_parent_node_group.nodes.active = selectable_gng_target
                 else:
@@ -423,19 +470,19 @@ class ViewNodeGraphOneGNG(bpy.types.Operator):
                         selectable_gng_target
                     )
 
-                # go one level down (applied on active gng)
+                # click 'edit group', i.e. go one level down in the graph
                 bpy.ops.node.group_edit(exit=False)
 
         # if there is no modifier linked to this GNG
-        # and the node group is not an inner node group:
-        # then create a new modifier and link the node group to it
+        # and it is not an inner GNG: create a new modifier
+        # for the currently active object and link the GNG to it
         else:
-            # Add a new 'Geometry nodes group' modifier
+            # add a new 'Geometry nodes group' modifier
             # (will set it as active)
             bpy.ops.object.modifier_add(type="NODES")
             new_modifier = bpy.context.object.modifiers.active
 
-            # assign the desired node group to this modifier
+            # assign the subpanel's GNGto this modifier
             new_modifier.node_group = bpy.data.node_groups[
                 self.subpanel_gng_name
             ]
