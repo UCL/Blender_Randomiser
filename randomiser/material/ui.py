@@ -5,7 +5,8 @@ https://blender.stackexchange.com/questions/185693/how-can-i-control-the-number-
 """
 import bpy
 
-from .. import config, utils
+from .. import config
+from ..utils import nodes2rand
 
 
 # ----------------------
@@ -225,7 +226,7 @@ class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
 
         # Get list of input nodes to randomise
         # for this subpanel's material
-        list_input_nodes = utils.get_material_nodes_to_randomise_indep(
+        list_input_nodes = nodes2rand.get_material_nodes_to_randomise_indep(
             subpanel_material.name
         )
 
@@ -284,7 +285,7 @@ class SubSubPanelGroupNodes(TemplatePanel, bpy.types.Panel):
         # exclude groups with no nodes to randomise inside!
         # TODO: is it better to add to cls somewhere else? (not sure where...)
         cls.list_nodes2rand_in_groups = (
-            utils.get_material_nodes_to_randomise_group(
+            nodes2rand.get_material_nodes_to_randomise_group(
                 cls.subpanel_material_str
             )
         )
