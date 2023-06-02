@@ -29,7 +29,7 @@ class MainPanelRandomMaterialNodes(TemplatePanel):  # , bpy.types.Panel):
         column = self.layout.column(align=True)
         column.label(
             text=(
-                "Click on a material's name"
+                "Click on a material's name "
                 "to display its graph on the Shader Editor"
             )
         )
@@ -106,7 +106,7 @@ def draw_sockets_list(
             # socket min and max columns
             socket_id = nd.name + "_" + sckt.name
             if (nd.id_data.name in bpy.data.node_groups) and (
-                bpy.data.node_groups[nd.id_data.name].type != "GEOMETRY"
+                bpy.data.node_groups[nd.id_data.name].type == "SHADER"
             ):  # only for SHADER groups
                 socket_id = nd.id_data.name + "_" + socket_id
 
@@ -303,8 +303,6 @@ class SubSubPanelGroupNodes(TemplatePanel, bpy.types.Panel):
             cls.group_node_name = list_group_nodes_names_this_material[
                 cls.subsubpanel_group_node_idx
             ]
-        # else:
-        #     cls.group_node_name = '' # not needed
 
         # only display this sub-subpanel if its index is < total group nodes
         # for this material

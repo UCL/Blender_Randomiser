@@ -1,6 +1,7 @@
 import bpy
 
 from .. import config
+from . import node_groups
 
 
 def get_nodes_to_randomise_from_list(
@@ -119,13 +120,18 @@ def get_material_nodes_to_randomise_group(
     """
 
     # list of nodes for current material
-    # belonging to a group
+    # belonging to a group; the group can be any levels deep
+
+    # list of inner node groups for this material
+    map_inner_node_groups = node_groups.get_map_inner_ngs_given_roots(
+        [bpy.data.materials[material_str]]
+    )
+    list_inner_node_groups = list(map_inner_node_groups.keys())
+
+    # list of all material nodes inside a group
     list_material_nodes_in_groups = []
-    for nd in bpy.data.materials[material_str].node_tree.nodes:
-        if nd.type == "GROUP":
-            list_material_nodes_in_groups.extend(
-                nd.node_tree.nodes
-            )  # nodes inside groups
+    for ng in list_inner_node_groups:
+        list_material_nodes_in_groups.extend(ng.nodes)  # nodes inside groups
 
     # find input nodes that startwith random
     # in any of those groups
