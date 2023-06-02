@@ -172,12 +172,12 @@ def get_parent_of_sng(node_group):
 def get_parent_of_ng(node_group):
     # Select the function to compute the parent of the
     # node group based on the node group type
-
-    if node_group.type == "SHADER" or type(node_group) == bpy.types.Material:
-        get_parent_of_ng = get_parent_of_sng
+    if (type(node_group) == bpy.types.Material) or (
+        node_group.type == "SHADER"
+    ):
+        return get_parent_of_sng(node_group)
     elif node_group.type == "GEOMETRY":
-        get_parent_of_ng = get_parent_of_gng
-    return get_parent_of_ng
+        return get_parent_of_gng(node_group)
 
 
 def get_root_and_depth_of_ng(node_group):
