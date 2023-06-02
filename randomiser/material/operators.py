@@ -5,6 +5,7 @@ import numpy as np
 from bpy.app.handlers import persistent
 
 from .. import config
+from ..utils import node_groups as ng
 
 
 # --------------------------------------------
@@ -322,6 +323,11 @@ class ViewNodeGraphOneMaterial(bpy.types.Operator):
             cob.active_material = bpy.data.materials[
                 self.subpanel_material_name
             ]
+
+        # ensure we are at the top level in the graph
+        ng.set_gngs_graph_to_top_level(
+            bpy.data.materials[self.subpanel_material_name]
+        )
 
         return {"FINISHED"}
 
