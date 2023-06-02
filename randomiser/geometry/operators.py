@@ -441,7 +441,7 @@ class ViewNodeGraphOneGNG(bpy.types.Operator):
 
             # compute the path to this subpanel's GNG
             # from the parent root GNG (both ends inclusive)
-            path_to_gng = ng.get_path_to_gng(
+            path_to_gng = ng.get_path_to_ng(
                 bpy.data.node_groups[self.subpanel_gng_name]
             )
 

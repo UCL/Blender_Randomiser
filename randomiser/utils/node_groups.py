@@ -69,9 +69,11 @@ def get_modifier_linked_to_gng(gng_name, context_active_object):
 
 
 def get_node_group_parent_of_node_group(node_group):
+    # input node group could be a material, in which case the
+    # node group parent is none
     parent_ng = None
 
-    if node_group is not None:
+    if node_group is not None and (type(node_group) != bpy.types.Material):
         list_all_ngs = [
             gr for gr in bpy.data.node_groups if gr.type == node_group.type
         ]
@@ -135,12 +137,18 @@ def get_parent_of_sng(node_group):
         _description_
     """
     # the parent of a SNG can be another SNG, a Material, or None
+    # input node group could be a material, in which case the parent is none
 
     # check if parent is a node group
     parent_sng = get_node_group_parent_of_node_group(node_group)
 
-    # check if parent is a material
-    if (parent_sng is not None) and (node_group is not None):
+    # if the input node group is NOT a material:
+    # check further if parent is a material
+    if (
+        (parent_sng is None)
+        and (node_group is not None)
+        and (type(node_group) is not bpy.types.Material)
+    ):
         list_all_materials = [
             mat for mat in bpy.data.materials if mat.use_nodes
         ]
@@ -164,7 +172,8 @@ def get_parent_of_sng(node_group):
 def get_root_and_depth_of_ng(node_group):
     # select function to compute parent of node group
     # based on node group type
-    if node_group.type == "SHADER":
+    # TODO: combine this with path?
+    if node_group.type == "SHADER" or type(node_group) == bpy.types.Material:
         get_parent_of_ng = get_parent_of_sng
     elif node_group.type == "GEOMETRY":
         get_parent_of_ng = get_parent_of_gng
@@ -185,35 +194,6 @@ def get_root_and_depth_of_ng(node_group):
     return (parent, depth)
 
 
-# def get_map_inner_gngs_given_roots(
-#     list_candidate_root_node_groups,
-# ):
-#     """Compute dictionary that maps inner node groups to a tuple made of
-#     - the inner node group's root parent node group,
-#     - the inner node group's depth
-
-#     The dictionary is computed for inner node groups whose root parents
-#     are in the input list
-
-#     Parameters
-#     ----------
-#     list_candidate_root_node_groups : _type_
-#         _description_
-#     """
-
-#     list_node_groups = [
-#         gr for gr in bpy.data.node_groups if gr.type == "GEOMETRY"
-#     ]
-
-#     map_node_group_to_root_node_group = {
-#         gr: get_root_and_depth_of_ng(gr)  # tuple
-#         for gr in list_node_groups
-#         if get_root_and_depth_of_ng(gr)[0] in list_candidate_root_node_groups
-#     }
-
-#     return map_node_group_to_root_node_group
-
-
 def get_map_inner_ngs_given_roots(
     list_candidate_roots,
 ):
@@ -227,27 +207,23 @@ def get_map_inner_ngs_given_roots(
     Parameters
     ----------
     list_candidate_root_node_groups : _type_
-        _description_
+        list of node groups
     """
+    # TODO: check in inputs are inded roots and print warning if not?
     list_node_groups = [
         gr for gr in bpy.data.node_groups  # if gr.type == "GEOMETRY"
     ]
 
     map_node_group_to_root = {}
     for gr in list_node_groups:
-        if get_root_and_depth_of_ng(gr)[0] in list_candidate_roots:
-            map_node_group_to_root[gr] = get_root_and_depth_of_ng(gr)  # tuple
-
-    # map_node_group_to_root = {
-    #     gr: get_root_and_depth_of_node_group(gr)  # tuple
-    #     for gr in list_node_groups
-    #     if get_root_and_depth_of_node_group(gr)[0] in list_candidate_roots
-    # }
+        root_parent, depth = get_root_and_depth_of_ng(gr)
+        if root_parent in list_candidate_roots:
+            map_node_group_to_root[gr] = (root_parent, depth)  # tuple
 
     return map_node_group_to_root
 
 
-def get_path_to_ng(ng):
+def get_path_to_ng(node_group):
     """Compute path of parent group nodes up
     to the input group node
 
@@ -265,19 +241,25 @@ def get_path_to_ng(ng):
     path_to_ng: list
         a list of parent geometry group nodes up to the input one
     """
+    # select function to compute parent of node group
+    # based on node group type
+    if node_group.type == "SHADER" or type(node_group) == bpy.types.Material:
+        get_parent_of_ng = get_parent_of_sng
+    elif node_group.type == "GEOMETRY":
+        get_parent_of_ng = get_parent_of_gng
 
-    parent = get_parent_of_gng(ng)
+    parent = get_parent_of_ng(node_group)
     if parent is None:
         path_to_ng = []  # why empty rather than [None]?
     else:
         path_to_ng = [parent]
-        while get_parent_of_gng(parent) is not None:
-            parent = get_parent_of_gng(parent)
+        while get_parent_of_ng(parent) is not None:
+            parent = get_parent_of_ng(parent)
             path_to_ng.append(parent)
 
         path_to_ng.reverse()
 
-    path_to_ng.append(ng)
+    path_to_ng.append(node_group)
     return path_to_ng
 
 
@@ -360,9 +342,3 @@ def set_gngs_graph_to_top_level(root_parent_node_group):
         bpy.ops.node.group_edit(exit=True)  # with exit=True we go up one level
 
     return
-
-
-# get map of shader node group
-# given a root node (aka material), it returns all the inner shader
-# node groups
-# def get_parent_of_sng():
