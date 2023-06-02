@@ -169,14 +169,19 @@ def get_parent_of_sng(node_group):
     return parent_sng  # immediate parent
 
 
-def get_root_and_depth_of_ng(node_group):
-    # select function to compute parent of node group
-    # based on node group type
-    # TODO: combine this with path?
+def get_parent_of_ng(node_group):
+    # Select the function to compute the parent of the
+    # node group based on the node group type
+
     if node_group.type == "SHADER" or type(node_group) == bpy.types.Material:
         get_parent_of_ng = get_parent_of_sng
     elif node_group.type == "GEOMETRY":
         get_parent_of_ng = get_parent_of_gng
+    return get_parent_of_ng
+
+
+def get_root_and_depth_of_ng(node_group):
+    # TODO: combine this with path?
 
     # compute root node group: this is the node group in
     # the path whose parent is None. For shader node groups,
@@ -241,13 +246,6 @@ def get_path_to_ng(node_group):
     path_to_ng: list
         a list of parent geometry group nodes up to the input one
     """
-    # select function to compute parent of node group
-    # based on node group type
-    if node_group.type == "SHADER" or type(node_group) == bpy.types.Material:
-        get_parent_of_ng = get_parent_of_sng
-    elif node_group.type == "GEOMETRY":
-        get_parent_of_ng = get_parent_of_gng
-
     parent = get_parent_of_ng(node_group)
     if parent is None:
         path_to_ng = []  # why empty rather than [None]?
@@ -294,7 +292,7 @@ def get_max_depth_of_root(root_parent_node_group):
 # ------------------------------------
 # View graph of selected node group
 # ------------------------------------
-def get_selectable_node_for_gng(geometry_node_group):
+def get_selectable_node_for_ng(node_group):
     """Get node associated to a (inner) geometry node group
     that allows for it to be selected
 
@@ -311,16 +309,26 @@ def get_selectable_node_for_gng(geometry_node_group):
     _type_
         _description_
     """
-    parent_node_group = get_parent_of_gng(geometry_node_group)
+    parent_node_group = get_parent_of_ng(node_group)
 
     selectable_node = None
     if parent_node_group is not None:
-        for nd in parent_node_group.nodes:
+        # get full list of nodes under the parent
+        # parent can be a group node (for shader or geometry nodes)
+        # or a Material (for shader nodes)
+        if type(parent_node_group) != bpy.types.Material:
+            list_nodes_under_parent = parent_node_group.nodes
+        else:
+            list_nodes_under_parent = parent_node_group.node_tree.nodes
+
+        # get the node in the parent node_tree that wraps the node group
+        # of interest
+        for nd in list_nodes_under_parent:
             if (
                 nd.type == "GROUP"
                 and (hasattr(nd, "node_tree"))
                 and (hasattr(nd.node_tree, "name"))
-                and (nd.node_tree.name == geometry_node_group.name)
+                and (nd.node_tree.name == node_group.name)
             ):
                 selectable_node = nd
                 break

@@ -458,7 +458,7 @@ class ViewNodeGraphOneGNG(bpy.types.Operator):
                 gng_target = path_to_gng[i + 1]
 
                 # get selectable version of the target GNG
-                selectable_gng_target = ng.get_selectable_node_for_gng(
+                selectable_gng_target = ng.get_selectable_node_for_ng(
                     gng_target
                 )
 
@@ -466,7 +466,7 @@ class ViewNodeGraphOneGNG(bpy.types.Operator):
                 if gng_parent == root_parent_node_group:
                     root_parent_node_group.nodes.active = selectable_gng_target
                 else:
-                    selectable_parent_gng = ng.get_selectable_node_for_gng(
+                    selectable_parent_gng = ng.get_selectable_node_for_ng(
                         gng_parent
                     )
                     selectable_parent_gng.node_tree.nodes.active = (
