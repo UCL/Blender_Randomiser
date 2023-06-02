@@ -230,6 +230,23 @@ class ViewNodeGraphOneMaterial(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
+        """Determine whether the operator can be executed
+
+        The name of the subpanel must be a material in Blender's data
+        structure
+
+        If the operator can't be executed, the button will appear as disabled.
+
+        Parameters
+        ----------
+        context : _type_
+            _description_
+
+        Returns
+        -------
+        _type_
+            _description_
+        """
         # used to check if the operator can run.
         cs = context.scene
         subpanel_material = cs.socket_props_per_material.collection[
@@ -325,7 +342,7 @@ class ViewNodeGraphOneMaterial(bpy.types.Operator):
             ]
 
         # ensure we are at the top level in the graph
-        ng.set_gngs_graph_to_top_level(
+        ng.set_ngs_graph_to_top_level(
             bpy.data.materials[self.subpanel_material_name]
         )
 

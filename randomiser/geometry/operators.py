@@ -412,7 +412,7 @@ class ViewNodeGraphOneGNG(bpy.types.Operator):
             bpy.ops.object.modifier_set_active(modifier=subpanel_modifier.name)
 
             # ensure graph is at top level
-            ng.set_gngs_graph_to_top_level(
+            ng.set_ngs_graph_to_top_level(
                 bpy.data.node_groups[self.subpanel_gng_name]
             )
 
@@ -447,7 +447,7 @@ class ViewNodeGraphOneGNG(bpy.types.Operator):
 
             # ensure we are at the top level in the graph
             # (top level = parent root GNG)
-            ng.set_gngs_graph_to_top_level(root_parent_node_group)
+            ng.set_ngs_graph_to_top_level(root_parent_node_group)
 
             # navigate the graph to the desired GNG
             # at every step: we set the target GNG as active and

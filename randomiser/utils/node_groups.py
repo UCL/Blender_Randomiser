@@ -336,7 +336,7 @@ def get_selectable_node_for_ng(node_group):
     return selectable_node
 
 
-def set_gngs_graph_to_top_level(root_parent_node_group):
+def set_ngs_graph_to_top_level(root_parent_node_group):
     """Reset the geometry nodes graph view to
     the root parent geometry node group
 
