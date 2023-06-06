@@ -1,6 +1,6 @@
 # Blender_Randomiser
 
-## Usage
+## Installation
 First, clone the repository in your desired directory
 ```
 git clone https://github.com/UCL/Blender_Randomiser.git
