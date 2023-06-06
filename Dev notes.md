@@ -149,6 +149,22 @@ To enable an already installed add-on from the CLI:
 
 [Accepted space-regions combinations](https://blender.stackexchange.com/a/97268)
 
+## Testing
+[PR 62](https://github.com/UCL/Blender_Randomiser/pull/62) is a first attempt at testing with Blender's Python interpreter.
+
+I used this [pytest-blender plugin](https://github.com/mondeja/pytest-blender#pytest-blender), which seems to have very useful fixtures and also provides some steps towards CI.
+
+To use the plugin, we need to install `pytest` and all other dependencies used in testing (`pytest-cov` mainly) in the site-packages of Blender's Python. The repo provides some guidance for this [here](https://github.com/mondeja/pytest-blender#usage). It is important to make sure you use the correct Python interpreter and pip (Blender's ones) when installing `pytest` and `pytest-cov`.
+
+I think an alternative approach would be to use [Blender as a python module](https://wiki.blender.org/wiki/Building_Blender/Other/BlenderAsPyModule), but the pytest-blender plugin approach seems easier.
+
+
+## Handover notes 6/6/2023
+from Sofia & Ruaridh, see [here](https://hackmd.io/-e8g50WRTPSH8XeEaNIqlw#)
+(we both have access and can give access to others).
+
+Includes description of work done on the first TI, next steps and some gotchas.
+
 ---
 
 ## Other notes on Python scripting in Blender
