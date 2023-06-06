@@ -4,7 +4,7 @@ import bpy
 import numpy as np
 from bpy.app.handlers import persistent
 
-from . import config
+from .. import config
 
 
 # --------------------------------------------
@@ -27,7 +27,9 @@ class RandomiseAllMaterialNodes(bpy.types.Operator):
     """
 
     # metadata
-    bl_idname = "node.randomise_all_sockets"  # this is appended to bpy.ops.
+    bl_idname = (
+        "node.randomise_all_material_sockets"  # this is appended to bpy.ops.
+    )
     bl_label = "Randomise selected sockets"
     bl_options = {"REGISTER", "UNDO"}
 
@@ -72,6 +74,11 @@ class RandomiseAllMaterialNodes(bpy.types.Operator):
         for mat_str in self.list_subpanel_material_names:
             # get collection of socket properties for this material
             # ATT socket properties do not include the actual socket object
+            if cs.socket_props_per_material.collection[
+                mat_str
+            ].update_sockets_collection:
+                print("Collection of material sockets updated")
+
             sockets_props_collection = cs.socket_props_per_material.collection[
                 mat_str
             ].collection
@@ -190,7 +197,7 @@ class RandomiseAllMaterialNodes(bpy.types.Operator):
 #  once executed
 @persistent
 def randomise_material_nodes_per_frame(dummy):
-    bpy.ops.node.randomise_all_sockets("INVOKE_DEFAULT")
+    bpy.ops.node.randomise_all_material_sockets("INVOKE_DEFAULT")
 
     return
 

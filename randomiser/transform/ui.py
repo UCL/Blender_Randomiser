@@ -12,6 +12,7 @@ class PanelAddRandomTransform(bpy.types.Panel):
     bl_idname = "NODE_MATERIAL_PT_random_transform"
     bl_label = "Randomise TRANSFORM"
     # title of the panel / label displayed to the user
+    # TODO: refactor this, take from ..material.ui import TemplatePanel?
     bl_space_type = "NODE_EDITOR"
     bl_region_type = "UI"
     bl_category = "Randomiser"

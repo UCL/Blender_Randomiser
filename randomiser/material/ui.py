@@ -5,8 +5,7 @@ https://blender.stackexchange.com/questions/185693/how-can-i-control-the-number-
 """
 import bpy
 
-from .. import utils
-from . import config
+from .. import config, utils
 
 
 # ----------------------
@@ -21,13 +20,18 @@ class TemplatePanel(bpy.types.Panel):
 # ----------------------
 # Main panel
 # ---------------------
-class MainPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
+class MainPanelRandomMaterialNodes(TemplatePanel):  # , bpy.types.Panel):
     bl_idname = "NODE_MATERIAL_PT_mainpanel"
     bl_label = "Randomise MATERIAL"
 
     def draw(self, context):
         column = self.layout.column(align=True)
-        column.label(text="Select material to see available sockets.")
+        column.label(
+            text=(
+                "Click on a material's name"
+                "to display its graph on the Shader Editor"
+            )
+        )
 
 
 # ---------------------------------------------------
@@ -100,7 +104,9 @@ def draw_sockets_list(
 
             # socket min and max columns
             socket_id = nd.name + "_" + sckt.name
-            if nd.id_data.name in bpy.data.node_groups:
+            if (nd.id_data.name in bpy.data.node_groups) and (
+                bpy.data.node_groups[nd.id_data.name].type != "GEOMETRY"
+            ):  # only for SHADER groups
                 socket_id = nd.id_data.name + "_" + socket_id
 
             # if socket is a color: format min/max as a color picker
@@ -121,6 +127,15 @@ def draw_sockets_list(
                             text=cl,
                             index=j,
                         )
+            # if socket is Boolean: add non-editable labels
+            elif type(sckt) == bpy.types.NodeSocketBool:
+                for m_str, col in zip(["min", "max"], [col3, col4]):
+                    m_val = getattr(
+                        sockets_props_collection[socket_id],
+                        m_str + "_" + cs.socket_type_to_attr[type(sckt)],
+                    )
+                    col.label(text=str(list(m_val)[0]))
+
             # if socket is not color type: format as a regular property
             else:
                 for m_str, col in zip(["min", "max"], [col3, col4]):
@@ -150,7 +165,7 @@ class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
     bl_idname = "NODE_MATERIAL_PT_subpanel"
     bl_parent_id = "NODE_MATERIAL_PT_mainpanel"
     bl_label = ""  # title of the panel displayed to the user
-    # bl_options = {"DEFAULT_CLOSED"}
+    bl_options = {"DEFAULT_CLOSED"}
     # https://docs.blender.org/api/master/bpy.types.Panel.html#bpy.types.Panel.bl_options
 
     @classmethod
@@ -213,6 +228,17 @@ class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
         list_input_nodes = utils.get_material_nodes_to_randomise_indep(
             subpanel_material.name
         )
+
+        # TODO
+        # get nodes from sockets instead?
+        # list_parent_nodes_str = [
+        #     sckt.name.split('_')[0] for sckt in sockets_props_collection
+        # ]
+
+        # list_input_nodes = [
+        #     bpy.data.node_groups[subpanel_gng.name].nodes[nd_str]
+        #     for nd_str in list_parent_nodes_str
+        # ]
 
         draw_sockets_list(
             cs,
@@ -344,7 +370,7 @@ class SubPanelRandomMaterialOperator(TemplatePanel, bpy.types.Panel):
     def draw(self, context):
         column = self.layout.column(align=True)
         column.operator(
-            "node.randomise_all_sockets",
+            "node.randomise_all_material_sockets",
             text="Randomise",
         )
 

@@ -205,6 +205,28 @@ class SocketProperties(bpy.types.PropertyGroup):
         size=4, update=constrain_rgba_closure("max_" + rgba_4d_str)  # noqa
     )
 
+    # ----------------------------
+    # int_1d
+    int_1d_str = "int_1d"
+    min_int_1d: bpy.props.IntVectorProperty(  # type: ignore
+        size=1, update=constrain_min_closure(int_1d_str)
+    )
+
+    max_int_1d: bpy.props.IntVectorProperty(  # type: ignore
+        size=1, update=constrain_max_closure(int_1d_str)
+    )
+
+    # ----------------------------
+    # bool_1d
+    # bool_1d_str = "bool_1d"
+    min_bool_1d: bpy.props.BoolVectorProperty(  # type: ignore
+        size=1,
+    )
+
+    max_bool_1d: bpy.props.BoolVectorProperty(  # type: ignore
+        size=1,
+    )
+
     # ---------------------
     # randomisation toggle
     bool_randomise: bpy.props.BoolProperty()  # type: ignore
