@@ -5,7 +5,8 @@ https://blender.stackexchange.com/questions/185693/how-can-i-control-the-number-
 """
 import bpy
 
-from .. import config, utils
+from .. import config
+from ..utils import nodes2rand
 
 
 # ----------------------
@@ -28,7 +29,7 @@ class MainPanelRandomMaterialNodes(TemplatePanel):  # , bpy.types.Panel):
         column = self.layout.column(align=True)
         column.label(
             text=(
-                "Click on a material's name"
+                "Click on a material's name "
                 "to display its graph on the Shader Editor"
             )
         )
@@ -105,7 +106,7 @@ def draw_sockets_list(
             # socket min and max columns
             socket_id = nd.name + "_" + sckt.name
             if (nd.id_data.name in bpy.data.node_groups) and (
-                bpy.data.node_groups[nd.id_data.name].type != "GEOMETRY"
+                bpy.data.node_groups[nd.id_data.name].type == "SHADER"
             ):  # only for SHADER groups
                 socket_id = nd.id_data.name + "_" + socket_id
 
@@ -225,7 +226,7 @@ class SubPanelRandomMaterialNodes(TemplatePanel, bpy.types.Panel):
 
         # Get list of input nodes to randomise
         # for this subpanel's material
-        list_input_nodes = utils.get_material_nodes_to_randomise_indep(
+        list_input_nodes = nodes2rand.get_material_nodes_to_randomise_indep(
             subpanel_material.name
         )
 
@@ -284,7 +285,7 @@ class SubSubPanelGroupNodes(TemplatePanel, bpy.types.Panel):
         # exclude groups with no nodes to randomise inside!
         # TODO: is it better to add to cls somewhere else? (not sure where...)
         cls.list_nodes2rand_in_groups = (
-            utils.get_material_nodes_to_randomise_group(
+            nodes2rand.get_material_nodes_to_randomise_group(
                 cls.subpanel_material_str
             )
         )
@@ -302,8 +303,6 @@ class SubSubPanelGroupNodes(TemplatePanel, bpy.types.Panel):
             cls.group_node_name = list_group_nodes_names_this_material[
                 cls.subsubpanel_group_node_idx
             ]
-        # else:
-        #     cls.group_node_name = '' # not needed
 
         # only display this sub-subpanel if its index is < total group nodes
         # for this material

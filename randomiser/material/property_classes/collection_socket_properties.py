@@ -2,7 +2,7 @@ import re
 
 import bpy
 
-from ... import utils
+from ...utils import nodes2rand
 from .socket_properties import SocketProperties
 
 
@@ -206,7 +206,9 @@ class ColSocketProperties(bpy.types.PropertyGroup):
         # - with no input sockets
         # - their name starts with random
         # - and they can be independent or inside a node group
-        list_input_nodes = utils.get_material_nodes_to_randomise_all(self.name)
+        list_input_nodes = nodes2rand.get_material_nodes_to_randomise_all(
+            self.name
+        )
 
         # list of sockets
         list_sockets = [out for nd in list_input_nodes for out in nd.outputs]
