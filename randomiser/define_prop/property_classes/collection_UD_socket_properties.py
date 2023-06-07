@@ -213,7 +213,7 @@ class ColUDSocketProperties(bpy.types.PropertyGroup):
             list of sockets in the input nodes in the graph
         """
         # get list of input nodes for this geometry node group (GNG)
-        list_input_nodes = utils.get_geometry_nodes_to_randomise(
+        list_input_nodes = utils.get_UD_sockets_to_randomise_from_list(
             self.name
         )  #####need to get this list from UI
 
@@ -241,16 +241,16 @@ def register():
     bpy.utils.register_class(ColUDSocketProperties)
 
     # make the property available via bpy.context.scene...
-    # (i.e., bpy.context.scene.socket_props_per_gng)
-    # bpy.types.Scene.socket_props_per_gng = bpy.props.PointerProperty(
-    #     type=ColUDSocketProperties
-    # )
+    # (i.e., bpy.context.scene.socket_props_per_gng) #####
+    bpy.types.Scene.socket_props_per_UD = bpy.props.PointerProperty(
+        type=ColUDSocketProperties
+    )
 
 
 def unregister():
     bpy.utils.unregister_class(ColUDSocketProperties)
 
     # remove from bpy.context.scene...
-    # attr_to_remove = "socket_props_per_gng"
-    # if hasattr(bpy.types.Scene, attr_to_remove):
-    #     delattr(bpy.types.Scene, attr_to_remove)
+    attr_to_remove = "socket_props_per_UD"
+    if hasattr(bpy.types.Scene, attr_to_remove):
+        delattr(bpy.types.Scene, attr_to_remove)

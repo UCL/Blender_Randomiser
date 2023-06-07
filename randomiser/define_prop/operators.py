@@ -1,3 +1,4 @@
+import pdb
 import random
 
 import bpy
@@ -195,9 +196,27 @@ class RandomiseAllUDProps(bpy.types.Operator):
         # NOTE: this list should have been updated already,
         # when drawing the panel
         cs = context.scene
-        self.list_subpanel_gng_names = [
-            gng.name for gng in cs.socket_props_per_gng.collection
-        ]
+        pdb.set_trace()
+        self.list_subpanel_gng_names = [gng.name for gng in cs.custom_props]
+        # reverse_order_prop = bpy.props.BoolProperty(
+        #     default=False, name="Reverse Order"
+        # )
+        # reverse_order: reverse_order_prop  # type: ignore
+
+        # @classmethod
+        # def poll(cls, context):
+        #     return bool(context.scene.custom)
+
+        # def execute(self, context):
+        #     scn = context.scene
+        #     if self.reverse_order:
+        #         for i in range(scn.custom, -1, -1):
+        #             item = scn.custom[i]
+        #             print("Name:", item.name, "-", "ID:", item.id)
+        #     else:
+        #     for item in scn.custom:
+        #         print("Name:", item.name, "-", "ID", item.id)
+        # return {"FINISHED"}
 
         # for every GNG: save sockets to randomise
         self.sockets_to_randomise_per_gng = {}
