@@ -5,7 +5,6 @@ from . import config
 
 def get_UD_sockets_to_randomise_from_list(
     list_candidate_nodes: list,
-    node2randomise_prefix: str = config.DEFAULT_RANDOM_KEYWORD,
 ):
     """Get list of nodes to randomise from list.
 
@@ -38,7 +37,7 @@ def get_UD_sockets_to_randomise_from_list(
         nd
         for nd in list_candidate_nodes
         if len(nd.inputs) == 0
-        and nd.name.lower().startswith(node2randomise_prefix.lower())
+        # and nd.name.lower().startswith(node2randomise_prefix.lower())
         and nd.type
         not in [
             "GROUP_INPUT",
