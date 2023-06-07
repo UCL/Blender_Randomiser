@@ -24,7 +24,8 @@ def compute_UD_sockets_sets(self):
     self.set_sckt_names_in_collection_of_props = set(
         sck_p.name for sck_p in self.collection
     )
-
+    #####REFACTOR TO WORK WITH UI LIST/REMOVE
+    # since don't need graphs for custom props?
     # set of sockets in graph for this GNG
     list_sckt_names_in_graph = [
         "UD_" + sck.name for sck in self.candidate_sockets
@@ -88,6 +89,8 @@ def set_update_collection(self, value):
         overwritten to consider the latest data
     """
 
+    #####REFACTOR TO WORK WITH UI LIST/REMOVE
+    # since don't need graphs for custom props?
     if value:
         # if the update function is triggered directly and not via
         # the getter function: compute the sets here
@@ -210,7 +213,9 @@ class ColUDSocketProperties(bpy.types.PropertyGroup):
             list of sockets in the input nodes in the graph
         """
         # get list of input nodes for this geometry node group (GNG)
-        list_input_nodes = utils.get_geometry_nodes_to_randomise(self.name)
+        list_input_nodes = utils.get_geometry_nodes_to_randomise(
+            self.name
+        )  #####can delete????
 
         # get list of sockets that are candidate for randomisation
         list_sockets = [
@@ -224,7 +229,7 @@ class ColUDSocketProperties(bpy.types.PropertyGroup):
                 bpy.types.NodeSocketObject,
                 bpy.types.NodeSocketString,
             ]
-        ]
+        ]  #####refactor to sockets without input nodes
 
         return list_sockets
 
@@ -237,15 +242,15 @@ def register():
 
     # make the property available via bpy.context.scene...
     # (i.e., bpy.context.scene.socket_props_per_gng)
-    bpy.types.Scene.socket_props_per_gng = bpy.props.PointerProperty(
-        type=ColUDSocketProperties
-    )
+    # bpy.types.Scene.socket_props_per_gng = bpy.props.PointerProperty(
+    #     type=ColUDSocketProperties
+    # )
 
 
 def unregister():
     bpy.utils.unregister_class(ColUDSocketProperties)
 
     # remove from bpy.context.scene...
-    attr_to_remove = "socket_props_per_gng"
-    if hasattr(bpy.types.Scene, attr_to_remove):
-        delattr(bpy.types.Scene, attr_to_remove)
+    # attr_to_remove = "socket_props_per_gng"
+    # if hasattr(bpy.types.Scene, attr_to_remove):
+    #     delattr(bpy.types.Scene, attr_to_remove)
