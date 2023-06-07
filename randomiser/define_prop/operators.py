@@ -143,9 +143,7 @@ class RandomiseAllUDProps(bpy.types.Operator):
     """
 
     # metadata
-    bl_idname = (
-        "node.randomise_all_geometry_sockets"  # this is appended to bpy.ops.
-    )
+    bl_idname = "opr.randomise_all_ud_sockets"  # this is appended to bpy.ops.
     bl_label = "Randomise selected sockets"
     bl_options = {"REGISTER", "UNDO"}
 
@@ -169,7 +167,7 @@ class RandomiseAllUDProps(bpy.types.Operator):
             number of geometry node groups in the collection
         """
 
-        return len(context.scene.socket_props_per_gng.collection) > 0
+        #####return len(context.scene.socket_props_per_gng.collection) > 0
 
     def invoke(self, context, event):
         """Initialise parmeters before executing the operator
