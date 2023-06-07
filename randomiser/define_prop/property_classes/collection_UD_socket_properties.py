@@ -215,7 +215,7 @@ class ColUDSocketProperties(bpy.types.PropertyGroup):
         # get list of input nodes for this geometry node group (GNG)
         list_input_nodes = utils.get_geometry_nodes_to_randomise(
             self.name
-        )  #####can delete????
+        )  #####need to get this list from UI
 
         # get list of sockets that are candidate for randomisation
         list_sockets = [
