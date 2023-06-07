@@ -91,10 +91,10 @@ class CUSTOM_OT_printItems(bpy.types.Operator):
         if self.reverse_order:
             for i in range(scn.custom, -1, -1):
                 item = scn.custom[i]
-                print("Name:", item.name, "-", "ID:", item.user_defined)
+                print("Name:", item.name, "-", "ID:", item.id)
         else:
             for item in scn.custom:
-                print("Name:", item.name, "-", "ID", item.user_defined)
+                print("Name:", item.name, "-", "ID", item.id)
         return {"FINISHED"}
 
 
