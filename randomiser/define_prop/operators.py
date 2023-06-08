@@ -3,8 +3,6 @@ import random
 import bpy
 import numpy as np
 
-from .. import config
-
 
 class CUSTOM_OT_actions(bpy.types.Operator):
     """Move items up and down, add and remove"""
@@ -354,23 +352,6 @@ list_classes_to_register = [
     CUSTOM_OT_printItems,
     CUSTOM_OT_clearList,
 ]
-
-#####REFACTOR for UIlist - remove reliance on ViewNodeGraphOneGNG
-# # or is this needed for displaying subpanel?
-for i in range(config.MAX_NUMBER_OF_SUBPANELS):
-    operator_i = type(
-        f"ViewNodeGraphOneGNG_subpanel_{i}",
-        (
-            # ViewNodeGraphOneGNG,
-            bpy.types.Operator,
-        ),
-        {
-            "bl_idname": f"node.view_graph_for_gng_{i}",
-            "bl_label": "",
-            "subpanel_gng_idx": i,
-        },
-    )
-    list_classes_to_register.append(operator_i)  # type: ignore
 
 
 # -----------------------------------------

@@ -24,6 +24,7 @@ def compute_UD_sockets_sets(self):
     self.set_sckt_names_in_collection_of_props = set(
         sck_p.name for sck_p in self.collection
     )
+    # pdb.set_trace()
     #####REFACTOR TO WORK WITH UI LIST/REMOVE
     # since don't need graphs for custom props?
     # set of sockets in graph for this GNG
