@@ -224,23 +224,23 @@ class SubPanelUDUIlist(TemplatePanel):
     bl_label = ""  # title of the panel displayed to the user
     bl_options = {"HIDE_HEADER"}
 
-    # @classmethod
-    # def poll(cls, context):
-    #     """Determine whether the panel can be displayed.
+    @classmethod
+    def poll(cls, context):
+        """Determine whether the panel can be displayed.
 
-    #     This panel is only displayed if there is an active object
+        This panel is only displayed if there is an active object
 
-    #     Parameters
-    #     ----------
-    #     context : _type_
-    #         _description_
+        Parameters
+        ----------
+        context : _type_
+            _description_
 
-    #     Returns
-    #     -------
-    #     boolean
-    #         True if there is an active object, False otherwise
-    #     """
-    #     return context.object is not None
+        Returns
+        -------
+        boolean
+            True if there is an active object, False otherwise
+        """
+        return context.object is not None
 
     def draw(self, context):
         column = self.layout.column(align=True)
@@ -339,9 +339,12 @@ class SubPanelRandomUD(
         cs = context.scene
 
         # force an update on the group nodes collection first
-        if cs.socket_props_per_UD.update_sockets_collection:
+        if cs.socket_props_per_UD.update_UD_props_collection:
             print("Collection of UD props updated")
-            # In redundant materials level (only need sockets)
+            ##### scene no attribute socket per UD
+
+        # print(cls.subpanel_UD_idx)
+        # print(cs.socket_props_per_UD.collection)
 
         return cls.subpanel_UD_idx < len(
             cs.socket_props_per_UD.collection
@@ -367,6 +370,7 @@ class SubPanelRandomUD(
 
         # get this subpanel's GNG
         cs.socket_props_per_UD.collection[self.subpanel_UD_idx]
+        ##### scene no attribute socket per UD
 
         # add view graph operator to layout
         layout = self.layout
@@ -391,7 +395,7 @@ class SubPanelRandomUD(
 
         # get this subpanel's GNG
         subpanel_UD_prop = cs.socket_props_per_UD.collection[
-            self.subpanel_UD_prop_idx
+            self.subpanel_UD_idx
         ]
 
         # force an update in the sockets for this GNG

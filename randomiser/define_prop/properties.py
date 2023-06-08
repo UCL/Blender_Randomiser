@@ -1,6 +1,7 @@
 import bpy
 
 from .property_classes import (
+    collection_UD_props,
     collection_UD_socket_properties,
 )
 
@@ -61,6 +62,7 @@ list_context_scene_attr = ["socket_type_to_attr"]
 
 def register():
     collection_UD_socket_properties.register()
+    collection_UD_props.register()
 
     for cls in list_classes_to_register:
         bpy.utils.register_class(cls)

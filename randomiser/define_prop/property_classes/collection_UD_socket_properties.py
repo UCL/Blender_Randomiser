@@ -240,17 +240,6 @@ class ColUDSocketProperties(bpy.types.PropertyGroup):
 def register():
     bpy.utils.register_class(ColUDSocketProperties)
 
-    # make the property available via bpy.context.scene...
-    # (i.e., bpy.context.scene.socket_props_per_gng) #####
-    bpy.types.Scene.socket_props_per_UD = bpy.props.PointerProperty(
-        type=ColUDSocketProperties
-    )
-
 
 def unregister():
     bpy.utils.unregister_class(ColUDSocketProperties)
-
-    # remove from bpy.context.scene...
-    attr_to_remove = "socket_props_per_UD"
-    if hasattr(bpy.types.Scene, attr_to_remove):
-        delattr(bpy.types.Scene, attr_to_remove)

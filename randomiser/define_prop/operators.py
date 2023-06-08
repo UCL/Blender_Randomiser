@@ -3,7 +3,7 @@ import random
 import bpy
 import numpy as np
 
-from .. import utils
+from .. import config
 
 
 class CUSTOM_OT_actions(bpy.types.Operator):
@@ -168,6 +168,8 @@ class RandomiseAllUDProps(bpy.types.Operator):
         """
 
         return len(context.scene.socket_props_per_UD.collection) > 0
+
+    ##### scene no attribute socket per UD
 
     def invoke(self, context, event):
         """Initialise parmeters before executing the operator
@@ -340,266 +342,7 @@ class RandomiseAllUDProps(bpy.types.Operator):
 #     return
 
 
-# -------------------------------
-# Operator: view graph per GNG
-# -------------------------------
-#####REFACTOR for UIlist - needed for displaying subpanels
-# in MAX_NUMBER_OF_SUBPANELS for loop
-class ViewNodeGraphOneGNG(bpy.types.Operator):
-    """Show node graph for the relevant
-    Geometry Node Group
-
-    Parameters
-    ----------
-    bpy : _type_
-        _description_
-
-    Returns
-    -------
-    _type_
-        _description_
-    """
-
-    bl_idname = (
-        "gng.view_graph"  # this is appended to bpy.ops.
-        # NOTE: it will be overwritten for each instance of
-        # the operator
-    )
-    bl_label = "View node graph for this Geometry node group"
-    bl_options = {"REGISTER", "UNDO"}
-
-    @classmethod
-    def poll(cls, context):
-        """Determine whether the operator can be executed.
-
-        This operator can only run if:
-        - its geometry node group is of geometry type,
-        and either:
-        - the associated geometry node group is linked to a modifier
-          of the currently active object, or
-        - the associated geometry node group is an inner node and its
-          root parent is a geometry node group linked to a modifier
-          of the currently active object.
-
-        An inner node is a geometry node group defined inside
-        another geometry node group. The path of nodes to an inner
-        node is the list of group nodes that leads to the inner node.
-        Its root parent is the only parent node group in the path of nodes
-        without a parent.
-
-        If the operator can't be executed, the button will appear as disabled.
-
-        Parameters
-        ----------
-        context : _type_
-            _description_
-
-        Returns
-        -------
-        _type_
-            _description_
-        """
-
-        cs = context.scene
-        cob = context.object
-
-        # get list of all GNGs
-        list_gngs = [
-            gr.name for gr in bpy.data.node_groups if gr.type == "GEOMETRY"
-        ]
-
-        # get geometry node group (GNG) of this subpanel
-        subpanel_gng = cs.socket_props_per_gng.collection[cls.subpanel_gng_idx]
-
-        # get list of GNGs linked to modifiers of the active object
-        list_gngs_in_modifiers = utils.get_gngs_linked_to_modifiers(cob)
-        list_gngs_in_modifiers_names = [
-            ng.name for ng in list_gngs_in_modifiers
-        ]
-
-        # get list of (inner) GNGs whose root parent is a modfier-linked
-        # GNG
-        map_node_group_to_root_node_group = utils.get_map_inner_gngs(
-            list_gngs_in_modifiers,
-        )
-
-        # define condition to enable the operator
-        display_operator = (
-            subpanel_gng.name
-            in list_gngs
-            # TODO: maybe this is not required here?
-        ) and (
-            (subpanel_gng.name in list_gngs_in_modifiers_names)
-            or (
-                subpanel_gng.name
-                in [gr.name for gr in map_node_group_to_root_node_group.keys()]
-            )
-        )
-
-        return display_operator
-
-    def invoke(self, context, event):
-        """Initialise parmeters before executing the operator
-
-        The invoke() function runs before executing the operator.
-        Here, we add the subpanel's geometry node group name to
-        the operator self
-
-        Parameters
-        ----------
-        context : bpy_types.Context
-            the context from which the operator is executed
-        event : _type_
-            _description_
-
-        Returns
-        -------
-        _type_
-            _description_
-        """
-
-        cs = context.scene
-        subpanel_gng = cs.socket_props_per_gng.collection[
-            self.subpanel_gng_idx
-        ]
-        self.subpanel_gng_name = subpanel_gng.name
-
-        return self.execute(context)
-
-    def execute(self, context):
-        """Execute the 'view graph' operator.
-
-        It shows the graph for the geometry node group (GNG) shown in the
-        subpanel's header.
-
-        If the GNG associated to the subpanel is linked to a modifier of the
-        active object, then that modifier is set to active and the graph
-        is automatically updated.
-
-        If the GNG  associated to the subpanel is NOT linked to a modifier, but
-        it is an inner GNG of a modifier-linked GNG, then:
-        - the modifier of the root parent GNG is set as active, and the graph
-          is set to the root parent view
-        - the path to the inner GNG is computed
-        - the graph of the inner GNG is displayed, by recursively setting each
-          parent node as active and then executing the 'edit node' command.
-
-
-        If the GNG  associated to the subpanel is NOT linked to a modifier, and
-        it is NOT an inner GNG of a modifier-linked GNG, then a new modifier
-        will be added to the currently active material and this subpanel's GNG
-        will be linked to it
-
-        Parameters
-        ----------
-        context : _type_
-            _description_
-
-        Returns
-        -------
-        _type_
-            _description_
-        """
-
-        cob = context.object
-
-        # find the modifier linked to this GNG, if exists
-        subpanel_modifier = utils.get_modifier_linked_to_gng(
-            self.subpanel_gng_name, cob
-        )
-
-        # get dict of inner GNGs
-        # the dict maps inner GNGs to a tuple made of its root parent GNG
-        # and its depth
-        map_inner_node_groups_to_root_parent = utils.get_map_inner_gngs(
-            [gr for gr in bpy.data.node_groups if gr.type == "GEOMETRY"]
-        )
-
-        # if there is a modifier linked to this GNG: set that
-        # modifier as active (this will change the displayed graph)
-        if subpanel_modifier:
-            bpy.ops.object.modifier_set_active(modifier=subpanel_modifier.name)
-
-            # ensure graph is at top level
-            utils.set_gngs_graph_to_top_level(
-                bpy.data.node_groups[self.subpanel_gng_name]
-            )
-
-        # if there is no modifier linked to this GNG,
-        # but it is an inner GNG whose root parent is a modifier-linked GNG:
-        # set the modifier as active and navigate the graph to the
-        # inner GNG
-        elif not subpanel_modifier and (
-            self.subpanel_gng_name
-            in [gr.name for gr in map_inner_node_groups_to_root_parent.keys()]
-        ):
-            # find the modifier linked to the (root) parent and set as active
-            # NOTE: if the root parent is not linked to a modifier,
-            # the operator will show as disabled
-            root_parent_node_group = map_inner_node_groups_to_root_parent[
-                bpy.data.node_groups[self.subpanel_gng_name]
-            ][0]
-
-            root_parent_modifier = utils.get_modifier_linked_to_gng(
-                root_parent_node_group.name, cob
-            )
-
-            bpy.ops.object.modifier_set_active(
-                modifier=root_parent_modifier.name
-            )
-
-            # compute the path to this subpanel's GNG
-            # from the parent root GNG (both ends inclusive)
-            path_to_gng = utils.get_path_to_gng(
-                bpy.data.node_groups[self.subpanel_gng_name]
-            )
-
-            # ensure we are at the top level in the graph
-            # (top level = parent root GNG)
-            utils.set_gngs_graph_to_top_level(root_parent_node_group)
-
-            # navigate the graph to the desired GNG
-            # at every step: we set the target GNG as active and
-            # click 'edit group'
-            for i, _ in enumerate(path_to_gng[:-1]):
-                # get target GNG for this step and its parent
-                gng_parent = path_to_gng[i]
-                gng_target = path_to_gng[i + 1]
-
-                # get selectable version of the target GNG
-                selectable_gng_target = (
-                    utils.get_selectable_node_for_node_group(gng_target)
-                )
-
-                # set target GNG as active
-                if gng_parent == root_parent_node_group:
-                    root_parent_node_group.nodes.active = selectable_gng_target
-                else:
-                    selectable_parent_gng = (
-                        utils.get_selectable_node_for_node_group(gng_parent)
-                    )
-                    selectable_parent_gng.node_tree.nodes.active = (
-                        selectable_gng_target
-                    )
-
-                # click 'edit group', i.e. go one level down in the graph
-                bpy.ops.node.group_edit(exit=False)
-
-        # if there is no modifier linked to this GNG
-        # and it is not an inner GNG: create a new modifier
-        # for the currently active object and link the GNG to it
-        else:
-            # add a new 'Geometry nodes group' modifier
-            # (will set it as active)
-            bpy.ops.object.modifier_add(type="NODES")
-            new_modifier = bpy.context.object.modifiers.active
-
-            # assign the subpanel's GNGto this modifier
-            new_modifier.node_group = bpy.data.node_groups[
-                self.subpanel_gng_name
-            ]
-
-        return {"FINISHED"}
+##### Graph function removed - not needed?
 
 
 # ---------------------
@@ -614,20 +357,20 @@ list_classes_to_register = [
 
 #####REFACTOR for UIlist - remove reliance on ViewNodeGraphOneGNG
 # # or is this needed for displaying subpanel?
-# for i in range(config.MAX_NUMBER_OF_SUBPANELS):
-#     operator_i = type(
-#         f"ViewNodeGraphOneGNG_subpanel_{i}",
-#         (
-#             # ViewNodeGraphOneGNG,
-#             bpy.types.Operator,
-#         ),
-#         {
-#             "bl_idname": f"node.view_graph_for_gng_{i}",
-#             "bl_label": "",
-#             "subpanel_gng_idx": i,
-#         },
-#     )
-#     list_classes_to_register.append(operator_i)  # type: ignore
+for i in range(config.MAX_NUMBER_OF_SUBPANELS):
+    operator_i = type(
+        f"ViewNodeGraphOneGNG_subpanel_{i}",
+        (
+            # ViewNodeGraphOneGNG,
+            bpy.types.Operator,
+        ),
+        {
+            "bl_idname": f"node.view_graph_for_gng_{i}",
+            "bl_label": "",
+            "subpanel_gng_idx": i,
+        },
+    )
+    list_classes_to_register.append(operator_i)  # type: ignore
 
 
 # -----------------------------------------
@@ -641,7 +384,7 @@ def register():
     #     randomise_geometry_nodes_per_frame
     # )
 
-    print("geometry operators registered")
+    print("UD operators registered")
 
 
 def unregister():
@@ -652,4 +395,4 @@ def unregister():
     #     randomise_geometry_nodes_per_frame
     # )
 
-    print("geometry operators unregistered")
+    print("UD operators unregistered")
