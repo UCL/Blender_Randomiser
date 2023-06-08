@@ -219,16 +219,16 @@ class ColUDSocketProperties(bpy.types.PropertyGroup):
 
         # get list of sockets that are candidate for randomisation
         list_sockets = [
-            out
+            nd
             for nd in list_input_nodes
-            for out in nd.outputs
-            if type(out)
-            not in [
-                bpy.types.NodeSocketGeometry,
-                bpy.types.NodeSocketMaterial,
-                bpy.types.NodeSocketObject,
-                bpy.types.NodeSocketString,
-            ]
+            # for out in nd.outputs
+            # if type(out)
+            # not in [
+            #     bpy.types.NodeSocketGeometry,
+            #     bpy.types.NodeSocketMaterial,
+            #     bpy.types.NodeSocketObject,
+            #     bpy.types.NodeSocketString,
+            # ]
         ]  #####refactor to sockets without input nodes
 
         return list_sockets

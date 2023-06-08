@@ -36,13 +36,13 @@ def get_UD_sockets_to_randomise_from_list(
     list_input_nodes = [
         nd
         for nd in list_candidate_nodes
-        if len(nd.inputs) == 0
+        # if len(nd.inputs) == 0
         # and nd.name.lower().startswith(node2randomise_prefix.lower())
-        and nd.type
-        not in [
-            "GROUP_INPUT",
-            "GROUP_OUTPUT",
-        ]
+        # and nd.type
+        # not in [
+        #     "GROUP_INPUT",
+        #     "GROUP_OUTPUT",
+        # ]
     ]
 
     return list_input_nodes
