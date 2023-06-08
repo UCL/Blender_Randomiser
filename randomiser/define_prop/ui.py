@@ -1,5 +1,6 @@
 import bpy
 
+from .. import config
 from ..material.ui import TemplatePanel  # draw_sockets_list
 
 
@@ -32,19 +33,20 @@ class CUSTOM_UL_items(bpy.types.UIList):
 # ---------------------------------------------------
 # Common layout for list of sockets to randomise
 # ----------------------------------------------------
-##### REFACTOR to removed list input nodes
+##### REFACTOR for list input nodes as list UD props
+# - commented out sockets at end of this func
 def draw_sockets_list_UD(
     cs,
     layout,
-    list_input_nodes,
+    list_UD_props,
     sockets_props_collection,
 ):
     # Define UI fields for every socket property
     # NOTE: if I don't sort the input nodes, everytime one of the nodes is
     # selected in the graph it moves to the bottom of the panel.
-    list_input_nodes_sorted = sorted(list_input_nodes, key=lambda x: x.name)
-    print(list_input_nodes_sorted)
-    for i_n, nd in enumerate(list_input_nodes_sorted):
+    list_UD_props_sorted = sorted(list_UD_props, key=lambda x: x.name)
+    print(list_UD_props_sorted)
+    for i_n, UD in enumerate(list_UD_props_sorted):
         row = layout.row()
 
         # if first node: add labels for
@@ -58,7 +60,7 @@ def draw_sockets_list_UD(
             row_split.column(align=True)
 
             # input node name
-            col1.label(text=nd.name)
+            col1.label(text=UD.name)
             col1.alignment = "CENTER"
 
             # min label
@@ -74,80 +76,80 @@ def draw_sockets_list_UD(
             row.separator(factor=1.0)  # add empty row before each node
             row = layout.row()
 
-            row.label(text=nd.name)
+            row.label(text=UD.name)
 
         # add sockets for this node in the subseq rows
-        # for sckt in nd.outputs:
-        #     # split row in 5 columns
-        #     row = layout.row()
-        #     row_split = row.split()
-        #     col1 = row_split.column(align=True)
-        #     col2 = row_split.column(align=True)
-        #     col3 = row_split.column(align=True)
-        #     col4 = row_split.column(align=True)
-        #     col5 = row_split.column(align=True)
+        for sckt in UD.outputs:
+            # split row in 5 columns
+            row = layout.row()
+            row_split = row.split()
+            col1 = row_split.column(align=True)
+            col2 = row_split.column(align=True)
+            col3 = row_split.column(align=True)
+            col4 = row_split.column(align=True)
+            col5 = row_split.column(align=True)
 
-        #     # socket name
-        #     col1.alignment = "RIGHT"
-        #     col1.label(text=sckt.name)
+            # socket name
+            col1.alignment = "RIGHT"
+            col1.label(text=sckt.name)
 
-        #     # socket current value
-        #     col2.prop(
-        #         sckt,
-        #         "default_value",
-        #         icon_only=True,
-        #     )
-        #     col2.enabled = False  # current value is not editable
+            # socket current value
+            col2.prop(
+                sckt,
+                "default_value",
+                icon_only=True,
+            )
+            col2.enabled = False  # current value is not editable
 
-        #     # socket min and max columns
-        #     socket_id = nd.name + "_" + sckt.name
-        #     if (nd.id_data.name in bpy.data.node_groups) and (
-        #         bpy.data.node_groups[nd.id_data.name].type != "GEOMETRY"
-        #     ):  # only for SHADER groups
-        #         socket_id = nd.id_data.name + "_" + socket_id
+            # socket min and max columns
+            socket_id = UD.name + "_" + sckt.name
+            if (UD.id_data.name in bpy.data.node_groups) and (
+                bpy.data.node_groups[UD.id_data.name].type != "GEOMETRY"
+            ):  # only for SHADER groups
+                socket_id = UD.id_data.name + "_" + socket_id
 
-        #     # if socket is a color: format min/max as a color picker
-        #     # and an array (color picker doesn't include alpha value)
-        #     if type(sckt) == bpy.types.NodeSocketColor:
-        #         for m_str, col in zip(["min", "max"], [col3, col4]):
-        #             # color picker
-        #             col.template_color_picker(
-        #                 sockets_props_collection[socket_id],
-        #                 m_str + "_" + cs.socket_type_to_attr[type(sckt)],
-        #             )
-        #             # array
-        #             for j, cl in enumerate(["R", "G", "B", "alpha"]):
-        #                 col.prop(
-        #                     sockets_props_collection[socket_id],
-        #                     m_str + "_" + cs.socket_type_to_attr[type(sckt)],
-        #                     icon_only=False,
-        #                     text=cl,
-        #                     index=j,
-        #                 )
-        #     # if socket is Boolean: add non-editable labels
-        #     elif type(sckt) == bpy.types.NodeSocketBool:
-        #         for m_str, col in zip(["min", "max"], [col3, col4]):
-        #             m_val = getattr(
-        #                 sockets_props_collection[socket_id],
-        #                 m_str + "_" + cs.socket_type_to_attr[type(sckt)],
-        #             )
-        #             col.label(text=str(list(m_val)[0]))
+            # if socket is a color: format min/max as a color picker
+            # and an array (color picker doesn't include alpha value)
+            if type(sckt) == bpy.types.NodeSocketColor:
+                for m_str, col in zip(["min", "max"], [col3, col4]):
+                    # color picker
+                    col.template_color_picker(
+                        sockets_props_collection[socket_id],
+                        m_str + "_" + cs.socket_type_to_attr[type(sckt)],
+                    )
+                    # array
+                    for j, cl in enumerate(["R", "G", "B", "alpha"]):
+                        col.prop(
+                            sockets_props_collection[socket_id],
+                            m_str + "_" + cs.socket_type_to_attr[type(sckt)],
+                            icon_only=False,
+                            text=cl,
+                            index=j,
+                        )
+            # if socket is Boolean: add non-editable labels
+            elif type(sckt) == bpy.types.NodeSocketBool:
+                for m_str, col in zip(["min", "max"], [col3, col4]):
+                    m_val = getattr(
+                        sockets_props_collection[socket_id],
+                        m_str + "_" + cs.socket_type_to_attr[type(sckt)],
+                    )
+                    col.label(text=str(list(m_val)[0]))
 
-        #     # if socket is not color type: format as a regular property
-        #     else:
-        #         for m_str, col in zip(["min", "max"], [col3, col4]):
-        #             col.prop(
-        #                 sockets_props_collection[socket_id],
-        #                 m_str + "_" + cs.socket_type_to_attr[type(sckt)],
-        #                 icon_only=True,
-        #             )
+            # if socket is not color type: format as a regular property
+            else:
+                for m_str, col in zip(["min", "max"], [col3, col4]):
+                    col.prop(
+                        sockets_props_collection[socket_id],
+                        m_str + "_" + cs.socket_type_to_attr[type(sckt)],
+                        icon_only=True,
+                    )
 
-        #     # randomisation toggle
-        #     col5.prop(
-        #         sockets_props_collection[socket_id],
-        #         "bool_randomise",
-        #         icon_only=True,
-        #     )
+            # randomisation toggle
+            col5.prop(
+                sockets_props_collection[socket_id],
+                "bool_randomise",
+                icon_only=True,
+            )
 
 
 # ----------------------
@@ -222,23 +224,23 @@ class SubPanelUDUIlist(TemplatePanel):
     bl_label = ""  # title of the panel displayed to the user
     bl_options = {"HIDE_HEADER"}
 
-    @classmethod
-    def poll(cls, context):
-        """Determine whether the panel can be displayed.
+    # @classmethod
+    # def poll(cls, context):
+    #     """Determine whether the panel can be displayed.
 
-        This panel is only displayed if there is an active object
+    #     This panel is only displayed if there is an active object
 
-        Parameters
-        ----------
-        context : _type_
-            _description_
+    #     Parameters
+    #     ----------
+    #     context : _type_
+    #         _description_
 
-        Returns
-        -------
-        boolean
-            True if there is an active object, False otherwise
-        """
-        return context.object is not None
+    #     Returns
+    #     -------
+    #     boolean
+    #         True if there is an active object, False otherwise
+    #     """
+    #     return context.object is not None
 
     def draw(self, context):
         column = self.layout.column(align=True)
@@ -337,18 +339,14 @@ class SubPanelRandomUD(
         cs = context.scene
 
         # force an update on the group nodes collection first
-        if cs.socket_props_per_UD.update_gngs_collection:
-            print("Collection of Geometry Node Groups updated")
-            ######pointer needs defined in collection_UD_sock_props?
+        if cs.socket_props_per_UD.update_sockets_collection:
+            print("Collection of UD props updated")
             # In redundant materials level (only need sockets)
 
-        return cls.subpanel_gng_idx < len(
+        return cls.subpanel_UD_idx < len(
             cs.socket_props_per_UD.collection
-        )  #####clc.subpanel defined in operators.py
+        )  # clc.subpanel defined in operators.py
         # only display subpanels for which this is true
-        # return cls.subpanel_custom_idx < len(
-        #     cs.socket_props_per_material.collection
-        # )
 
     def draw_header(
         self, context
@@ -368,18 +366,18 @@ class SubPanelRandomUD(
         cs = context.scene
 
         # get this subpanel's GNG
-        subpanel_gng = cs.socket_props_per_UD.collection[self.subpanel_gng_idx]
+        cs.socket_props_per_UD.collection[self.subpanel_UD_idx]
 
         # add view graph operator to layout
         layout = self.layout
         layout.use_property_split = True
         layout.use_property_decorate = False
-        layout.operator(
-            f"node.view_graph_for_gng_{self.subpanel_gng_idx}",
-            text=subpanel_gng.name,
-            emboss=True,
-        )  #####operator defined once node.view_graph_for_gng
-        # - not needed for custom props?
+        # layout.operator(
+        #     f"node.view_graph_for_gng_{self.subpanel_UD_prop_idx}",
+        #     text=subpanel_UD_prop.name,
+        #     emboss=True,
+        # )  #####operator defined once node.view_graph_for_gng
+        # # - not needed for custom props?
 
     def draw(self, context):
         """Define the content to display in the GNG subpanel
@@ -392,27 +390,31 @@ class SubPanelRandomUD(
         cs = context.scene
 
         # get this subpanel's GNG
-        subpanel_gng = cs.socket_props_per_UD.collection[self.subpanel_gng_idx]
-        #####NEED TO COMBINE THESE TWO PARTS INTO JUST SOCKETS
+        subpanel_UD_prop = cs.socket_props_per_UD.collection[
+            self.subpanel_UD_prop_idx
+        ]
+
         # force an update in the sockets for this GNG
         if cs.socket_props_per_UD.collection[
-            subpanel_gng.name
+            subpanel_UD_prop.name
         ].update_sockets_collection:
-            print("Collection of Geometry Node Groups updated")
+            print("Collection of UD props updated")
 
         # get (updated) collection of socket props for this GNG
         sockets_props_collection = cs.socket_props_per_UD.collection[
-            subpanel_gng.name
+            subpanel_UD_prop.name
         ].collection
 
         # Get list of input nodes to randomise for this subpanel's GNG
-        list_parent_nodes_str = [
+        list_parent_UD_str = [
             sckt.name.split("_")[0] for sckt in sockets_props_collection
         ]
-        #####REMOVE INPUT NODES FROM SOCKETS LIST FOR CUSTOM PROPS
-        list_input_nodes = [
-            bpy.data.node_groups[subpanel_gng.name].nodes[nd_str]
-            for nd_str in list_parent_nodes_str
+
+        list_UD_props = [
+            bpy.context.scene.custom[UD_str]
+            for UD_str in list_parent_UD_str
+            # bpy.data.node_groups[subpanel_gng.name].nodes[nd_str]
+            # for nd_str in list_parent_nodes_str
         ]
 
         # Draw sockets to randomise per input node, including their
@@ -420,7 +422,7 @@ class SubPanelRandomUD(
         draw_sockets_list_UD(
             cs,
             self.layout,
-            list_input_nodes,  ##### remove once refactored
+            list_UD_props,
             sockets_props_collection,
         )
 
@@ -501,27 +503,27 @@ list_classes_to_register = [
 # defined a priori, we define n=MAX_NUMBER_OF_SUBPANELS classes and
 # assign an index to each of them. We will only display the subpanels
 # whose index is lower than the total number of GNGs defined in the scene.
-# for i in range(config.MAX_NUMBER_OF_SUBPANELS):
-#     # define subpanel class for GNG i
-#     # subpanel_class_i = type(
-#     #     f"NODE_GEOMETRY_PT_subpanel_{i}",
-#     #     (SubPanelRandomGeometryNodes,),
-#     #     {
-#     #         "bl_idname": f"NODE_GEOMETRY_PT_subpanel_{i}",
-#     #         "subpanel_gng_idx": i,
-#     #     },
-#     # )
-#     subpanel_class_i = type(
-#         f"UD_PT_subpanel_{i}",
-#         (SubPanelRandomUD,),
-#         {
-#             "bl_idname": f"UD_PT_subpanel_{i}",
-#             "subpanel_gng_idx": i,  ##### IN UI AND OPERATORS
-#         },
-#     )
+for i in range(config.MAX_NUMBER_OF_SUBPANELS):
+    # define subpanel class for GNG i
+    # subpanel_class_i = type(
+    #     f"NODE_GEOMETRY_PT_subpanel_{i}",
+    #     (SubPanelRandomGeometryNodes,),
+    #     {
+    #         "bl_idname": f"NODE_GEOMETRY_PT_subpanel_{i}",
+    #         "subpanel_gng_idx": i,
+    #     },
+    # )
+    subpanel_class_i = type(
+        f"UD_PT_subpanel_{i}",
+        (SubPanelRandomUD,),
+        {
+            "bl_idname": f"UD_PT_subpanel_{i}",
+            "subpanel_UD_idx": i,  ##### IN UI AND OPERATORS
+        },
+    )
 
-#     # append to list of classes to register
-#     list_classes_to_register.append(subpanel_class_i)  # type: ignore
+    # append to list of classes to register
+    list_classes_to_register.append(subpanel_class_i)  # type: ignore
 
 
 # add Subpanel with operator to the list
