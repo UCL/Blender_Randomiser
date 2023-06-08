@@ -1,10 +1,9 @@
-import pdb
 import random
 
 import bpy
 import numpy as np
 
-from .. import config, utils
+from .. import utils
 
 
 class CUSTOM_OT_actions(bpy.types.Operator):
@@ -168,7 +167,7 @@ class RandomiseAllUDProps(bpy.types.Operator):
             number of geometry node groups in the collection
         """
 
-        #####return len(context.scene.socket_props_per_gng.collection) > 0
+        return len(context.scene.socket_props_per_UD.collection) > 0
 
     def invoke(self, context, event):
         """Initialise parmeters before executing the operator
@@ -196,74 +195,52 @@ class RandomiseAllUDProps(bpy.types.Operator):
         # NOTE: this list should have been updated already,
         # when drawing the panel
         cs = context.scene
-        pdb.set_trace()
-        self.list_subpanel_gng_names = [gng.name for gng in cs.custom_props]
-        # reverse_order_prop = bpy.props.BoolProperty(
-        #     default=False, name="Reverse Order"
-        # )
-        # reverse_order: reverse_order_prop  # type: ignore
-
-        # @classmethod
-        # def poll(cls, context):
-        #     return bool(context.scene.custom)
-
-        # def execute(self, context):
-        #     scn = context.scene
-        #     if self.reverse_order:
-        #         for i in range(scn.custom, -1, -1):
-        #             item = scn.custom[i]
-        #             print("Name:", item.name, "-", "ID:", item.id)
-        #     else:
-        #     for item in scn.custom:
-        #         print("Name:", item.name, "-", "ID", item.id)
-        # return {"FINISHED"}
+        self.list_subpanel_UD_props_names = [
+            UD.name for UD in cs.socket_props_per_UD.collection
+        ]
 
         # for every GNG: save sockets to randomise
-        self.sockets_to_randomise_per_gng = {}
-        for gng_str in self.list_subpanel_gng_names:
+        self.sockets_to_randomise_per_UD = {}
+        for UD_str in self.list_subpanel_UD_props_names:
             # get collection of socket properties for this GNG
             # ATT socket properties do not include the actual socket object
-            if cs.socket_props_per_gng.collection[
-                gng_str
+            if cs.socket_props_per_UD.collection[
+                UD_str
             ].update_sockets_collection:
-                print("Collection of geometry sockets updated")
+                print("Collection of UD props sockets updated")
 
-            sockets_props_collection = cs.socket_props_per_gng.collection[
-                gng_str
-            ].collection
+            cs.socket_props_per_UD.collection[UD_str].collection
 
             # get candidate sockets for this GNG
-            candidate_sockets = cs.socket_props_per_gng.collection[
-                gng_str
-            ].candidate_sockets
+            cs.socket_props_per_UD.collection[UD_str].candidate_sockets
 
-            # if socket unlinked and randomisation toggle is True:
-            # modify socket props to set toggle to False
-            self.sockets_to_randomise_per_gng[gng_str] = []
-            for sckt in candidate_sockets:
-                # get socket identifier string
-                sckt_id = sckt.node.name + "_" + sckt.name
+            # # if socket unlinked and randomisation toggle is True:
+            # # modify socket props to set toggle to False
+            # self.sockets_to_randomise_per_UD[UD_str] = []
+            # for sckt in candidate_sockets:
+            #     # get socket identifier string
+            #     sckt_id = sckt.node.name + "_" + sckt.name
 
-                # if this socket is selected to randomise but it is unlinked:
-                # set randomisation toggle to False
-                if (not sckt.is_linked) and (
-                    sockets_props_collection[sckt_id].bool_randomise
-                ):
-                    setattr(
-                        sockets_props_collection[sckt_id],
-                        "bool_randomise",
-                        False,
-                    )
-                    print(
-                        f"Socket {sckt_id} from {gng_str} is unlinked:",
-                        "randomisation toggle set to False",
-                    )
+            #     # if this socket is selected to randomise but it is unlinked:
+            #     # set randomisation toggle to False
+            #     if (not sckt.is_linked) and (
+            #         sockets_props_collection[sckt_id].bool_randomise
+            #     ):
+            #         setattr(
+            #             sockets_props_collection[sckt_id],
+            #             "bool_randomise",
+            #             False,
+            #         )
+            #         print(
+            #             f"Socket {sckt_id} from {gng_str} is unlinked:",
+            #             "randomisation toggle set to False",
+            #         )
 
-                # after modifying randomisation toggle
-                # save list of sockets to randomise to dict,
-                # with key = material
-                if sockets_props_collection[sckt_id].bool_randomise:
-                    self.sockets_to_randomise_per_gng[gng_str].append(sckt)
+            #     # after modifying randomisation toggle
+            #     # save list of sockets to randomise to dict,
+            #     # with key = material
+            #     if sockets_props_collection[sckt_id].bool_randomise:
+            #         self.sockets_to_randomise_per_gng[gng_str].append(sckt)
 
         return self.execute(context)
 
@@ -286,16 +263,16 @@ class RandomiseAllUDProps(bpy.types.Operator):
         cs = context.scene
 
         # For every GNG with a subpanel
-        for gng_str in self.list_subpanel_gng_names:
+        for UD_str in self.list_subpanel_UD_names:
             # get collection of socket properties for this material
             # NOTE: socket properties do not include the actual socket object
-            sockets_props_collection = cs.socket_props_per_gng.collection[
-                gng_str
+            sockets_props_collection = cs.socket_props_per_UD.collection[
+                UD_str
             ].collection
 
             # Loop through the sockets to randomise
-            for sckt in self.sockets_to_randomise_per_gng[gng_str]:
-                socket_id = sckt.node.name + "_" + sckt.name
+            for sckt in self.sockets_to_randomise_per_UD[UD_str]:
+                socket_id = "sckt.node.name" + "_" + sckt.name
 
                 # get min value for this socket
                 min_val = np.array(
@@ -315,7 +292,7 @@ class RandomiseAllUDProps(bpy.types.Operator):
 
                 # set default value
                 # if socket type is boolean
-                if type(sckt) == bpy.types.NodeSocketBool:
+                if type(sckt) == bpy.types.BoolProperty:
                     sckt.default_value = random.choice(
                         [bool(list(m_val)[0]) for m_val in [min_val, max_val]]
                     )  # 1d only
@@ -324,7 +301,7 @@ class RandomiseAllUDProps(bpy.types.Operator):
                     # https://stackoverflow.com/questions/6824681/get-a-random-boolean-in-python
 
                 # if socket type is int
-                elif type(sckt) == bpy.types.NodeSocketInt:
+                elif type(sckt) == bpy.types.IntProperty:
                     sckt.default_value = random.randint(max_val, min_val)
 
                 # for all other socket types
@@ -636,21 +613,21 @@ list_classes_to_register = [
 ]
 
 #####REFACTOR for UIlist - remove reliance on ViewNodeGraphOneGNG
-# or is this needed for displaying subpanel?
-for i in range(config.MAX_NUMBER_OF_SUBPANELS):
-    operator_i = type(
-        f"ViewNodeGraphOneGNG_subpanel_{i}",
-        (
-            ViewNodeGraphOneGNG,
-            bpy.types.Operator,
-        ),
-        {
-            "bl_idname": f"node.view_graph_for_gng_{i}",
-            "bl_label": "",
-            "subpanel_gng_idx": i,
-        },
-    )
-    list_classes_to_register.append(operator_i)  # type: ignore
+# # or is this needed for displaying subpanel?
+# for i in range(config.MAX_NUMBER_OF_SUBPANELS):
+#     operator_i = type(
+#         f"ViewNodeGraphOneGNG_subpanel_{i}",
+#         (
+#             # ViewNodeGraphOneGNG,
+#             bpy.types.Operator,
+#         ),
+#         {
+#             "bl_idname": f"node.view_graph_for_gng_{i}",
+#             "bl_label": "",
+#             "subpanel_gng_idx": i,
+#         },
+#     )
+#     list_classes_to_register.append(operator_i)  # type: ignore
 
 
 # -----------------------------------------
