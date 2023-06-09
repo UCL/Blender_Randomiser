@@ -21,7 +21,7 @@ list_classes_to_register = [
 
 dict_context_scene_attr = {
     "UD_prop_to_attr": config.MAP_PROPS_TO_ATTR,
-    "socket_type_to_ini_min_max": config.MAP_SOCKET_TYPE_TO_INI_MIN_MAX,
+    "UD_prop_to_ini_min_max": config.MAP_PROPS_TO_INI_MIN_MAX,
 }
 ##### Not needed?  bpy.props.BoolProperty directly
 

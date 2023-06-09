@@ -1,6 +1,7 @@
 # Parameters shared across materials modules
 import bpy
 import numpy as np
+from mathutils import Vector
 
 # MAX_NUMBER_OF_SUBPANELS: upper limit for the expected
 # number of *materials* in a scene.
@@ -39,7 +40,17 @@ MAP_SOCKET_TYPE_TO_ATTR = {
 }
 
 MAP_PROPS_TO_ATTR = {
-    bpy.props.FloatVectorProperty: "float_3d",
+    # bpy.types.NodeSocketFloat: "float_1d"
+    # bpy.props.FloatVectorProperty size=1,
+    Vector: "float_3d",  # bpy.props.FloatVectorProperty size=3,
+    # bpy.types.NodeSocketInt: "int_1d"
+    # bpy.props.IntProperty,
+    # bpy.types.NodeSocketColor: "rgba_4d",  # "float_4d", if
+    # bpy.types.NodeSocketBool: "bool_1d", elif
+}
+
+MAP_PROPS_TO_INI_MIN_MAX = {
+    Vector: {"min": -np.inf, "max": np.inf},
 }
 
 # NOTE: if the property is a float vector of size (1,n)
