@@ -124,7 +124,7 @@ class CUSTOM_OT_clearList(bpy.types.Operator):
 # Operator Randomise selected sockets
 # across all Geometry node groups
 # --------------------------------------------
-##### REFACTOR
+##### REFACTOR - remove to replace with randomise all?
 class RandomiseAllUDProps(bpy.types.Operator):
     """Randomise the selected output sockets
     across all geometry node groups
