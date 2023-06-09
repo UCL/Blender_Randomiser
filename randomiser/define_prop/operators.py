@@ -167,8 +167,6 @@ class RandomiseAllUDProps(bpy.types.Operator):
 
         return len(context.scene.socket_props_per_UD.collection) > 0
 
-    ##### scene no attribute socket per UD
-
     def invoke(self, context, event):
         """Initialise parmeters before executing the operator
 
@@ -340,7 +338,7 @@ class RandomiseAllUDProps(bpy.types.Operator):
 #     return
 
 
-##### Graph function removed - not needed?
+# Graph function removed - not needed?
 
 
 # ---------------------
