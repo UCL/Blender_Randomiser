@@ -40,7 +40,7 @@ def draw_sockets_list_UD(
     layout,
     list_UD_props,
     sockets_props_collection,
-    list_parents_node_str,
+    attritube_only_str,
 ):
     # Define UI fields for every socket property
     # NOTE: if I don't sort the input nodes, everytime one of the nodes is
@@ -174,7 +174,7 @@ def draw_sockets_list_UD(
                     m_str
                     + "_"
                     + cs.UD_prop_to_attr[
-                        attr_get_type(bpy.context.scene, "camera.location")
+                        attr_get_type(bpy.context.scene, attritube_only_str)
                     ],
                     icon_only=True,
                 )
@@ -470,8 +470,14 @@ class SubPanelRandomUD(
         # [sckt.name.split("_")[0] for sckt in sockets_props_collection]
 
         # Get list of input nodes to randomise for this subpanel's GNG
-        list_parent_nodes_str = sockets_props_collection.name.rsplit(".", 1)
-        print("list_parent_nodes_str = ", list_parent_nodes_str)
+        full_str = sockets_props_collection.name
+        len_path = len(full_str.rsplit(".", config.MAX_NUMBER_OF_SUBPANELS))
+        list_parent_nodes_str = full_str.rsplit(".", len_path - 3)
+        attritube_only_str = full_str.replace(
+            list_parent_nodes_str[0] + ".", ""
+        )
+
+        print("list_parent_nodes_str = ", attritube_only_str)
         # list_parent_nodes_str = [
         #     sckt.name.split("_")[0] for sckt in sockets_props_collection
         # ]
@@ -498,7 +504,7 @@ class SubPanelRandomUD(
             self.layout,
             list_UD_props,
             sockets_props_collection,
-            list_parent_nodes_str,
+            attritube_only_str,
         )
 
 
