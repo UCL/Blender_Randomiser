@@ -78,78 +78,75 @@ def draw_sockets_list_UD(
 
             row.label(text=UD.name)
 
-        # add sockets for this node in the subseq rows
-        for sckt in UD.outputs:
-            # split row in 5 columns
-            row = layout.row()
-            row_split = row.split()
-            col1 = row_split.column(align=True)
-            col2 = row_split.column(align=True)
-            col3 = row_split.column(align=True)
-            col4 = row_split.column(align=True)
-            col5 = row_split.column(align=True)
+        row = layout.row()
+        row_split = row.split()
+        col1 = row_split.column(align=True)
+        col2 = row_split.column(align=True)
+        col3 = row_split.column(align=True)
+        col4 = row_split.column(align=True)
+        row_split.column(align=True)
 
-            # socket name
-            col1.alignment = "RIGHT"
-            col1.label(text=sckt.name)
+        # UD prop name
+        col1.alignment = "RIGHT"
+        col1.label(text="value")  # text=sckt.name)
 
-            # socket current value
-            col2.prop(
-                sckt,
-                "default_value",
-                icon_only=True,
-            )
-            col2.enabled = False  # current value is not editable
+        # socket current value
+        col2.prop(
+            UD,
+            "default_value",
+            icon_only=True,
+        )
+        col2.enabled = False  # current value is not editable
 
-            # socket min and max columns
-            socket_id = UD.name + "_" + sckt.name
-            if (UD.id_data.name in bpy.data.node_groups) and (
-                bpy.data.node_groups[UD.id_data.name].type != "GEOMETRY"
-            ):  # only for SHADER groups
-                socket_id = UD.id_data.name + "_" + socket_id
+        # # socket min and max columns
+        # socket_id = UD.name + "_" + sckt.name
+        # if (UD.id_data.name in bpy.data.node_groups) and (
+        #     bpy.data.node_groups[UD.id_data.name].type != "GEOMETRY"
+        # ):  # only for SHADER groups
+        #     socket_id = UD.id_data.name + "_" + socket_id
 
-            # if socket is a color: format min/max as a color picker
-            # and an array (color picker doesn't include alpha value)
-            if type(sckt) == bpy.types.NodeSocketColor:
-                for m_str, col in zip(["min", "max"], [col3, col4]):
-                    # color picker
-                    col.template_color_picker(
-                        sockets_props_collection[socket_id],
-                        m_str + "_" + cs.socket_type_to_attr[type(sckt)],
-                    )
-                    # array
-                    for j, cl in enumerate(["R", "G", "B", "alpha"]):
-                        col.prop(
-                            sockets_props_collection[socket_id],
-                            m_str + "_" + cs.socket_type_to_attr[type(sckt)],
-                            icon_only=False,
-                            text=cl,
-                            index=j,
-                        )
-            # if socket is Boolean: add non-editable labels
-            elif type(sckt) == bpy.types.NodeSocketBool:
-                for m_str, col in zip(["min", "max"], [col3, col4]):
-                    m_val = getattr(
-                        sockets_props_collection[socket_id],
-                        m_str + "_" + cs.socket_type_to_attr[type(sckt)],
-                    )
-                    col.label(text=str(list(m_val)[0]))
+        # # if socket is a color: format min/max as a color picker
+        # # and an array (color picker doesn't include alpha value)
+        # if type(sckt) == bpy.types.NodeSocketColor:
+        #     for m_str, col in zip(["min", "max"], [col3, col4]):
+        #         # color picker
+        #         col.template_color_picker(
+        #             sockets_props_collection[socket_id],
+        #             m_str + "_" + cs.socket_type_to_attr[type(sckt)],
+        #         )
+        #         # array
+        #         for j, cl in enumerate(["R", "G", "B", "alpha"]):
+        #             col.prop(
+        #                 sockets_props_collection[socket_id],
+        #                 m_str + "_" + cs.socket_type_to_attr[type(sckt)],
+        #                 icon_only=False,
+        #                 text=cl,
+        #                 index=j,
+        #             )
+        # # if socket is Boolean: add non-editable labels
+        # elif type(sckt) == bpy.types.NodeSocketBool:
+        #     for m_str, col in zip(["min", "max"], [col3, col4]):
+        #         m_val = getattr(
+        #             sockets_props_collection[socket_id],
+        #             m_str + "_" + cs.socket_type_to_attr[type(sckt)],
+        #         )
+        #         col.label(text=str(list(m_val)[0]))
 
-            # if socket is not color type: format as a regular property
-            else:
-                for m_str, col in zip(["min", "max"], [col3, col4]):
-                    col.prop(
-                        sockets_props_collection[socket_id],
-                        m_str + "_" + cs.socket_type_to_attr[type(sckt)],
-                        icon_only=True,
-                    )
+        # # if socket is not color type: format as a regular property
+        # else:
+        #     for m_str, col in zip(["min", "max"], [col3, col4]):
+        #         col.prop(
+        #             sockets_props_collection[socket_id],
+        #             m_str + "_" + cs.socket_type_to_attr[type(sckt)],
+        #             icon_only=True,
+        #         )
 
-            # randomisation toggle
-            col5.prop(
-                sockets_props_collection[socket_id],
-                "bool_randomise",
-                icon_only=True,
-            )
+        # # randomisation toggle
+        # col5.prop(
+        #     sockets_props_collection[socket_id],
+        #     "bool_randomise",
+        #     icon_only=True,
+        # )
 
 
 # ----------------------
@@ -341,10 +338,6 @@ class SubPanelRandomUD(
         # force an update on the group nodes collection first
         if cs.socket_props_per_UD.update_UD_props_collection:
             print("Collection of UD props updated")
-            ##### scene no attribute socket per UD
-
-        # print(cls.subpanel_UD_idx)
-        # print(cs.socket_props_per_UD.collection)
 
         return cls.subpanel_UD_idx < len(
             cs.socket_props_per_UD.collection
@@ -370,7 +363,6 @@ class SubPanelRandomUD(
 
         # get this subpanel's GNG
         cs.socket_props_per_UD.collection[self.subpanel_UD_idx]
-        ##### scene no attribute socket per UD
 
         # add view graph operator to layout
         layout = self.layout
@@ -380,7 +372,7 @@ class SubPanelRandomUD(
         #     f"node.view_graph_for_gng_{self.subpanel_UD_prop_idx}",
         #     text=subpanel_UD_prop.name,
         #     emboss=True,
-        # )  #####operator defined once node.view_graph_for_gng
+        # )  #operator defined once node.view_graph_for_gng
         # # - not needed for custom props?
 
     def draw(self, context):
@@ -410,16 +402,17 @@ class SubPanelRandomUD(
         ].collection
 
         # Get list of input nodes to randomise for this subpanel's GNG
-        list_parent_UD_str = [
-            sckt.name.split("_")[0] for sckt in sockets_props_collection
-        ]
+        [sckt.name.split("_")[0] for sckt in sockets_props_collection]
 
         list_UD_props = [
-            bpy.context.scene.custom[UD_str]
-            for UD_str in list_parent_UD_str
+            UD_str
+            for UD_str in bpy.context.scene.custom
+            # bpy.context.scene.custom[UD_str]
+            # for UD_str in list_parent_UD_str
             # bpy.data.node_groups[subpanel_gng.name].nodes[nd_str]
             # for nd_str in list_parent_nodes_str
         ]
+        print("list_UD_props =======", list_UD_props)
 
         # Draw sockets to randomise per input node, including their
         # current value and min/max boundaries

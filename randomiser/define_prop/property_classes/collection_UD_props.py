@@ -1,6 +1,6 @@
 import bpy
 
-from .collection_UD_socket_properties import ColUDSocketProperties
+from ...material.property_classes.socket_properties import SocketProperties
 
 
 # ---------------------------------------------------
@@ -116,11 +116,14 @@ class ColUDParentProps(bpy.types.PropertyGroup):
         _description_
     """
 
-    # collection of [collections of socket properties] (one per node group)
-    collection: bpy.props.CollectionProperty(  # type: ignore
-        type=ColUDSocketProperties  # elements in the collection
-    )
+    # # collection of [collections of socket properties] (one per node group)
+    # collection: bpy.props.CollectionProperty(  # type: ignore
+    #     type=ColUDSocketProperties  # elements in the collection
+    # )
 
+    collection: bpy.props.CollectionProperty(  # type: ignore
+        type=SocketProperties
+    )
     # autopopulate collection of geometry node groups
     update_UD_props_collection: bpy.props.BoolProperty(  # type: ignore
         default=False,
