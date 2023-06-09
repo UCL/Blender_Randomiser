@@ -141,9 +141,14 @@ def draw_sockets_list_UD(
         else:  # bpy.types.NodeSocketBool:
             # Object.location bpy.props.FloatVector
             print(
-                "TESTING STR TO BPY OBJ::::: ",
+                "TESTING STR TO BPY OBJ (hardcoded)::::: ",
                 type(bpy.data.scenes["Scene"].camera.location),
             )
+
+            print(
+                "TESTING STR TO BPY OBJ (final version)::::: ",
+                attr_get_type(bpy.context.scene, "camera.location"),
+            ),
             for m_str, col in zip(["min", "max"], [col3, col4]):
                 # # example usage (requires path_resolve)
                 # value_set(bpy.context.object,
@@ -152,24 +157,25 @@ def draw_sockets_list_UD(
                 # # example usage (uses simple setattr)
                 # value_set(bpy.context.object, 'location', (1, 2, 3))
 
-                print(
-                    "TEST NEW DEF = ",
-                    print(
-                        "TESTING STR TO BPY OBJ::::: ",
-                        attr_get_type(bpy.context.scene, "camera.location"),
-                    ),
-                )
-                print("m_str is ", m_str)
-                print("UD = ", UD.name)
-                print("type(UD.name) = ", type(UD.name))
+                # print(
+                #     "TEST NEW DEF = ",
+                # print(
+                #     "TESTING STR TO BPY OBJ::::: ",
+                #     attr_get_type(bpy.context.scene, "camera.location"),
+                # ),
+                # )
+                # print("m_str is ", m_str)
+                # print("UD = ", UD.name)
+                # print("type(UD.name) = ", type(UD.name))
+                # print('TEST MAPPING = ',  cs.UD_prop_to_attr[
+                #    attr_get_type(bpy.context.scene, "camera.location")])
                 col.prop(
                     sockets_props_collection,  # [socket_id],
-                    m_str + "_float_1d",
-                    # + "_" + cs.UD_prop_to_attr[prop(UD)]
-                    # m_str + "_", type(list_parents_node_str),
-                    #'float_1d', #cs.socket_type_to_attr[type(sckt)],
-                    # type(sckt) == bpy.types.NodeSocketColor:
-                    # property not found: SocketProperties.min_
+                    m_str
+                    + "_"
+                    + cs.UD_prop_to_attr[
+                        attr_get_type(bpy.context.scene, "camera.location")
+                    ],
                     icon_only=True,
                 )
                 # np.array(getattr(self, m_str + "_min"))
@@ -185,22 +191,6 @@ def draw_sockets_list_UD(
         )
 
 
-def value_set(obj, path, value):
-    if "." in path:
-        # gives us: ('modifiers["Subsurf"]', 'levels')
-        path_prop, path_attr = path.rsplit(".", 1)
-
-        # same as: prop = obj.modifiers["Subsurf"]
-        prop = obj.path_resolve(path_prop)
-    else:
-        prop = obj
-        # single attribute such as name, location... etc
-        path_attr = path
-
-    # same as: prop.levels = value
-    setattr(prop, path_attr, value)
-
-
 def attr_get_type(obj, path):
     if "." in path:
         # gives us: ('modifiers["Subsurf"]', 'levels')
@@ -214,9 +204,6 @@ def attr_get_type(obj, path):
         path_attr = path
 
     # same as: prop.levels = value
-    print("prop = ", prop)
-    print("path_attr = ", path_attr)
-    # pdb.set_trace()
 
     return type(getattr(prop, path_attr))
     # setattr(prop, path_attr, value)
