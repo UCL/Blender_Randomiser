@@ -1,5 +1,6 @@
 import bpy
 
+from .. import config
 from .property_classes import (
     collection_UD_props,
     collection_UD_socket_properties,
@@ -18,12 +19,21 @@ list_classes_to_register = [
     CUSTOM_colorCollection,
 ]
 
-list_context_scene_attr = ["socket_type_to_attr"]
+dict_context_scene_attr = {
+    "UD_prop_to_attr": config.MAP_PROPS_TO_ATTR,
+    "socket_type_to_ini_min_max": config.MAP_SOCKET_TYPE_TO_INI_MIN_MAX,
+}
+##### Not needed?  bpy.props.BoolProperty directly
 
 
 def register():
     collection_UD_socket_properties.register()
     collection_UD_props.register()
+
+    # link global Python variables to bpy.context.scene
+    # if I use setattr: attribute must exist first right?
+    for attr_ky, attr_val in dict_context_scene_attr.items():
+        setattr(bpy.types.Scene, attr_ky, attr_val)
 
     for cls in list_classes_to_register:
         bpy.utils.register_class(cls)
@@ -46,5 +56,10 @@ def unregister():
 
     del bpy.types.Scene.custom
     del bpy.types.Scene.custom_index
+
+    # delete the custom properties linked to bpy.context.scene
+    for attr_ky in dict_context_scene_attr.keys():
+        if hasattr(bpy.types.Scene, attr_ky):
+            delattr(bpy.types.Scene, attr_ky)
 
     print("UD properties unregistered")

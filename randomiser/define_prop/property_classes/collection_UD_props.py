@@ -1,6 +1,6 @@
 import bpy
 
-from ...material.property_classes.socket_properties import SocketProperties
+from ..property_classes.collection_UD_socket_properties import SocketProperties
 
 
 # ---------------------------------------------------
@@ -131,6 +131,9 @@ class ColUDParentProps(bpy.types.PropertyGroup):
         set=set_update_UD_props_collection,
     )
 
+    ##### CHECK IF VALUE IS PROPERTY HERE FIRST
+    # - make sure working for correct string first
+
     # candidate geometry node groups
     @property
     def candidate_UD_props(self):  # getter method
@@ -143,12 +146,24 @@ class ColUDParentProps(bpy.types.PropertyGroup):
             _description_
         """
         # self is the collection of node groups
-        ##### REFACTOR for UIlist
         list_UD_props = [
             UD
             for UD in bpy.context.scene.custom
+            # nd
+            # for nd in bpy.data.node_groups
             # if nd.type == "GEOMETRY"
+            # and (
+            #     any(
+            #         [
+            #             ni.name.lower().startswith(
+            #                 config.DEFAULT_RANDOM_KEYWORD
+            #             )
+            #             for ni in nd.nodes
+            #         ]
+            #     )
+            # )
         ]
+        # print("type list_UD_props ========== ", type(list_UD_props[0]))
         # # sort by name
         # list_node_groups = sorted(
         #     list_materials,
