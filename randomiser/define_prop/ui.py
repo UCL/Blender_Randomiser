@@ -33,8 +33,6 @@ class CUSTOM_UL_items(bpy.types.UIList):
 # ---------------------------------------------------
 # Common layout for list of sockets to randomise
 # ----------------------------------------------------
-##### REFACTOR for list input nodes as list UD props
-# - commented out sockets at end of this func
 def draw_sockets_list_UD(
     cs,
     layout,
@@ -451,8 +449,8 @@ class SubPanelRandomUD(
         # print("subpanel_UD_prop = ", subpanel_UD_prop)
         # print("self.subpanel_UD_idx = ", self.subpanel_UD_idx)
 
-        # # force an update ( ##### check string is valid property -
-        # # checked elsewhere?)
+        # # force an update
+        # (##### CHECK VALID PROPERTY orchecked elsewhere?)
         # if cs.socket_props_per_UD.collection[ # same as subpanel_UD_prop
         #     self.subpanel_UD_idx
         # ].update_sockets_collection:
@@ -599,7 +597,7 @@ for i in range(config.MAX_NUMBER_OF_SUBPANELS):
         (SubPanelRandomUD,),
         {
             "bl_idname": f"UD_PT_subpanel_{i}",
-            "subpanel_UD_idx": i,  ##### IN UI AND OPERATORS
+            "subpanel_UD_idx": i,  # IN UI AND OPERATORS
         },
     )
 

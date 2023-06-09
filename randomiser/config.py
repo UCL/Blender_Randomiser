@@ -50,7 +50,12 @@ MAP_PROPS_TO_ATTR = {
 }
 
 MAP_PROPS_TO_INI_MIN_MAX = {
+    # bpy.types.NodeSocketFloat: {"min": -np.inf, "max": np.inf},
     Vector: {"min": -np.inf, "max": np.inf},
+    # bpy.types.NodeSocketInt: {
+    #     "min": int(-1000),  # -2147483648
+    #     "max": int(1000),  # 2147483647
+    # },  # ---- not sure this will work?
 }
 
 # NOTE: if the property is a float vector of size (1,n)
