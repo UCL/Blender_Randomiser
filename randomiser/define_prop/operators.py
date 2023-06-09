@@ -59,7 +59,7 @@ class CUSTOM_OT_actions(bpy.types.Operator):
 
         if self.action == "ADD":
             item = scn.custom.add()
-            item.name = "Your Name"
+            item.name = "bpy.context.scene.camera.location"
             item.id = len(scn.custom)
             scn.custom_index = len(scn.custom) - 1
             info = '"%s" added to list' % (item.name)
@@ -197,7 +197,7 @@ class RandomiseAllUDProps(bpy.types.Operator):
             UD.name for UD in cs.socket_props_per_UD.collection
         ]
 
-        # for every GNG: save sockets to randomise
+        # for every GNG:f save sockets to randomise
         self.sockets_to_randomise_per_UD = {}
         for UD_str in self.list_subpanel_UD_props_names:
             # get collection of socket properties for this GNG

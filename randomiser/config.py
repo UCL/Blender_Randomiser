@@ -38,6 +38,10 @@ MAP_SOCKET_TYPE_TO_ATTR = {
     bpy.types.NodeSocketBool: "bool_1d",
 }
 
+MAP_PROPS_TO_ATTR = {
+    bpy.props.FloatVectorProperty: "float_3d",
+}
+
 # NOTE: if the property is a float vector of size (1,n)
 # the initial min/max values specified here apply to all n dimensions
 # TODO: should we change this to allow different values per dimension?
