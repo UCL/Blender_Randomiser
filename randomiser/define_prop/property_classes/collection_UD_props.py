@@ -1,6 +1,7 @@
 import bpy
 
 from ..property_classes.collection_UD_socket_properties import SocketProperties
+from ..ui import attr_get_type, get_attr_only_str
 
 
 # ---------------------------------------------------
@@ -145,10 +146,15 @@ class ColUDParentProps(bpy.types.PropertyGroup):
         _type_
             _description_
         """
+
+        # get_attr_only_strbpy.context.scene.custom
         # self is the collection of node groups
         list_UD_props = [
             UD
             for UD in bpy.context.scene.custom
+            if attr_get_type(bpy.context.scene, get_attr_only_str(UD.name))[1]
+            != "dummy"
+            # if attr_get_type(bpy.context.scene,UD)[2] != 'dummy'
             # nd
             # for nd in bpy.data.node_groups
             # if nd.type == "GEOMETRY"
