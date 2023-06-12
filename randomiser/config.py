@@ -43,6 +43,7 @@ MAP_PROPS_TO_ATTR = {
     # bpy.types.NodeSocketFloat: "float_1d"
     # bpy.props.FloatVectorProperty size=1,
     Vector: "float_3d",  # bpy.props.FloatVectorProperty size=3,
+    float: "float_1d",
     # bpy.types.NodeSocketInt: "int_1d"
     # bpy.props.IntProperty,
     # bpy.types.NodeSocketColor: "rgba_4d",  # "float_4d", if
@@ -52,6 +53,7 @@ MAP_PROPS_TO_ATTR = {
 MAP_PROPS_TO_INI_MIN_MAX = {
     # bpy.types.NodeSocketFloat: {"min": -np.inf, "max": np.inf},
     Vector: {"min": -np.inf, "max": np.inf},
+    float: {"min": -np.inf, "max": np.inf},
     # bpy.types.NodeSocketInt: {
     #     "min": int(-1000),  # -2147483648
     #     "max": int(1000),  # 2147483647

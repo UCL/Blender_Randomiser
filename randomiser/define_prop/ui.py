@@ -39,6 +39,7 @@ def draw_sockets_list_UD(
     list_UD_props,
     sockets_props_collection,
     attribute_only_str,
+    full_str,
 ):
     # Define UI fields for every socket property
     # NOTE: if I don't sort the input nodes, everytime one of the nodes is
@@ -137,20 +138,15 @@ def draw_sockets_list_UD(
         ##### REFACTOR EASY CASE FIRST
         # (may not need other cases)
         else:  # bpy.types.NodeSocketBool:
-            # Object.location bpy.props.FloatVector
-            print(
-                "TESTING STR TO BPY OBJ (hardcoded)::::: ",
-                type(bpy.data.scenes["Scene"].camera.location),
-            )
-
-            print(
-                "TESTING STR TO BPY OBJ (final version)::::: ",
-                attr_get_type(bpy.context.scene, "camera.location"),
-            ),
             for m_str, col in zip(["min", "max"], [col3, col4]):
                 attr_type = attr_get_type(
                     bpy.context.scene, attribute_only_str
                 )[0]
+                print(
+                    "sockets_props_collection ???????",
+                    sockets_props_collection,
+                )
+                print("type ??????????? ", attribute_only_str, attr_type)
                 col.prop(
                     sockets_props_collection,  # [socket_id],
                     m_str + "_" + cs.UD_prop_to_attr[attr_type],
@@ -172,6 +168,7 @@ def draw_sockets_list_UD(
 def attr_get_type(obj, path):
     if "." in path:
         # gives us: ('modifiers["Subsurf"]', 'levels')
+        # len_path = len(full_str.rsplit(".", config.MAX_NUMBER_OF_SUBPANELS))
         path_prop, path_attr = path.rsplit(".", 1)
 
         # same as: prop = obj.modifiers["Subsurf"]
@@ -519,6 +516,7 @@ class SubPanelRandomUD(
             list_UD_props,
             sockets_props_collection,
             attribute_only_str,
+            full_str,
         )
 
 
