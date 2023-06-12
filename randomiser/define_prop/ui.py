@@ -186,7 +186,7 @@ def attr_get_type(obj, path):
     try:
         action = getattr(prop, path_attr)
     except Exception:
-        print("Property does not exist")
+        # print("Property does not exist")
         action = "dummy"
     # action = getattr(prop, path_attr)
 

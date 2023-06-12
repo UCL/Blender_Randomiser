@@ -20,8 +20,16 @@ def compute_UD_props_sets(self):
     # set of GNGs already in collection
     self.set_UD_props_in_collection = set(UD.name for UD in self.collection)
 
+    for UD in self.collection:
+        print("self.collection !!!!!!!!!! ", UD.name)
+
     # set of node groups in Blender data structure
     self.set_UD_props_in_data = set(UD.name for UD in self.candidate_UD_props)
+
+    for UD in self.candidate_UD_props:
+        print("self.candidate_UD_props !!!!!!!!!! ", UD.name)
+
+    # pdb.set_trace()
 
     # set of node groups in one of the sets only
     self.set_UD_props_in_one_only = (
@@ -152,8 +160,11 @@ class ColUDParentProps(bpy.types.PropertyGroup):
         list_UD_props = [
             UD
             for UD in bpy.context.scene.custom
-            if attr_get_type(bpy.context.scene, get_attr_only_str(UD.name))[1]
-            != "dummy"
+            if (
+                attr_get_type(bpy.context.scene, get_attr_only_str(UD.name))[1]
+                != "dummy"
+            )
+            # != "dummy"
             # if attr_get_type(bpy.context.scene,UD)[2] != 'dummy'
             # nd
             # for nd in bpy.data.node_groups
