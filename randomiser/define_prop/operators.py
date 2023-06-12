@@ -59,7 +59,7 @@ class CUSTOM_OT_actions(bpy.types.Operator):
 
         if self.action == "ADD":
             item = scn.custom.add()
-            item.name = "bpy.context.scene.camera.location"
+            item.name = "bpy.context.scene.camera.ranch"
             item.id = len(scn.custom)
             scn.custom_index = len(scn.custom) - 1
             info = '"%s" added to list' % (item.name)

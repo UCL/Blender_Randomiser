@@ -38,7 +38,7 @@ def draw_sockets_list_UD(
     layout,
     list_UD_props,
     sockets_props_collection,
-    attritube_only_str,
+    attribute_only_str,
 ):
     # Define UI fields for every socket property
     # NOTE: if I don't sort the input nodes, everytime one of the nodes is
@@ -148,32 +148,12 @@ def draw_sockets_list_UD(
                 attr_get_type(bpy.context.scene, "camera.location"),
             ),
             for m_str, col in zip(["min", "max"], [col3, col4]):
-                # # example usage (requires path_resolve)
-                # value_set(bpy.context.object,
-                # 'modifiers["Subsurf"].levels', 2)
-
-                # # example usage (uses simple setattr)
-                # value_set(bpy.context.object, 'location', (1, 2, 3))
-
-                # print(
-                #     "TEST NEW DEF = ",
-                # print(
-                #     "TESTING STR TO BPY OBJ::::: ",
-                #     attr_get_type(bpy.context.scene, "camera.location"),
-                # ),
-                # )
-                # print("m_str is ", m_str)
-                # print("UD = ", UD.name)
-                # print("type(UD.name) = ", type(UD.name))
-                # print('TEST MAPPING = ',  cs.UD_prop_to_attr[
-                #    attr_get_type(bpy.context.scene, "camera.location")])
+                attr_type = attr_get_type(
+                    bpy.context.scene, attribute_only_str
+                )[0]
                 col.prop(
                     sockets_props_collection,  # [socket_id],
-                    m_str
-                    + "_"
-                    + cs.UD_prop_to_attr[
-                        attr_get_type(bpy.context.scene, attritube_only_str)
-                    ],
+                    m_str + "_" + cs.UD_prop_to_attr[attr_type],
                     icon_only=True,
                 )
                 # np.array(getattr(self, m_str + "_min"))
@@ -203,8 +183,23 @@ def attr_get_type(obj, path):
 
     # same as: prop.levels = value
 
-    return type(getattr(prop, path_attr))
+    try:
+        action = getattr(prop, path_attr)
+    except Exception:
+        print("Property does not exist")
+        action = "dummy"
+    # action = getattr(prop, path_attr)
+
+    return type(action), action, prop, path_attr
     # setattr(prop, path_attr, value)
+
+
+def get_attr_only_str(full_str):
+    len_path = len(full_str.rsplit(".", config.MAX_NUMBER_OF_SUBPANELS))
+    list_parent_nodes_str = full_str.rsplit(".", len_path - 3)
+    attribute_only_str = full_str.replace(list_parent_nodes_str[0] + ".", "")
+
+    return attribute_only_str
 
 
 # ----------------------
@@ -398,9 +393,34 @@ class SubPanelRandomUD(
         if cs.socket_props_per_UD.update_UD_props_collection:
             print("Collection of UD props updated")
 
-        return cls.subpanel_UD_idx < len(cs.socket_props_per_UD.collection)
-        # clc.subpanel defined in operators.py
-        # only display subpanels for which this is true
+        if cls.subpanel_UD_idx < len(cs.socket_props_per_UD.collection):
+            # pdb.set_trace()
+            sockets_props_collection = cs.socket_props_per_UD.collection[
+                cls.subpanel_UD_idx
+            ]
+
+            full_str = sockets_props_collection.name
+            attribute_only_str = get_attr_only_str(full_str)
+            prop_type, action, prop, path_attr = attr_get_type(
+                bpy.context.scene, attribute_only_str
+            )
+
+            print("prop_type", prop_type)
+            print("action", action)
+            print("prop", prop)
+            print("path_attr", path_attr)
+
+        else:
+            action = "dummy"
+            # bpy.ops.custom.list_action(action='UP')
+            # pdb.set_trace()
+            # print('action',action)
+
+        return action != "dummy"
+
+    # , getattr(prop, path_attr, None)
+    # clc.subpanel defined in operators.py
+    # only display subpanels for which this is true
 
     def draw_header(
         self, context
@@ -451,10 +471,10 @@ class SubPanelRandomUD(
 
         # # force an update
         # (##### CHECK VALID PROPERTY orchecked elsewhere?)
-        # if cs.socket_props_per_UD.collection[ # same as subpanel_UD_prop
+        # if cs.socket_props_per_UD[
         #     self.subpanel_UD_idx
-        # ].update_sockets_collection:
-        #     print("Collection of UD props updated")
+        # ].update_collection:
+        #     print("Collection of UD properties updated")
 
         # get (updated) collection of chosen propr for this subpanel
         sockets_props_collection = cs.socket_props_per_UD.collection[
@@ -471,23 +491,19 @@ class SubPanelRandomUD(
         full_str = sockets_props_collection.name
         len_path = len(full_str.rsplit(".", config.MAX_NUMBER_OF_SUBPANELS))
         list_parent_nodes_str = full_str.rsplit(".", len_path - 3)
-        attritube_only_str = full_str.replace(
+        attribute_only_str = full_str.replace(
             list_parent_nodes_str[0] + ".", ""
         )
 
-        print("list_parent_nodes_str = ", attritube_only_str)
-        # list_parent_nodes_str = [
-        #     sckt.name.split("_")[0] for sckt in sockets_props_collection
-        # ]
-
-        # list_UD_props = [
-        #     bpy.data.node_groups[self.subpanel_UD.name].nodes[nd_str]
-        #     for nd_str in list_parent_nodes_str
-        # ]
+        print("list_parent_nodes_str = ", attribute_only_str)
 
         list_UD_props = [
             UD_str
             for UD_str in bpy.context.scene.custom
+            if attr_get_type(
+                bpy.context.scene, get_attr_only_str(UD_str.name)
+            )[1]
+            != "dummy"
             # bpy.context.scene.custom[UD_str]
             # for UD_str in list_parent_UD_str
             # bpy.data.node_groups[subpanel_gng.name].nodes[nd_str]
@@ -502,7 +518,7 @@ class SubPanelRandomUD(
             self.layout,
             list_UD_props,
             sockets_props_collection,
-            attritube_only_str,
+            attribute_only_str,
         )
 
 
