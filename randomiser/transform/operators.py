@@ -50,6 +50,8 @@ class ApplyRandomTransform(bpy.types.Operator):
         _type_
             _description_
         """
+
+        
         loc = context.scene.randomise_camera_props.camera_pos
         rot = context.scene.randomise_camera_props.camera_rot
 

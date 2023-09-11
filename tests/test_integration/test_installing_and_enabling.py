@@ -2,9 +2,12 @@
 # with pytest: https://github.com/mondeja/pytest-blender#pytest-blender
 import subprocess
 from pathlib import Path
+import os
 
 import bpy
 import pytest
+import numpy as np
+from random import seed
 
 
 # add-on is uninstalled before each test (if it exists)
@@ -15,6 +18,10 @@ def uninstall_randomiser_addon(uninstall_addons):
     uninstall_addons(addons_ids=["randomiser"])
 
 
+def test_seed_as_input():
+    pass
+
+    
 # TODO:
 # - make "randomiser" a fixture?
 # - make sample.blend a fixture? keep it in test_data/?
@@ -81,6 +88,106 @@ def test_install_and_enable_1(
         and (all([x in ["", None] for x in list_stderr]))
         and (directory_exists)
     )
+
+def test_randomiser_position():
+    # Define rnage of values we randomise over
+    lower_bound = 1.0
+    upper_bound = 3.0
+
+    # set range for randomise in blender properties
+    bpy.data.scenes["Scene"].randomise_camera_props.camera_pos_x_max[0] = upper_bound
+    bpy.data.scenes["Scene"].randomise_camera_props.camera_pos_x_min[0] = lower_bound
+    bpy.data.scenes["Scene"].randomise_camera_props.camera_pos_y_max[0] = upper_bound
+    bpy.data.scenes["Scene"].randomise_camera_props.camera_pos_y_min[0] = lower_bound
+    bpy.data.scenes["Scene"].randomise_camera_props.camera_pos_z_max[0] = upper_bound
+    bpy.data.scenes["Scene"].randomise_camera_props.camera_pos_z_min[0] = lower_bound
+
+    # run a large number of randomisation and check they fall with the predefined range
+    total_random_test = 1000
+    for _ in range(total_random_test):
+        bpy.ops.camera.apply_random_transform("INVOKE_DEFAULT")
+        assert (
+            (bpy.data.objects["Camera"].location[0] >= lower_bound)
+            and (bpy.data.objects["Camera"].location[0] <= upper_bound)
+            and (bpy.data.objects["Camera"].location[1] >= lower_bound)
+            and (bpy.data.objects["Camera"].location[1] <= upper_bound)
+            and (bpy.data.objects["Camera"].location[2] >= lower_bound)
+            and (bpy.data.objects["Camera"].location[2] <= upper_bound)
+        )
+
+def test_randomiser_rotation():
+    # Define range of values we randomise over
+    lower_bound = 10.0
+    upper_bound = 90.0
+
+    # convert to radians
+    deg2rad = np.pi / 180
+    lower_bound_rad = lower_bound * deg2rad
+    upper_bound_rad = upper_bound * deg2rad
+
+    # set range for randomise in blender properties
+    bpy.data.scenes["Scene"].randomise_camera_props.camera_rot_x_max[0] = upper_bound
+    bpy.data.scenes["Scene"].randomise_camera_props.camera_rot_x_min[0] = lower_bound
+    bpy.data.scenes["Scene"].randomise_camera_props.camera_rot_y_max[0] = upper_bound
+    bpy.data.scenes["Scene"].randomise_camera_props.camera_rot_y_min[0] = lower_bound
+    bpy.data.scenes["Scene"].randomise_camera_props.camera_rot_z_max[0] = upper_bound
+    bpy.data.scenes["Scene"].randomise_camera_props.camera_rot_z_min[0] = lower_bound
+
+    # run a large number of randomisation and check they fall with the predefined range
+    total_random_test = 1000
+    for _ in range(total_random_test):
+        bpy.ops.camera.apply_random_transform("INVOKE_DEFAULT")
+        assert (
+            (bpy.data.objects["Camera"].rotation_euler[0] >= lower_bound_rad)
+            and (bpy.data.objects["Camera"].rotation_euler[0] <= upper_bound_rad)
+            and (bpy.data.objects["Camera"].rotation_euler[1] >= lower_bound_rad)
+            and (bpy.data.objects["Camera"].rotation_euler[1] <= upper_bound_rad)
+            and (bpy.data.objects["Camera"].rotation_euler[2] >= lower_bound_rad)
+            and (bpy.data.objects["Camera"].rotation_euler[2] <= upper_bound_rad)
+        )
+
+
+def test_random_seed():
+    # Run randomisation 5 times and save some numbers
+    bpy.data.scenes["Scene"].seed_properties.seed = 1
+    seed(1)
+    first_run = []
+    for _ in range(5):
+        bpy.ops.camera.apply_random_transform("INVOKE_DEFAULT")
+        first_run.append(bpy.data.objects["Camera"].location[0])
+
+    # Change the sure and ensure the randomised numbers are different
+    bpy.data.scenes["Scene"].seed_properties.seed = 2
+    seed(2)
+    for idx in range(5):
+        bpy.ops.camera.apply_random_transform("INVOKE_DEFAULT")
+        assert bpy.data.objects["Camera"].location[0] != first_run[idx]
+
+    # Check that this randomisation outputs the same numbers are the first for loop
+    bpy.data.scenes["Scene"].seed_properties.seed = 1
+    seed(1)
+    for idx in range(5):
+        bpy.ops.camera.apply_random_transform("INVOKE_DEFAULT")
+        assert bpy.data.objects["Camera"].location[0] == first_run[idx]
+
+
+
+def test_bool_delta_position():
+    pass
+
+def test_bool_delta_rotation():
+    pass
+
+def test_per_frame():
+    # is the sequence the same (going one way)?
+    pass
+
+def test_per_frame_bidirectional():
+    # is the sequence the same (going both ways)?
+    pass
+
+
+
 
 
 # modified from the pytest-blender docs
