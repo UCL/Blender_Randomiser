@@ -16,6 +16,7 @@ Example:
 
 from pathlib import Path
 from random import seed
+import pip
 
 import bpy
 
@@ -105,6 +106,12 @@ def main():
         bpy.context.scene.seed_properties.seed = args.seed[0]
         seed(args.seed[0])
         bpy.context.scene.seed_properties.seed_toggle = True
+
+    # Install testing libraries inside of blender
+    pip.main(['install', 'pytest', '--user'])
+    pip.main(['install', 'pytest-cov', '--user'])
+    pip.main(['install', 'pytest-blender', '--user'])
+
 
 
 if __name__ == "__main__":
