@@ -39,27 +39,6 @@ MAP_SOCKET_TYPE_TO_ATTR = {
     bpy.types.NodeSocketBool: "bool_1d",
 }
 
-MAP_PROPS_TO_ATTR = {
-    # bpy.types.NodeSocketFloat: "float_1d"
-    # bpy.props.FloatVectorProperty size=1,
-    Vector: "float_3d",  # bpy.props.FloatVectorProperty size=3,
-    float: "float_1d",
-    # bpy.types.NodeSocketInt: "int_1d"
-    # bpy.props.IntProperty,
-    # bpy.types.NodeSocketColor: "rgba_4d",  # "float_4d", if
-    # bpy.types.NodeSocketBool: "bool_1d", elif
-}
-
-MAP_PROPS_TO_INI_MIN_MAX = {
-    # bpy.types.NodeSocketFloat: {"min": -np.inf, "max": np.inf},
-    Vector: {"min": -np.inf, "max": np.inf},
-    float: {"min": -np.inf, "max": np.inf},
-    # bpy.types.NodeSocketInt: {
-    #     "min": int(-1000),  # -2147483648
-    #     "max": int(1000),  # 2147483647
-    # },  # ---- not sure this will work?
-}
-
 # NOTE: if the property is a float vector of size (1,n)
 # the initial min/max values specified here apply to all n dimensions
 # TODO: should we change this to allow different values per dimension?
@@ -73,4 +52,30 @@ MAP_SOCKET_TYPE_TO_INI_MIN_MAX = {
         "max": int(1000),  # 2147483647
     },  # ---- not sure this will work?
     bpy.types.NodeSocketBool: {"min": False, "max": True},
+}
+
+
+MAP_PROPS_TO_ATTR = {
+    # bpy.types.NodeSocketFloat: "float_1d"
+    # bpy.props.FloatVectorProperty size=1,
+    Vector: "float_3d",  # bpy.props.FloatVectorProperty size=3,
+    float: "float_1d",
+    int: "int_1d",
+    bool: "bool_1d",
+    # bpy.types.NodeSocketInt: "int_1d"
+    # bpy.props.IntProperty,
+    # bpy.types.NodeSocketColor: "rgba_4d",  # "float_4d", if
+    # bpy.types.NodeSocketBool: "bool_1d", elif
+}
+
+MAP_PROPS_TO_INI_MIN_MAX = {
+    # bpy.types.NodeSocketFloat: {"min": -np.inf, "max": np.inf},
+    Vector: {"min": -np.inf, "max": np.inf},
+    float: {"min": -np.inf, "max": np.inf},
+    int: {"min": int(-10), "max": int(10)},
+    bool: {"min": False, "max": True},
+    # bpy.types.NodeSocketInt: {
+    #     "min": int(-1000),  # -2147483648
+    #     "max": int(1000),  # 2147483647
+    # },  # ---- not sure this will work?
 }
