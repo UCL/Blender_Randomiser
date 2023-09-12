@@ -17,10 +17,6 @@ from random import seed
 def uninstall_randomiser_addon(uninstall_addons):
     uninstall_addons(addons_ids=["randomiser"])
 
-
-def test_seed_as_input():
-    pass
-
     
 # TODO:
 # - make "randomiser" a fixture?
@@ -90,7 +86,9 @@ def test_install_and_enable_1(
     )
 
 def test_randomiser_position():
-    # Define rnage of values we randomise over
+    ''' Testing whether our randomizers generate poisitions within a specified range (between 1 and 3). '''
+
+    # Define range of values we randomise over
     lower_bound = 1.0
     upper_bound = 3.0
 
@@ -116,6 +114,8 @@ def test_randomiser_position():
         )
 
 def test_randomiser_rotation():
+    ''' Test our randomiser generates rotation angles between a specified range (between 10° and 90°). '''
+
     # Define range of values we randomise over
     lower_bound = 10.0
     upper_bound = 90.0
@@ -148,29 +148,27 @@ def test_randomiser_rotation():
 
 
 def test_random_seed():
+    ''' Test whether changing the seed works by checking random numbers are the same after setting the same seed.  '''
+
     # Run randomisation 5 times and save some numbers
     bpy.data.scenes["Scene"].seed_properties.seed = 1
-    seed(1)
+    sequence_length = 5
     first_run = []
-    for _ in range(5):
+    for _ in range(sequence_length):
         bpy.ops.camera.apply_random_transform("INVOKE_DEFAULT")
         first_run.append(bpy.data.objects["Camera"].location[0])
 
     # Change the sure and ensure the randomised numbers are different
     bpy.data.scenes["Scene"].seed_properties.seed = 2
-    seed(2)
-    for idx in range(5):
+    for idx in range(sequence_length):
         bpy.ops.camera.apply_random_transform("INVOKE_DEFAULT")
         assert bpy.data.objects["Camera"].location[0] != first_run[idx]
 
     # Check that this randomisation outputs the same numbers are the first for loop
     bpy.data.scenes["Scene"].seed_properties.seed = 1
-    seed(1)
-    for idx in range(5):
+    for idx in range(sequence_length):
         bpy.ops.camera.apply_random_transform("INVOKE_DEFAULT")
         assert bpy.data.objects["Camera"].location[0] == first_run[idx]
-
-
 
 def test_bool_delta_position():
     pass
@@ -179,16 +177,51 @@ def test_bool_delta_rotation():
     pass
 
 def test_per_frame():
-    # is the sequence the same (going one way)?
-    pass
+    ''' Test if we can replicate a sequence of random numbers using the same seed when running an animation. '''
+
+    # Record the first few x positions (randomly generated) in a sequence of frames
+    bpy.data.scenes["Scene"].seed_properties.seed = 1
+    sequence_length = 5
+    first_run = []
+    for idx in range(sequence_length):
+        bpy.app.handlers.frame_change_pre[0]('dummy')
+        bpy.data.scenes["Scene"].frame_current = idx
+        first_run.append(bpy.data.objects["Camera"].location[0])
+ 
+    # Repeat the same sequence with a different seed, then ensure the numbers generated are different
+    bpy.data.scenes["Scene"].seed_properties.seed = 2
+    for idx in range(sequence_length):
+        bpy.app.handlers.frame_change_pre[0]('dummy')
+        bpy.data.scenes["Scene"].frame_current = idx
+        assert first_run[idx] != bpy.data.objects["Camera"].location[0]
+
+    # Repeat sequence with original seed and check if the numbers generated are the same
+    bpy.data.scenes["Scene"].seed_properties.seed = 1
+    for idx in range(sequence_length):
+        bpy.app.handlers.frame_change_pre[0]('dummy')
+        bpy.data.scenes["Scene"].frame_current = idx
+        assert first_run[idx] == bpy.data.objects["Camera"].location[0]
+
 
 def test_per_frame_bidirectional():
-    # is the sequence the same (going both ways)?
+    ''' Test if frames in the animation sequence are the same going forward as going backwards. '''
+
+    # Run forward through a set of frames in an animation and record the number generated
+    first_run = []
+    for idx in range(5):
+        seed(bpy.data.scenes["Scene"].seed_properties.seed + idx)
+        bpy.app.handlers.frame_change_pre[0]('dummy')
+        bpy.data.scenes["Scene"].frame_current = idx
+        first_run.append(bpy.data.objects["Camera"].location[0])
+
+    # Run backwards through the same frames as before, ensuring that the numbers generated are the same
+    for idx in range(4, -1, -1):
+        bpy.app.handlers.frame_change_pre[0]('dummy')
+        bpy.data.scenes["Scene"].frame_current = idx
+        assert first_run[idx] == bpy.data.objects["Camera"].location[0]
+
+def test_seed_as_input():
     pass
-
-
-
-
 
 # modified from the pytest-blender docs
 def test_install_and_enable_2(install_addons_from_dir, uninstall_addons):
