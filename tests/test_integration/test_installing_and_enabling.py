@@ -85,6 +85,10 @@ def test_install_and_enable_1(
         and (directory_exists)
     )
 
+#####################
+##   TRANSFORMS   ###
+#####################
+
 def test_randomiser_position():
     ''' Testing whether our randomizers generate poisitions within a specified range (between 1 and 3). '''
 
@@ -151,6 +155,7 @@ def test_random_seed():
     ''' Test whether changing the seed works by checking random numbers are the same after setting the same seed.  '''
 
     # Run randomisation 5 times and save some numbers
+    bpy.data.scenes["Scene"].seed_properties.seed_toggle = True
     bpy.data.scenes["Scene"].seed_properties.seed = 1
     sequence_length = 5
     first_run = []
@@ -180,7 +185,9 @@ def test_per_frame():
     ''' Test if we can replicate a sequence of random numbers using the same seed when running an animation. '''
 
     # Record the first few x positions (randomly generated) in a sequence of frames
-    bpy.data.scenes["Scene"].seed_properties.seed = 1
+    bpy.data.scenes["Scene"].seed_properties.seed_toggle = True
+    bpy.data.scenes["Scene"].seed_properties.seed = 3
+    bpy.data.scenes["Scene"].frame_current = 0
     sequence_length = 5
     first_run = []
     for idx in range(sequence_length):
@@ -189,14 +196,16 @@ def test_per_frame():
         first_run.append(bpy.data.objects["Camera"].location[0])
  
     # Repeat the same sequence with a different seed, then ensure the numbers generated are different
-    bpy.data.scenes["Scene"].seed_properties.seed = 2
+    bpy.data.scenes["Scene"].seed_properties.seed = 4
+    bpy.data.scenes["Scene"].frame_current = 0
     for idx in range(sequence_length):
         bpy.app.handlers.frame_change_pre[0]('dummy')
         bpy.data.scenes["Scene"].frame_current = idx
         assert first_run[idx] != bpy.data.objects["Camera"].location[0]
 
     # Repeat sequence with original seed and check if the numbers generated are the same
-    bpy.data.scenes["Scene"].seed_properties.seed = 1
+    bpy.data.scenes["Scene"].seed_properties.seed = 3
+    bpy.data.scenes["Scene"].frame_current = 0
     for idx in range(sequence_length):
         bpy.app.handlers.frame_change_pre[0]('dummy')
         bpy.data.scenes["Scene"].frame_current = idx
@@ -207,21 +216,19 @@ def test_per_frame_bidirectional():
     ''' Test if frames in the animation sequence are the same going forward as going backwards. '''
 
     # Run forward through a set of frames in an animation and record the number generated
+    bpy.data.scenes["Scene"].seed_properties.seed_toggle = True
+    bpy.data.scenes["Scene"].seed_properties.seed = 5
     first_run = []
-    for idx in range(5):
-        seed(bpy.data.scenes["Scene"].seed_properties.seed + idx)
-        bpy.app.handlers.frame_change_pre[0]('dummy')
+    for idx in range(7):
         bpy.data.scenes["Scene"].frame_current = idx
+        bpy.app.handlers.frame_change_pre[0]('dummy')
         first_run.append(bpy.data.objects["Camera"].location[0])
 
     # Run backwards through the same frames as before, ensuring that the numbers generated are the same
     for idx in range(4, -1, -1):
-        bpy.app.handlers.frame_change_pre[0]('dummy')
         bpy.data.scenes["Scene"].frame_current = idx
+        bpy.app.handlers.frame_change_pre[0]('dummy')
         assert first_run[idx] == bpy.data.objects["Camera"].location[0]
-
-def test_seed_as_input():
-    pass
 
 # modified from the pytest-blender docs
 def test_install_and_enable_2(install_addons_from_dir, uninstall_addons):
