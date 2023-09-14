@@ -20,17 +20,18 @@ def compute_UD_props_sets(self):
     # set of GNGs already in collection
     self.set_UD_props_in_collection = set(UD.name for UD in self.collection)
 
-    for UD in self.collection:
-        print("self.collection !!!!!!!!!! ", UD.name)
+    # for UD in self.collection:
+    ##print("self.collection !!!!!!!!!! ", UD.name)
 
     # set of node groups in Blender data structure
     self.set_UD_props_in_data = set(UD.name for UD in self.candidate_UD_props)
 
-    for UD in self.candidate_UD_props:
-        print("self.candidate_UD_props !!!!!!!!!! ", UD.name)
+    # for UD in self.candidate_UD_props:
+    ## print("self.candidate_UD_props !!!!!!!!!! ", UD.name)
 
     # pdb.set_trace()
 
+    ### REMOVE????
     # set of node groups in one of the sets only
     self.set_UD_props_in_one_only = (
         self.set_UD_props_in_collection.symmetric_difference(
@@ -77,6 +78,7 @@ def set_update_UD_props_collection(self, value):
         _description_
     """
 
+    ##### ISSUE WITH DUPLICATION?????
     # if update value is True
     if value:
         # if the update fn is triggered directly and not via
@@ -87,6 +89,7 @@ def set_update_UD_props_collection(self, value):
         # for all node groups that are in one set only
         for UD_name in self.set_UD_props_in_one_only:
             # if only in collection: remove it from the collection
+
             if UD_name in self.set_UD_props_in_collection:
                 self.collection.remove(self.collection.find(UD_name))
 

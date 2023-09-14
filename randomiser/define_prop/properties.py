@@ -42,7 +42,8 @@ def register():
             bpy.types.Scene.custom = bpy.props.CollectionProperty(
                 type=CUSTOM_colorCollection
             )
-        bpy.types.Scene.custom_index = bpy.props.IntProperty()
+
+    bpy.types.Scene.custom_index = bpy.props.IntProperty()
 
     print("UD properties registered")
 
