@@ -15,9 +15,9 @@ except ImportError:
 # add-on is uninstalled before each test (if it exists)
 # all tests in this session can access the feature
 # autouse: the fixture is automatically requested by all tests
-@pytest.fixture(scope="session", autouse=True)
+'''@pytest.fixture(scope="session", autouse=True)
 def uninstall_randomiser_addon(uninstall_addons):
-    uninstall_addons(addons_ids=["randomiser"])
+    uninstall_addons(addons_ids=["randomiser"])'''
 
 
 # TODO:
