@@ -3,7 +3,7 @@
 import subprocess
 from pathlib import Path
 
-import bpy
+import bpy  # type: ignore
 import numpy as np
 import pytest
 

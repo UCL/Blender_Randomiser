@@ -35,7 +35,6 @@ dev = [
   "ruff",
   "setuptools_scm",
   "pytest-blender",
-  "bpy",
 ]
 
 [build-system]
