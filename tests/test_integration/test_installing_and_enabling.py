@@ -3,9 +3,13 @@
 import subprocess
 from pathlib import Path
 
-import bpy  # type: ignore
 import numpy as np
 import pytest
+
+try:
+    import bpy
+except ImportError:
+    pytest.skip("bpy not available", allow_module_level=True)
 
 
 # add-on is uninstalled before each test (if it exists)
