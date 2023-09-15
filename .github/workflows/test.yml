@@ -48,11 +48,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install pre-commit cookiecutter pyyaml pytest pytest-cov toml pytest-blender
           pip install -r requirements-dev-pip.txt
-          blender_executable="$(< _blender-executable-path.txt)"
-          python_blender_executable="$(pytest-blender --blender-executable $blender_executable)"
-          $python_blender_executable -m ensurepip
-          $python_blender_executable -m pip install pytest
-          echo "blender-executable=$BLENDER_EXECUTABLE" >> $GITHUB_OUTPUT
       - name: Test with pytest
         run: pytest -svv --blender-executable \
           "${{ steps.install-dependencies.outputs.blender-executable }}" tests
