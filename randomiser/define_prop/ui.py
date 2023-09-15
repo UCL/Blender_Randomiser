@@ -397,9 +397,15 @@ class SubPanelRandomUD(
 
             full_str = sockets_props_collection.name
             attribute_only_str = get_attr_only_str(full_str)
-            prop_type, action, prop, path_attr = attr_get_type(
-                bpy.context.scene, attribute_only_str
-            )
+
+            if "bpy.context.scene" in full_str:
+                prop_type, action, prop, path_attr = attr_get_type(
+                    bpy.context.scene, attribute_only_str
+                )
+            elif "bpy.data.objects" in full_str:
+                prop_type, action, prop, path_attr = attr_get_type(
+                    bpy.data.objects["Cube"], attribute_only_str
+                )
 
             print("prop_type", prop_type)
             print("action", action)
