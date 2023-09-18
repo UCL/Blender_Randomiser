@@ -260,6 +260,146 @@ def test_per_frame_bidirectional():
         assert first_run[idx] == bpy.data.objects["Camera"].location[0]
 
 
+###################
+##   GEOMETRY   ###
+###################
+
+
+def test_randomiser_geometry():
+    """ """
+
+    # Define range of values we randomise over
+    lower_bound = 1.0
+    upper_bound = 3.0
+
+    # set range for randomise in blender properties
+    bpy.data.node_groups.new("Geometry Nodes", "GeometryNodeTree")
+    print("OBJECTS ->")
+    print(list([i for i in bpy.data.objects]))
+
+    bpy.ops.mesh.primitive_cube_add(
+        enter_editmode=False,
+        align="WORLD",
+        location=(0, 0, 0),
+        scale=(1, 1, 1),
+    )
+    bpy.ops.object.modifier_add(type="NODES")
+    bpy.ops.node.new_geometry_node_group_assign()
+    node_group = bpy.context.object.modifiers[0].node_group
+
+    # add socket
+    inputs = node_group.inputs
+    inputs.new(type="NodeSocketFloat", name="cube_size")
+    inputs.remove(inputs[0])  # remove first socket (maybe remove)
+
+    # Add nodes
+    nodes = node_group.nodes
+    cube = nodes.new(type="GeometryNodeMeshCube")
+    value = nodes.new(type="ShaderNodeValue")
+
+    # connect
+    links = node_group.links
+    links.new(value.outputs["Value"], cube.inputs["Size"])
+    links.new(cube.outputs["Mesh"], nodes["Group Output"].inputs["Geometry"])
+
+    bpy.data.scenes["Scene"].socket_props_per_gng.collection[
+        0
+    ].collection.add()
+    bpy.data.scenes["Scene"].socket_props_per_gng.collection[0].collection[
+        0
+    ].max_float_1d[0] = upper_bound
+    bpy.data.scenes["Scene"].socket_props_per_gng.collection[0].collection[
+        0
+    ].min_float_1d[0] = lower_bound
+
+    # run a large number of randomisation and check
+    # they fall with the predefined range
+    total_random_test = 1000
+    for _ in range(total_random_test):
+        bpy.ops.camera.apply_random_transform("INVOKE_DEFAULT")
+        assert (
+            bpy.data.node_groups["Geometry Nodes"]
+            .nodes["RandomConeDepth"]
+            .outputs[0]
+            .default_value
+            >= lower_bound
+        ) and (
+            bpy.data.node_groups["Geometry Nodes"]
+            .nodes["RandomConeDepth"]
+            .outputs[0]
+            .default_value
+            <= upper_bound
+        )
+
+
+def test_modifier_act_on_object():
+    pass
+
+
+def test_random_seed_geometry():
+    pass
+
+
+def test_per_frame_geometry():
+    pass
+
+
+def test_random_node_displayed():
+    # Once a node is renamed to include "Random..." does it appear in
+    # bpy.data.scenes["Scene"].socket_props_per_gng.collection[0].collection
+    # and then is it displayed on the UI.  Or does everything in the
+    # collection named "Random..."
+    pass
+
+
+###################
+##   MATERIAL   ###
+###################
+
+
+def test_randomiser_metallic():
+    """ """
+
+    # Define range of values we randomise over
+    lower_bound = 1.0
+    upper_bound = 3.0
+
+    # set range for randomise in blender properties
+    # bpy.data.materials.new('Materials')
+    bpy.data.scenes["Scene"].socket_props_per_material.collection.add()
+    bpy.data.scenes["Scene"].socket_props_per_material.collection[
+        0
+    ].collection.add()
+    bpy.data.scenes["Scene"].socket_props_per_material.collection[
+        0
+    ].collection.add()
+    bpy.data.scenes["Scene"].socket_props_per_material.collection[
+        0
+    ].collection[1].max_float_1d[0] = upper_bound
+    bpy.data.scenes["Scene"].socket_props_per_material.collection[
+        0
+    ].collection[1].min_float_1d[0] = lower_bound
+
+    # run a large number of randomisation and check they fall
+    # with the predefined range
+    total_random_test = 1000
+    for _ in range(total_random_test):
+        bpy.ops.camera.apply_random_transform("INVOKE_DEFAULT")
+        assert (
+            bpy.data.materials["Materials"]
+            .node_tree.nodes["RandomMetallic"]
+            .outputs[0]
+            .default_value
+            >= lower_bound
+        ) and (
+            bpy.data.materials["Materials"]
+            .node_tree.nodes["RandomMetallic"]
+            .outputs[0]
+            .default_value
+            <= upper_bound
+        )
+
+
 # modified from the pytest-blender docs
 def test_install_and_enable_2(install_addons_from_dir, uninstall_addons):
     # install and enable addons from directory
