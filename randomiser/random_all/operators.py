@@ -88,6 +88,53 @@ class ApplyRandomAll(bpy.types.Operator):
         return {"FINISHED"}
 
 
+# -------------------------------
+class ApplySaveParams(bpy.types.Operator):
+    # docstring shows as a tooltip for menu items and buttons.
+    """Save parameter outputs in .json
+
+    Parameters
+    ----------
+    bpy : _type_
+        _description_
+
+    Returns
+    -------
+    _type_
+        _description_
+    """
+
+    bl_idname = "camera.save_param_out"  # appended to bpy.ops.
+    bl_label = "Save parameter outputs"
+
+    bl_options = {"REGISTER", "UNDO"}
+
+    @classmethod
+    def poll(cls, context):
+        # check the context here
+        return context.object is not None
+
+    def execute(self, context):
+        """Execute the save param operator
+
+        Save parameter outputs in .json
+
+        Parameters
+        ----------
+        context : _type_
+            _description_
+
+        Returns
+        -------
+        _type_
+            _description_
+        """
+
+        print("hello")
+
+        return {"FINISHED"}
+
+
 @persistent
 def randomise_all_per_frame(dummy):
     bpy.ops.camera.randomise_all("INVOKE_DEFAULT")
@@ -100,6 +147,7 @@ def randomise_all_per_frame(dummy):
 # ---------------------
 list_classes_to_register = [
     ApplyRandomAll,
+    ApplySaveParams,
 ]
 
 

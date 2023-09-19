@@ -3,27 +3,29 @@ import bpy
 
 # ---------------------------
 # Properties
-class PropertiesRandomSeed(bpy.types.PropertyGroup):
+class PropertiesRandomAll(bpy.types.PropertyGroup):
     """
     Class holding the set of properties
-    for the random seed
+    for the randomise all panels
 
     """
 
-    seed_toggle_prop = bpy.props.BoolProperty(
-        name="Set random seed", default=False
-    )
-    seed_toggle: seed_toggle_prop  # type: ignore
+    # seed_toggle_prop = bpy.props.BoolProperty(
+    #     name="Set random seed", default=False
+    # )
+    # seed_toggle: seed_toggle_prop  # type: ignore
 
-    seed_prop = bpy.props.IntProperty(name="Seed", default=42)
-    seed: seed_prop  # type: ignore
+    tot_frame_no_prop = bpy.props.IntProperty(
+        name="Total Frame Number", default=50
+    )
+    tot_frame_no: tot_frame_no_prop  # type: ignore
 
 
 # ------------------------------------
 # Register / unregister classes
 # ------------------------------------
 list_classes_to_register = [
-    PropertiesRandomSeed,
+    PropertiesRandomAll,
 ]
 
 
@@ -33,11 +35,11 @@ def register():
     for cls in list_classes_to_register:
         bpy.utils.register_class(cls)
 
-        bpy.types.Scene.seed_properties = bpy.props.PointerProperty(
-            type=PropertiesRandomSeed
+        bpy.types.Scene.rand_all_properties = bpy.props.PointerProperty(
+            type=PropertiesRandomAll
         )
 
-    print("seed properties registered")
+    print("randomise all properties registered")
 
 
 def unregister():
@@ -47,6 +49,6 @@ def unregister():
     for cls in list_classes_to_register:
         bpy.utils.unregister_class(cls)
 
-    del bpy.types.Scene.seed_properties
+    del bpy.types.Scene.rand_all_properties
 
-    print("seed properties unregistered")
+    print("randomise all properties unregistered")

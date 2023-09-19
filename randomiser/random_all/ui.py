@@ -43,11 +43,11 @@ class PanelRandomAll(bpy.types.Panel):
 
         ###################
         # Camera positon
-        row = layout.row()  # row = layout.row(align=True)
-        row.label(text="x")
+        # row = layout.row()  # row = layout.row(align=True)
+        # row.label(text="x")
 
-        row_split = row.split()
-        col1 = row_split.column(align=True)
+        # row_split = row.split()
+        # col1 = row_split.column(align=True)
         # col2 = row_split.column(align=True)
         # col3 = row_split.column(align=True)
         # col4 = row_split.column(align=True)
@@ -55,6 +55,21 @@ class PanelRandomAll(bpy.types.Panel):
         # Randomise button
         col = self.layout.column()
         col.operator("camera.randomise_all", text="Randomise")
+
+        # Camera rotation y
+        row = layout.row()
+        row.label(text="Save randomisation outputs")
+        row_split = row.split()
+        col1 = row_split.column(align=True)
+        col2 = row_split.column(align=True)
+
+        col1.operator("camera.save_param_out", text="Save Parameter Outputs")
+        # col1.enabled = False
+        col2.prop(
+            context.scene.rand_all_properties,
+            "tot_frame_no",
+            icon_only=True,
+        )
 
         # row = self.layout.row(align=True)
         # split = row.split()
