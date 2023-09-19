@@ -6,6 +6,62 @@ from bpy.app.handlers import persistent
 from mathutils import Vector
 
 
+def get_transform_inputs(context):
+    loc = context.scene.randomise_camera_props.camera_pos
+    rot = context.scene.randomise_camera_props.camera_rot
+
+    loc_x_min = context.scene.randomise_camera_props.camera_pos_x_min[0]
+    loc_x_max = context.scene.randomise_camera_props.camera_pos_x_max[0]
+    loc_x_range = [loc_x_min, loc_x_max]
+
+    loc_y_min = context.scene.randomise_camera_props.camera_pos_y_min[0]
+    loc_y_max = context.scene.randomise_camera_props.camera_pos_y_max[0]
+    loc_y_range = [loc_y_min, loc_y_max]
+
+    loc_z_min = context.scene.randomise_camera_props.camera_pos_z_min[0]
+    loc_z_max = context.scene.randomise_camera_props.camera_pos_z_max[0]
+    loc_z_range = [loc_z_min, loc_z_max]
+
+    rot_x_min = context.scene.randomise_camera_props.camera_rot_x_min[0]
+    rot_x_max = context.scene.randomise_camera_props.camera_rot_x_max[0]
+    rot_x_range = [rot_x_min, rot_x_max]
+
+    rot_y_min = context.scene.randomise_camera_props.camera_rot_y_min[0]
+    rot_y_max = context.scene.randomise_camera_props.camera_rot_y_max[0]
+    rot_y_range = [rot_y_min, rot_y_max]
+
+    rot_z_min = context.scene.randomise_camera_props.camera_rot_z_min[0]
+    rot_z_max = context.scene.randomise_camera_props.camera_rot_z_max[0]
+    rot_z_range = [rot_z_min, rot_z_max]
+
+    delta_on = context.scene.randomise_camera_props.bool_delta
+
+    rand_posx = context.scene.randomise_camera_props.bool_rand_posx
+    rand_posy = context.scene.randomise_camera_props.bool_rand_posy
+    rand_posz = context.scene.randomise_camera_props.bool_rand_posz
+    rand_rotx = context.scene.randomise_camera_props.bool_rand_rotx
+    rand_roty = context.scene.randomise_camera_props.bool_rand_roty
+    rand_rotz = context.scene.randomise_camera_props.bool_rand_rotz
+
+    return (
+        loc,
+        loc_x_range,
+        loc_y_range,
+        loc_z_range,
+        rot,
+        rot_x_range,
+        rot_y_range,
+        rot_z_range,
+        delta_on,
+        rand_posx,
+        rand_posy,
+        rand_posz,
+        rand_rotx,
+        rand_roty,
+        rand_rotz,
+    )
+
+
 # -------------------------------
 # Operator
 # -------------------------------
@@ -50,41 +106,24 @@ class ApplyRandomTransform(bpy.types.Operator):
         _type_
             _description_
         """
-        loc = context.scene.randomise_camera_props.camera_pos
-        rot = context.scene.randomise_camera_props.camera_rot
 
-        loc_x_min = context.scene.randomise_camera_props.camera_pos_x_min[0]
-        loc_x_max = context.scene.randomise_camera_props.camera_pos_x_max[0]
-        loc_x_range = [loc_x_min, loc_x_max]
-
-        loc_y_min = context.scene.randomise_camera_props.camera_pos_y_min[0]
-        loc_y_max = context.scene.randomise_camera_props.camera_pos_y_max[0]
-        loc_y_range = [loc_y_min, loc_y_max]
-
-        loc_z_min = context.scene.randomise_camera_props.camera_pos_z_min[0]
-        loc_z_max = context.scene.randomise_camera_props.camera_pos_z_max[0]
-        loc_z_range = [loc_z_min, loc_z_max]
-
-        rot_x_min = context.scene.randomise_camera_props.camera_rot_x_min[0]
-        rot_x_max = context.scene.randomise_camera_props.camera_rot_x_max[0]
-        rot_x_range = [rot_x_min, rot_x_max]
-
-        rot_y_min = context.scene.randomise_camera_props.camera_rot_y_min[0]
-        rot_y_max = context.scene.randomise_camera_props.camera_rot_y_max[0]
-        rot_y_range = [rot_y_min, rot_y_max]
-
-        rot_z_min = context.scene.randomise_camera_props.camera_rot_z_min[0]
-        rot_z_max = context.scene.randomise_camera_props.camera_rot_z_max[0]
-        rot_z_range = [rot_z_min, rot_z_max]
-
-        delta_on = context.scene.randomise_camera_props.bool_delta
-
-        rand_posx = context.scene.randomise_camera_props.bool_rand_posx
-        rand_posy = context.scene.randomise_camera_props.bool_rand_posy
-        rand_posz = context.scene.randomise_camera_props.bool_rand_posz
-        rand_rotx = context.scene.randomise_camera_props.bool_rand_rotx
-        rand_roty = context.scene.randomise_camera_props.bool_rand_roty
-        rand_rotz = context.scene.randomise_camera_props.bool_rand_rotz
+        (
+            loc,
+            loc_x_range,
+            loc_y_range,
+            loc_z_range,
+            rot,
+            rot_x_range,
+            rot_y_range,
+            rot_z_range,
+            delta_on,
+            rand_posx,
+            rand_posy,
+            rand_posz,
+            rand_rotx,
+            rand_roty,
+            rand_rotz,
+        ) = get_transform_inputs(context)
 
         randomise_selected(
             context,
