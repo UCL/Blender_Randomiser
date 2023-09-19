@@ -1,3 +1,7 @@
+import json
+import pathlib
+from random import seed
+
 import bpy
 from bpy.app.handlers import persistent
 
@@ -129,8 +133,57 @@ class ApplySaveParams(bpy.types.Operator):
         _type_
             _description_
         """
+        bpy.data.scenes["Scene"].seed_properties.seed_toggle = True
+        seed(bpy.data.scenes["Scene"].seed_properties.seed)
+        bpy.data.scenes["Scene"].frame_current = 0
+        tot_frame_no = context.scene.rand_all_properties.tot_frame_no
+        x_pos_vals = []
+        y_pos_vals = []
+        z_pos_vals = []
+        #     if context.scene.randomise_camera_props.bool_delta:
+        #     value_str = "delta_location"
+        # else:
+        #     value_str = "location"
 
-        print("hello")
+        x_rot_vals = []
+        y_rot_vals = []
+        z_rot_vals = []
+        #     if context.scene.randomise_camera_props.bool_delta:
+        #     value_str = "delta_rotation_euler"
+        # else:
+        #     value_str = "rotation_euler"
+        #     first_run.append(bpy.data.objects["Camera"].location[0])
+
+        for idx in range(tot_frame_no):
+            bpy.app.handlers.frame_change_pre[0]("dummy")
+            bpy.data.scenes["Scene"].frame_current = idx
+
+            x_pos_vals.append(bpy.data.objects["Camera"].location[0])
+            y_pos_vals.append(bpy.data.objects["Camera"].location[1])
+            z_pos_vals.append(bpy.data.objects["Camera"].location[2])
+
+            x_rot_vals.append(bpy.data.objects["Camera"].rotation_euler[0])
+            y_rot_vals.append(bpy.data.objects["Camera"].rotation_euler[1])
+            z_rot_vals.append(bpy.data.objects["Camera"].rotation_euler[2])
+
+        data = {
+            "transform_x": x_pos_vals,
+            "transform_y": y_pos_vals,
+            "transform_z": z_pos_vals,
+            "rotation_x": x_rot_vals,
+            "rotation_y": y_rot_vals,
+            "rotation_z": z_rot_vals,
+        }
+
+        print(data)
+        path_to_file = pathlib.Path.home() / "tmp" / "transform_test.json"
+        print(path_to_file)
+
+        with open(path_to_file, "w") as out_file_obj:
+            # convert the dictionary into text
+            text = json.dumps(data, indent=4)
+            # write the text into the file
+            out_file_obj.write(text)
 
         return {"FINISHED"}
 

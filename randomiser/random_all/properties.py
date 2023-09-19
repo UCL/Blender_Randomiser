@@ -20,6 +20,8 @@ class PropertiesRandomAll(bpy.types.PropertyGroup):
     )
     tot_frame_no: tot_frame_no_prop  # type: ignore
 
+    # x_pos = bpy.props.GenericType()
+
 
 # ------------------------------------
 # Register / unregister classes
