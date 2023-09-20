@@ -1,4 +1,4 @@
-from random import uniform
+from random import seed, uniform
 
 import bpy
 import numpy as np
@@ -87,6 +87,16 @@ class ApplyRandomTransform(bpy.types.Operator):
         rand_roty = context.scene.randomise_camera_props.bool_rand_roty
         rand_rotz = context.scene.randomise_camera_props.bool_rand_rotz
 
+        previous_seed = context.scene.seed_properties.seed_previous
+        current_seed = context.scene.seed_properties.seed
+        seed_enabled = context.scene.seed_properties.seed_toggle
+        frame = bpy.data.scenes["Scene"].frame_current
+        if (previous_seed != (current_seed + frame)) and (
+            seed_enabled is True
+        ):
+            seed(current_seed + frame)
+            context.scene.seed_properties.seed_previous = current_seed + frame
+
         randomise_selected(
             context,
             loc,
@@ -111,7 +121,13 @@ class ApplyRandomTransform(bpy.types.Operator):
 
 @persistent
 def randomise_camera_transform_per_frame(dummy):
+    tmp_toggle = bpy.data.scenes["Scene"].seed_properties.seed_toggle
+    bpy.data.scenes["Scene"].seed_properties.seed_toggle = True
+    bpy.data.scenes["Scene"].seed_properties.seed_previous = (
+        bpy.data.scenes["Scene"].seed_properties.seed - 1
+    )
     bpy.ops.camera.apply_random_transform("INVOKE_DEFAULT")
+    bpy.data.scenes["Scene"].seed_properties.seed_toggle = tmp_toggle
     return
 
 
