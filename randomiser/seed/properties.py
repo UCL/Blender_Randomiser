@@ -18,11 +18,6 @@ class PropertiesRandomSeed(bpy.types.PropertyGroup):
     seed_prop = bpy.props.IntProperty(name="Seed", default=42)
     seed: seed_prop  # type: ignore
 
-    seed_previous_prop = bpy.props.IntProperty(
-        name="Seed Previous", default=42
-    )
-    seed_previous: seed_previous_prop  # type: ignore
-
 
 # ------------------------------------
 # Register / unregister classes
