@@ -29,11 +29,11 @@ with open(path_to_file, "w") as out_file_obj:
     out_file_obj.write(text)
 
 
-path_to_file = pathlib.Path.home() / "tmp" / "input_parameters.json"
-### TODO check file exists
-with open(path_to_file, "r") as in_file_obj:
-    text = in_file_obj.read()
-    # convert the text into a dictionary
-    data = json.loads(text)
+# path_to_file = pathlib.Path.home() / "tmp" / "input_parameters.json"
+#### TODO check file exists
+# with open(path_to_file, "r") as in_file_obj:
+#    text = in_file_obj.read()
+#    # convert the text into a dictionary
+#    data = json.loads(text)
 
 ## first_run = data["transform_x"]

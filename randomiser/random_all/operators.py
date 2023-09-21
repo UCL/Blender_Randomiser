@@ -154,6 +154,8 @@ class ApplySaveParams(bpy.types.Operator):
         #     value_str = "rotation_euler"
         #     first_run.append(bpy.data.objects["Camera"].location[0])
 
+        geom = []
+
         for idx in range(tot_frame_no):
             bpy.app.handlers.frame_change_pre[0]("dummy")
             bpy.data.scenes["Scene"].frame_current = idx
@@ -166,6 +168,14 @@ class ApplySaveParams(bpy.types.Operator):
             y_rot_vals.append(bpy.data.objects["Camera"].rotation_euler[1])
             z_rot_vals.append(bpy.data.objects["Camera"].rotation_euler[2])
 
+            bpy.ops.node.randomise_all_geometry_sockets("INVOKE_DEFAULT")
+            geom.append(
+                bpy.data.node_groups[0]
+                .nodes["RandomConeDepth"]
+                .outputs[0]
+                .default_value
+            )
+
         data = {
             "transform_x": x_pos_vals,
             "transform_y": y_pos_vals,
@@ -173,6 +183,7 @@ class ApplySaveParams(bpy.types.Operator):
             "rotation_x": x_rot_vals,
             "rotation_y": y_rot_vals,
             "rotation_z": z_rot_vals,
+            "geometry": geom,
         }
 
         print(data)
