@@ -85,7 +85,6 @@ class RandomiseAllGeometryNodes(bpy.types.Operator):
         self.list_subpanel_gng_names = [
             gng.name for gng in cs.socket_props_per_gng.collection
         ]
-
         # for every GNG: save sockets to randomise
         self.sockets_to_randomise_per_gng = {}
         for gng_str in self.list_subpanel_gng_names:
@@ -151,6 +150,7 @@ class RandomiseAllGeometryNodes(bpy.types.Operator):
         _type_
             _description_
         """
+
         cs = context.scene
 
         # For every GNG with a subpanel
