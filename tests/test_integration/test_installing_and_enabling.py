@@ -256,11 +256,12 @@ def test_randomiser_geometry():
     upper_bound = 3.0
 
     # set range for randomise in blender properties
-    """obj = bpy.data.objects[3]
+    obj = bpy.data.objects[3]
     bpy.context.view_layer.objects.active = obj
     bpy.context.scene.socket_props_per_gng.update_gngs_collection
-    bpy.ops.node.randomise_all_geometry_sockets("INVOKE_DEFAULT")"""
+    bpy.ops.node.randomise_all_geometry_sockets("INVOKE_DEFAULT")
 
+    # set range for randomise in blender properties
     bpy.data.scenes["Scene"].socket_props_per_gng.collection[0].collection[
         0
     ].max_float_1d[0] = upper_bound
@@ -316,31 +317,29 @@ def test_random_node_displayed():
 def test_randomiser_metallic():
     """ """
 
-    """# Define range of values we randomise over
+    # Define range of values we randomise over
     lower_bound = 1.0
     upper_bound = 3.0
 
     # set range for randomise in blender properties
-    # bpy.data.materials.new('Materials')
-    bpy.data.scenes["Scene"].socket_props_per_material.collection.add()
-    bpy.data.scenes["Scene"].socket_props_per_material.collection[
-        0
-    ].collection.add()
-    bpy.data.scenes["Scene"].socket_props_per_material.collection[
-        0
-    ].collection.add()
-    bpy.data.scenes["Scene"].socket_props_per_material.collection[
-        0
-    ].collection[1].max_float_1d[0] = upper_bound
-    bpy.data.scenes["Scene"].socket_props_per_material.collection[
-        0
-    ].collection[1].min_float_1d[0] = lower_bound
+    obj = bpy.data.objects[3]
+    bpy.context.view_layer.objects.active = obj
+    bpy.context.scene.socket_props_per_gng.update_gngs_collection
+    bpy.ops.node.randomise_all_geometry_sockets("INVOKE_DEFAULT")
 
-    # run a large number of randomisation and check they fall
-    # with the predefined range
+    # set range for randomise in blender properties
+    bpy.data.scenes["Scene"].socket_props_per_material.collection[
+        0
+    ].collection[0].max_float_1d[0] = upper_bound
+    bpy.data.scenes["Scene"].socket_props_per_material.collection[
+        0
+    ].collection[0].min_float_1d[0] = lower_bound
+
+    # run a large number of randomisation and check
+    # they fall with the predefined range
     total_random_test = 1000
     for _ in range(total_random_test):
-        bpy.ops.camera.apply_random_transform("INVOKE_DEFAULT")
+        bpy.ops.node.randomise_all_material_sockets("INVOKE_DEFAULT")
         assert (
             bpy.data.materials["Materials"]
             .node_tree.nodes["RandomMetallic"]
@@ -353,7 +352,8 @@ def test_randomiser_metallic():
             .outputs[0]
             .default_value
             <= upper_bound
-        )"""
+        )
+
     pass
 
 
