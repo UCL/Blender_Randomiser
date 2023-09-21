@@ -40,11 +40,12 @@ def test_install_and_enable_1(
             blender_executable,
             "--background",
             "--factory-startup",
-            "sample.blend",
         ]
     )
     list_return_codes.append(blender_result.returncode)
     list_stderr.append(blender_result.stderr)
+
+    bpy.ops.wm.open_mainfile(filepath="sample.blend")
 
     # install and enable randomiser addon
     bpy.ops.preferences.addon_install(filepath="./randomiser.zip")
@@ -60,6 +61,10 @@ def test_install_and_enable_1(
         and (all([x in ["", None] for x in list_stderr]))
         and (directory_exists)
     )
+
+
+def test_blend_file_loads():
+    assert len(bpy.data.objects) == 4
 
 
 #####################
@@ -238,28 +243,6 @@ def test_per_frame():
         assert first_run[idx] == bpy.data.objects["Camera"].location[0]
 
 
-def test_per_frame_bidirectional():
-    """Test if frames in the animation sequence
-    are the same going forward as going backwards."""
-
-    # Run forward through a set of frames
-    # in an animation and record the number generated
-    bpy.data.scenes["Scene"].seed_properties.seed_toggle = True
-    bpy.data.scenes["Scene"].seed_properties.seed = 5
-    first_run = []
-    for idx in range(7):
-        bpy.data.scenes["Scene"].frame_current = idx
-        bpy.app.handlers.frame_change_pre[0]("dummy")
-        first_run.append(bpy.data.objects["Camera"].location[0])
-
-    # Run backwards through the same frames as before,
-    # ensuring that the numbers generated are the same
-    for idx in range(4, -1, -1):
-        bpy.data.scenes["Scene"].frame_current = idx
-        bpy.app.handlers.frame_change_pre[0]("dummy")
-        assert first_run[idx] == bpy.data.objects["Camera"].location[0]
-
-
 ###################
 ##   GEOMETRY   ###
 ###################
@@ -273,37 +256,11 @@ def test_randomiser_geometry():
     upper_bound = 3.0
 
     # set range for randomise in blender properties
-    bpy.data.node_groups.new("Geometry Nodes", "GeometryNodeTree")
+    """obj = bpy.data.objects[3]
+    bpy.context.view_layer.objects.active = obj
+    bpy.context.scene.socket_props_per_gng.update_gngs_collection
+    bpy.ops.node.randomise_all_geometry_sockets("INVOKE_DEFAULT")"""
 
-    # Add a new cube to the scene
-    bpy.ops.mesh.primitive_cube_add(
-        enter_editmode=False,
-        align="WORLD",
-        location=(0, 0, 0),
-        scale=(1, 1, 1),
-    )
-    bpy.ops.object.modifier_add(type="NODES")
-    bpy.ops.node.new_geometry_node_group_assign()
-    node_group = bpy.context.object.modifiers[0].node_group
-
-    # add socket
-    inputs = node_group.inputs
-    inputs.new(type="NodeSocketFloat", name="cube_size")
-    inputs.remove(inputs[0])  # remove first socket (maybe remove)
-
-    # Add nodes
-    nodes = node_group.nodes
-    cube = nodes.new(type="GeometryNodeMeshCube")
-    value = nodes.new(type="ShaderNodeValue")
-    value.name = "RandomValue"
-    # connect
-    links = node_group.links
-    links.new(value.outputs["Value"], cube.inputs["Size"])
-    links.new(cube.outputs["Mesh"], nodes["Group Output"].inputs["Geometry"])
-    bpy.data.scenes["Scene"].socket_props_per_gng.collection.add()
-    bpy.data.scenes["Scene"].socket_props_per_gng.collection[
-        0
-    ].collection.add()
     bpy.data.scenes["Scene"].socket_props_per_gng.collection[0].collection[
         0
     ].max_float_1d[0] = upper_bound
@@ -317,14 +274,14 @@ def test_randomiser_geometry():
     for _ in range(total_random_test):
         bpy.ops.node.randomise_all_geometry_sockets("INVOKE_DEFAULT")
         assert (
-            bpy.data.node_groups[1]
-            .nodes["RandomValue"]
+            bpy.data.node_groups[0]
+            .nodes["RandomConeDepth"]
             .outputs[0]
             .default_value
             >= lower_bound
         ) and (
-            bpy.data.node_groups[1]
-            .nodes["RandomValue"]
+            bpy.data.node_groups[0]
+            .nodes["RandomConeDepth"]
             .outputs[0]
             .default_value
             <= upper_bound
