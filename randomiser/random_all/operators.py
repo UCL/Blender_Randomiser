@@ -140,41 +140,30 @@ class ApplySaveParams(bpy.types.Operator):
         x_pos_vals = []
         y_pos_vals = []
         z_pos_vals = []
-        #     if context.scene.randomise_camera_props.bool_delta:
-        #     value_str = "delta_location"
-        # else:
-        #     value_str = "location"
+        if context.scene.randomise_camera_props.bool_delta:
+            value_str = "delta_location"
+        else:
+            value_str = "location"
 
         x_rot_vals = []
         y_rot_vals = []
         z_rot_vals = []
-        #     if context.scene.randomise_camera_props.bool_delta:
-        #     value_str = "delta_rotation_euler"
-        # else:
-        #     value_str = "rotation_euler"
-        #     first_run.append(bpy.data.objects["Camera"].location[0])
-
-        geom = []
+        if context.scene.randomise_camera_props.bool_delta:
+            value_str = "delta_rotation_euler"
+        else:
+            value_str = "rotation_euler"
 
         for idx in range(tot_frame_no):
             bpy.app.handlers.frame_change_pre[0]("dummy")
             bpy.data.scenes["Scene"].frame_current = idx
+            getattr(context.scene.camera, value_str)[0]
+            x_pos_vals.append(getattr(context.scene.camera, value_str)[0])
+            y_pos_vals.append(getattr(context.scene.camera, value_str)[1])
+            z_pos_vals.append(getattr(context.scene.camera, value_str)[2])
 
-            x_pos_vals.append(bpy.data.objects["Camera"].location[0])
-            y_pos_vals.append(bpy.data.objects["Camera"].location[1])
-            z_pos_vals.append(bpy.data.objects["Camera"].location[2])
-
-            x_rot_vals.append(bpy.data.objects["Camera"].rotation_euler[0])
-            y_rot_vals.append(bpy.data.objects["Camera"].rotation_euler[1])
-            z_rot_vals.append(bpy.data.objects["Camera"].rotation_euler[2])
-
-            bpy.ops.node.randomise_all_geometry_sockets("INVOKE_DEFAULT")
-            geom.append(
-                bpy.data.node_groups[0]
-                .nodes["RandomConeDepth"]
-                .outputs[0]
-                .default_value
-            )
+            x_rot_vals.append(getattr(context.scene.camera, value_str)[0])
+            y_rot_vals.append(getattr(context.scene.camera, value_str)[1])
+            z_rot_vals.append(getattr(context.scene.camera, value_str)[2])
 
         data = {
             "transform_x": x_pos_vals,
@@ -183,12 +172,9 @@ class ApplySaveParams(bpy.types.Operator):
             "rotation_x": x_rot_vals,
             "rotation_y": y_rot_vals,
             "rotation_z": z_rot_vals,
-            "geometry": geom,
         }
 
-        print(data)
         path_to_file = pathlib.Path.home() / "tmp" / "transform_test.json"
-        print(path_to_file)
 
         with open(path_to_file, "w") as out_file_obj:
             # convert the dictionary into text
