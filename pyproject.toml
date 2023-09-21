@@ -34,6 +34,7 @@ dev = [
   "pre-commit",
   "ruff",
   "setuptools_scm",
+  "pytest-blender",
 ]
 
 [build-system]
@@ -52,7 +53,10 @@ include = ["blender_randomiser*"]
 exclude = ["tests*"]
 
 [tool.pytest.ini_options]
-addopts = "--cov=blender_randomiser"
+pythonpath = "randomiser"
+addopts = "--cov=randomiser"
+pytest-blender-debug = true
+blender-addons-cleaning = "uninstall"
 
 [tool.black]
 target-version = ['py310']
