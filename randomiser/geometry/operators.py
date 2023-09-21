@@ -32,7 +32,6 @@ class RandomiseAllGeometryNodes(bpy.types.Operator):
     )
     bl_label = "Randomise selected sockets"
     bl_options = {"REGISTER", "UNDO"}
-    testing = True
 
     @classmethod
     def poll(cls, context):
@@ -100,7 +99,6 @@ class RandomiseAllGeometryNodes(bpy.types.Operator):
             ].collection
 
             # get candidate sockets for this GNG
-            print(gng_str)
             candidate_sockets = cs.socket_props_per_gng.collection[
                 gng_str
             ].candidate_sockets
