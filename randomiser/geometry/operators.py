@@ -32,6 +32,7 @@ class RandomiseAllGeometryNodes(bpy.types.Operator):
     )
     bl_label = "Randomise selected sockets"
     bl_options = {"REGISTER", "UNDO"}
+    testing = True
 
     @classmethod
     def poll(cls, context):
@@ -55,7 +56,7 @@ class RandomiseAllGeometryNodes(bpy.types.Operator):
 
         return len(context.scene.socket_props_per_gng.collection) > 0
 
-    def invoke(self, context, event):
+    def invoke_proxy(self, context):
         """Initialise parmeters before executing the operator
 
         The invoke() function runs before executing the operator.
@@ -84,7 +85,6 @@ class RandomiseAllGeometryNodes(bpy.types.Operator):
         self.list_subpanel_gng_names = [
             gng.name for gng in cs.socket_props_per_gng.collection
         ]
-
         # for every GNG: save sockets to randomise
         self.sockets_to_randomise_per_gng = {}
         for gng_str in self.list_subpanel_gng_names:
@@ -100,6 +100,7 @@ class RandomiseAllGeometryNodes(bpy.types.Operator):
             ].collection
 
             # get candidate sockets for this GNG
+            print(gng_str)
             candidate_sockets = cs.socket_props_per_gng.collection[
                 gng_str
             ].candidate_sockets
@@ -132,6 +133,10 @@ class RandomiseAllGeometryNodes(bpy.types.Operator):
                 if sockets_props_collection[sckt_id].bool_randomise:
                     self.sockets_to_randomise_per_gng[gng_str].append(sckt)
 
+    def invoke(self, context, event):
+        self.testing = False
+        self.invoke_proxy(context)
+
         return self.execute(context)
 
     def execute(self, context):
@@ -150,6 +155,9 @@ class RandomiseAllGeometryNodes(bpy.types.Operator):
         _type_
             _description_
         """
+        if self.testing is True:
+            self.invoke_proxy(context)
+
         cs = context.scene
 
         # For every GNG with a subpanel
@@ -217,7 +225,7 @@ class RandomiseAllGeometryNodes(bpy.types.Operator):
 
                     # assign randomised socket value
                     sckt.default_value = random.uniform(min_val, max_val)
-
+        self.testing = True
         return {"FINISHED"}
 
 
