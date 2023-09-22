@@ -249,13 +249,16 @@ def test_per_frame():
 
 
 def test_randomiser_geometry():
-    """ """
+    """
+    Check if the position of vertex is correctly randomised between an
+    upper and lower bound.
+    """
 
     # Define range of values we randomise over
     lower_bound = 1.0
     upper_bound = 3.0
 
-    # set range for randomise in blender properties
+    # set up some of the properties that will be needed for testing
     obj = bpy.data.objects[3]
     bpy.context.view_layer.objects.active = obj
     bpy.context.scene.socket_props_per_gng.update_gngs_collection
@@ -294,7 +297,47 @@ def test_modifier_act_on_object():
 
 
 def test_random_seed_geometry():
-    pass
+    """Test whether changing the seed works by checking
+    random numbers are the same after setting the same seed."""
+
+    # Run randomisation 5 times and save some numbers
+    bpy.data.scenes["Scene"].seed_properties.seed_toggle = True
+    bpy.data.scenes["Scene"].seed_properties.seed = 5
+    sequence_length = 5
+    first_run = []
+    for _ in range(sequence_length):
+        bpy.ops.node.randomise_all_geometry_sockets("INVOKE_DEFAULT")
+        first_run.append(
+            bpy.data.node_groups[0]
+            .nodes["RandomConeDepth"]
+            .outputs[0]
+            .default_value
+        )
+
+    # Change the sure and ensure the randomised numbers are different
+    bpy.data.scenes["Scene"].seed_properties.seed = 6
+    for idx in range(sequence_length):
+        bpy.ops.node.randomise_all_geometry_sockets("INVOKE_DEFAULT")
+        assert (
+            bpy.data.node_groups[0]
+            .nodes["RandomConeDepth"]
+            .outputs[0]
+            .default_value
+            != first_run[idx]
+        )
+
+    # Check that this randomisation outputs
+    # the same numbers are the first for loop
+    bpy.data.scenes["Scene"].seed_properties.seed = 5
+    for idx in range(sequence_length):
+        bpy.ops.node.randomise_all_geometry_sockets("INVOKE_DEFAULT")
+        assert (
+            bpy.data.node_groups[0]
+            .nodes["RandomConeDepth"]
+            .outputs[0]
+            .default_value
+            == first_run[idx]
+        )
 
 
 def test_per_frame_geometry():
@@ -315,46 +358,107 @@ def test_random_node_displayed():
 
 
 def test_randomiser_metallic():
-    """ """
+    """
+    Check of the metallic value of a material is correctly randomised
+    between an upper and lower bound.
+    """
 
     # Define range of values we randomise over
-    lower_bound = 1.0
-    upper_bound = 3.0
+    lower_bound = 0.5
+    upper_bound = 1.0
 
-    # set range for randomise in blender properties
-    obj = bpy.data.objects[3]
+    # set up some of the properties that will be needed for testing
+    obj = bpy.data.objects[1]
     bpy.context.view_layer.objects.active = obj
-    bpy.context.scene.socket_props_per_gng.update_gngs_collection
-    bpy.ops.node.randomise_all_geometry_sockets("INVOKE_DEFAULT")
+    bpy.context.scene.socket_props_per_material.update_materials_collection
+    bpy.ops.node.randomise_all_material_sockets("INVOKE_DEFAULT")
+
+    print(len(bpy.data.scenes["Scene"].socket_props_per_material.collection))
+    print(
+        len(
+            bpy.data.scenes["Scene"]
+            .socket_props_per_material.collection[0]
+            .collection
+        )
+    )
 
     # set range for randomise in blender properties
-    bpy.data.scenes["Scene"].socket_props_per_material.collection[
-        0
-    ].collection[0].max_float_1d[0] = upper_bound
-    bpy.data.scenes["Scene"].socket_props_per_material.collection[
-        0
-    ].collection[0].min_float_1d[0] = lower_bound
+    for c in (
+        bpy.data.scenes["Scene"]
+        .socket_props_per_material.collection[0]
+        .collection
+    ):
+        c.max_float_1d[0] = upper_bound
+        c.min_float_1d[0] = lower_bound
 
     # run a large number of randomisation and check
     # they fall with the predefined range
     total_random_test = 1000
     for _ in range(total_random_test):
         bpy.ops.node.randomise_all_material_sockets("INVOKE_DEFAULT")
+        print(
+            bpy.data.materials["Material"]
+            .node_tree.nodes["RandomMetallic"]
+            .outputs[0]
+            .default_value
+        )
         assert (
-            bpy.data.materials["Materials"]
+            bpy.data.materials["Material"]
             .node_tree.nodes["RandomMetallic"]
             .outputs[0]
             .default_value
             >= lower_bound
         ) and (
-            bpy.data.materials["Materials"]
+            bpy.data.materials["Material"]
             .node_tree.nodes["RandomMetallic"]
             .outputs[0]
             .default_value
             <= upper_bound
         )
 
-    pass
+
+def test_random_seed_materials():
+    """Test whether changing the seed works by checking
+    random numbers are the same after setting the same seed."""
+
+    # Run randomisation 5 times and save some numbers
+    bpy.data.scenes["Scene"].seed_properties.seed_toggle = True
+    bpy.data.scenes["Scene"].seed_properties.seed = 7
+    sequence_length = 5
+    first_run = []
+    for _ in range(sequence_length):
+        bpy.ops.node.randomise_all_material_sockets("INVOKE_DEFAULT")
+        first_run.append(
+            bpy.data.materials["Material"]
+            .node_tree.nodes["RandomMetallic"]
+            .outputs[0]
+            .default_value
+        )
+
+    # Change the sure and ensure the randomised numbers are different
+    bpy.data.scenes["Scene"].seed_properties.seed = 8
+    for idx in range(sequence_length):
+        bpy.ops.node.randomise_all_material_sockets("INVOKE_DEFAULT")
+        assert (
+            bpy.data.materials["Material"]
+            .node_tree.nodes["RandomMetallic"]
+            .outputs[0]
+            .default_value
+            != first_run[idx]
+        )
+
+    # Check that this randomisation outputs
+    # the same numbers are the first for loop
+    bpy.data.scenes["Scene"].seed_properties.seed = 7
+    for idx in range(sequence_length):
+        bpy.ops.node.randomise_all_material_sockets("INVOKE_DEFAULT")
+        assert (
+            bpy.data.materials["Material"]
+            .node_tree.nodes["RandomMetallic"]
+            .outputs[0]
+            .default_value
+            == first_run[idx]
+        )
 
 
 # modified from the pytest-blender docs

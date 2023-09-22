@@ -1,4 +1,4 @@
-from random import uniform
+from random import seed, uniform
 
 import bpy
 import numpy as np
@@ -32,13 +32,14 @@ class RandomiseAllMaterialNodes(bpy.types.Operator):
     )
     bl_label = "Randomise selected sockets"
     bl_options = {"REGISTER", "UNDO"}
+    testing = True
 
     @classmethod
     def poll(cls, context):
         # operator can only run if there are materials in the collection
         return len(context.scene.socket_props_per_material.collection) > 0
 
-    def invoke(self, context, event):
+    def invoke_proxy(self, context):
         """Initialise parmeters before executing
 
         The invoke() function runs before executing the operator.
@@ -60,6 +61,7 @@ class RandomiseAllMaterialNodes(bpy.types.Operator):
         _type_
             _description_
         """
+
         # add list of materials to operator self
         # (this list should have been updated already, when drawing the panel)
         cs = context.scene
@@ -120,6 +122,10 @@ class RandomiseAllMaterialNodes(bpy.types.Operator):
                         sckt
                     )
 
+    def invoke(self, context, event):
+        self.testing = False
+        self.invoke_proxy(context)
+
         return self.execute(context)
 
     def execute(self, context):
@@ -138,7 +144,18 @@ class RandomiseAllMaterialNodes(bpy.types.Operator):
         _type_
             _description_
         """
+        if self.testing is True:
+            self.invoke_proxy(context)
+
         cs = context.scene
+
+        # Set the seed if it is toggled on
+        previous_seed = cs.seed_properties.seed_previous
+        current_seed = cs.seed_properties.seed
+        seed_enabled = cs.seed_properties.seed_toggle
+        if (previous_seed != current_seed) and (seed_enabled is True):
+            seed(current_seed)
+            cs.seed_properties.seed_previous = current_seed
 
         # For every material with a subpanel
         for mat_str in self.list_subpanel_material_names:
@@ -189,6 +206,8 @@ class RandomiseAllMaterialNodes(bpy.types.Operator):
 
                 # assign randomised socket value
                 sckt.default_value = uniform(min_val, max_val)
+
+        self.testing = True
 
         return {"FINISHED"}
 

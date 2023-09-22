@@ -1,4 +1,5 @@
 import random
+from random import seed
 
 import bpy
 import numpy as np
@@ -159,6 +160,14 @@ class RandomiseAllGeometryNodes(bpy.types.Operator):
             self.invoke_proxy(context)
 
         cs = context.scene
+
+        # Set the seed if it is toggled on
+        previous_seed = cs.seed_properties.seed_previous
+        current_seed = cs.seed_properties.seed
+        seed_enabled = cs.seed_properties.seed_toggle
+        if (previous_seed != current_seed) and (seed_enabled is True):
+            seed(current_seed)
+            cs.seed_properties.seed_previous = current_seed
 
         # For every GNG with a subpanel
         for gng_str in self.list_subpanel_gng_names:
