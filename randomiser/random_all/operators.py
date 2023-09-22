@@ -3,6 +3,7 @@ import pathlib
 from random import seed
 
 import bpy
+import numpy as np
 from bpy.app.handlers import persistent
 
 from ..transform.operators import get_transform_inputs, randomise_selected
@@ -133,45 +134,60 @@ class ApplySaveParams(bpy.types.Operator):
         _type_
             _description_
         """
-        bpy.data.scenes["Scene"].seed_properties.seed_toggle = True
-        seed(bpy.data.scenes["Scene"].seed_properties.seed)
+        if bpy.data.scenes["Scene"].seed_properties.seed_toggle:  # = True
+            seed(bpy.data.scenes["Scene"].seed_properties.seed)
+
         bpy.data.scenes["Scene"].frame_current = 0
-        tot_frame_no = context.scene.rand_all_properties.tot_frame_no
+        tot_frame_no = bpy.context.scene.rand_all_properties.tot_frame_no
         x_pos_vals = []
         y_pos_vals = []
         z_pos_vals = []
-        if context.scene.randomise_camera_props.bool_delta:
-            value_str = "delta_location"
-        else:
-            value_str = "location"
 
         x_rot_vals = []
         y_rot_vals = []
         z_rot_vals = []
-        if context.scene.randomise_camera_props.bool_delta:
+
+        if bpy.context.scene.randomise_camera_props.bool_delta:
+            loc_value_str = "delta_location"
             value_str = "delta_rotation_euler"
         else:
+            loc_value_str = "location"
             value_str = "rotation_euler"
 
+        rad2deg = 180 / np.pi
         for idx in range(tot_frame_no):
             bpy.app.handlers.frame_change_pre[0]("dummy")
             bpy.data.scenes["Scene"].frame_current = idx
-            getattr(context.scene.camera, value_str)[0]
-            x_pos_vals.append(getattr(context.scene.camera, value_str)[0])
-            y_pos_vals.append(getattr(context.scene.camera, value_str)[1])
-            z_pos_vals.append(getattr(context.scene.camera, value_str)[2])
 
-            x_rot_vals.append(getattr(context.scene.camera, value_str)[0])
-            y_rot_vals.append(getattr(context.scene.camera, value_str)[1])
-            z_rot_vals.append(getattr(context.scene.camera, value_str)[2])
+            x_pos_vals.append(
+                getattr(bpy.context.scene.camera, loc_value_str)[0]
+            )
+            y_pos_vals.append(
+                getattr(bpy.context.scene.camera, loc_value_str)[1]
+            )
+            z_pos_vals.append(
+                getattr(bpy.context.scene.camera, loc_value_str)[2]
+            )
+
+            x_rot_vals.append(
+                getattr(bpy.context.scene.camera, value_str)[0] * rad2deg
+            )
+            y_rot_vals.append(
+                getattr(bpy.context.scene.camera, value_str)[1] * rad2deg
+            )
+            z_rot_vals.append(
+                getattr(bpy.context.scene.camera, value_str)[2] * rad2deg
+            )
 
         data = {
-            "transform_x": x_pos_vals,
-            "transform_y": y_pos_vals,
-            "transform_z": z_pos_vals,
-            "rotation_x": x_rot_vals,
-            "rotation_y": y_rot_vals,
-            "rotation_z": z_rot_vals,
+            "location_str": loc_value_str,
+            "loc_x": x_pos_vals,
+            "loc_y": y_pos_vals,
+            "loc_z": z_pos_vals,
+            "rotation_str": value_str,
+            "rot_x": x_rot_vals,
+            "rot_y": y_rot_vals,
+            "rot_z": z_rot_vals,
         }
 
         path_to_file = pathlib.Path.home() / "tmp" / "transform_test.json"

@@ -54,11 +54,12 @@ class PanelRandomAll(bpy.types.Panel):
 
         # Randomise button
         col = self.layout.column()
-        col.operator("camera.randomise_all", text="Randomise")
+        col.operator("camera.randomise_all", text="Randomise All Panels")
 
         # Camera rotation y
         row = layout.row()
         row.label(text="Save randomisation outputs")
+        row = layout.row()
         row_split = row.split()
         col1 = row_split.column(align=True)
         col2 = row_split.column(align=True)
