@@ -133,3 +133,4 @@ dmypy.json
 *.zip
 example_addons/
 notebooks/
+.vscode/

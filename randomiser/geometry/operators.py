@@ -5,7 +5,8 @@ import bpy
 import numpy as np
 from bpy.app.handlers import persistent
 
-from .. import config, utils
+from .. import config
+from ..utils import node_groups as ng
 
 
 # --------------------------------------------
@@ -33,7 +34,6 @@ class RandomiseAllGeometryNodes(bpy.types.Operator):
     )
     bl_label = "Randomise selected sockets"
     bl_options = {"REGISTER", "UNDO"}
-    testing = True
 
     @classmethod
     def poll(cls, context):
@@ -57,7 +57,7 @@ class RandomiseAllGeometryNodes(bpy.types.Operator):
 
         return len(context.scene.socket_props_per_gng.collection) > 0
 
-    def invoke_proxy(self, context):
+    def invoke(self, context, event):
         """Initialise parmeters before executing the operator
 
         The invoke() function runs before executing the operator.
@@ -101,7 +101,6 @@ class RandomiseAllGeometryNodes(bpy.types.Operator):
             ].collection
 
             # get candidate sockets for this GNG
-            print(gng_str)
             candidate_sockets = cs.socket_props_per_gng.collection[
                 gng_str
             ].candidate_sockets
@@ -134,10 +133,6 @@ class RandomiseAllGeometryNodes(bpy.types.Operator):
                 if sockets_props_collection[sckt_id].bool_randomise:
                     self.sockets_to_randomise_per_gng[gng_str].append(sckt)
 
-    def invoke(self, context, event):
-        self.testing = False
-        self.invoke_proxy(context)
-
         return self.execute(context)
 
     def execute(self, context):
@@ -156,8 +151,6 @@ class RandomiseAllGeometryNodes(bpy.types.Operator):
         _type_
             _description_
         """
-        if self.testing is True:
-            self.invoke_proxy(context)
 
         cs = context.scene
 
@@ -234,7 +227,7 @@ class RandomiseAllGeometryNodes(bpy.types.Operator):
 
                     # assign randomised socket value
                     sckt.default_value = random.uniform(min_val, max_val)
-        self.testing = True
+
         return {"FINISHED"}
 
 
@@ -317,14 +310,14 @@ class ViewNodeGraphOneGNG(bpy.types.Operator):
         subpanel_gng = cs.socket_props_per_gng.collection[cls.subpanel_gng_idx]
 
         # get list of GNGs linked to modifiers of the active object
-        list_gngs_in_modifiers = utils.get_gngs_linked_to_modifiers(cob)
+        list_gngs_in_modifiers = ng.get_gngs_linked_to_modifiers(cob)
         list_gngs_in_modifiers_names = [
             ng.name for ng in list_gngs_in_modifiers
         ]
 
         # get list of (inner) GNGs whose root parent is a modfier-linked
         # GNG
-        map_node_group_to_root_node_group = utils.get_map_inner_gngs(
+        map_node_group_to_root_node_group = ng.get_map_inner_ngs_given_roots(
             list_gngs_in_modifiers,
         )
 
@@ -409,15 +402,17 @@ class ViewNodeGraphOneGNG(bpy.types.Operator):
         cob = context.object
 
         # find the modifier linked to this GNG, if exists
-        subpanel_modifier = utils.get_modifier_linked_to_gng(
+        subpanel_modifier = ng.get_modifier_linked_to_gng(
             self.subpanel_gng_name, cob
         )
 
         # get dict of inner GNGs
         # the dict maps inner GNGs to a tuple made of its root parent GNG
         # and its depth
-        map_inner_node_groups_to_root_parent = utils.get_map_inner_gngs(
-            [gr for gr in bpy.data.node_groups if gr.type == "GEOMETRY"]
+        map_inner_node_groups_to_root_parent = (
+            ng.get_map_inner_ngs_given_roots(
+                [gr for gr in bpy.data.node_groups if gr.type == "GEOMETRY"]
+            )
         )
 
         # if there is a modifier linked to this GNG: set that
@@ -426,7 +421,7 @@ class ViewNodeGraphOneGNG(bpy.types.Operator):
             bpy.ops.object.modifier_set_active(modifier=subpanel_modifier.name)
 
             # ensure graph is at top level
-            utils.set_gngs_graph_to_top_level(
+            ng.set_ngs_graph_to_top_level(
                 bpy.data.node_groups[self.subpanel_gng_name]
             )
 
@@ -445,7 +440,7 @@ class ViewNodeGraphOneGNG(bpy.types.Operator):
                 bpy.data.node_groups[self.subpanel_gng_name]
             ][0]
 
-            root_parent_modifier = utils.get_modifier_linked_to_gng(
+            root_parent_modifier = ng.get_modifier_linked_to_gng(
                 root_parent_node_group.name, cob
             )
 
@@ -455,13 +450,13 @@ class ViewNodeGraphOneGNG(bpy.types.Operator):
 
             # compute the path to this subpanel's GNG
             # from the parent root GNG (both ends inclusive)
-            path_to_gng = utils.get_path_to_gng(
+            path_to_gng = ng.get_path_to_ng(
                 bpy.data.node_groups[self.subpanel_gng_name]
             )
 
             # ensure we are at the top level in the graph
             # (top level = parent root GNG)
-            utils.set_gngs_graph_to_top_level(root_parent_node_group)
+            ng.set_ngs_graph_to_top_level(root_parent_node_group)
 
             # navigate the graph to the desired GNG
             # at every step: we set the target GNG as active and
@@ -472,16 +467,16 @@ class ViewNodeGraphOneGNG(bpy.types.Operator):
                 gng_target = path_to_gng[i + 1]
 
                 # get selectable version of the target GNG
-                selectable_gng_target = (
-                    utils.get_selectable_node_for_node_group(gng_target)
+                selectable_gng_target = ng.get_selectable_node_for_ng(
+                    gng_target
                 )
 
                 # set target GNG as active
                 if gng_parent == root_parent_node_group:
                     root_parent_node_group.nodes.active = selectable_gng_target
                 else:
-                    selectable_parent_gng = (
-                        utils.get_selectable_node_for_node_group(gng_parent)
+                    selectable_parent_gng = ng.get_selectable_node_for_ng(
+                        gng_parent
                     )
                     selectable_parent_gng.node_tree.nodes.active = (
                         selectable_gng_target

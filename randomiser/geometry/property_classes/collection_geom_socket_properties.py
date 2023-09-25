@@ -2,8 +2,8 @@ import re
 
 import bpy
 
-from ... import utils
 from ...material.property_classes.socket_properties import SocketProperties
+from ...utils import nodes2rand as nr
 
 
 # -----------------------------------------------------------------
@@ -210,7 +210,7 @@ class ColGeomSocketProperties(bpy.types.PropertyGroup):
             list of sockets in the input nodes in the graph
         """
         # get list of input nodes for this geometry node group (GNG)
-        list_input_nodes = utils.get_geometry_nodes_to_randomise(self.name)
+        list_input_nodes = nr.get_geometry_nodes_to_randomise(self.name)
 
         # get list of sockets that are candidate for randomisation
         list_sockets = [

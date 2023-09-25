@@ -64,6 +64,10 @@ def test_install_and_enable_1(
 
 
 def test_blend_file_loads():
+    """
+    Test if the sample.blend file included in the project has been
+    properly loaded.  A blank blender scene will contain 3 object by default.
+    """
     assert len(bpy.data.objects) == 4
 
 
@@ -73,8 +77,10 @@ def test_blend_file_loads():
 
 
 def test_randomiser_position():
-    """Testing whether our randomizers generate poisitions
-    within a specified range (between 1 and 3)."""
+    """
+    Testing whether our randomizers generate poisitions
+    within a specified range (between 1 and 3).
+    """
 
     # Define range of values we randomise over
     lower_bound = 1.0
@@ -116,8 +122,10 @@ def test_randomiser_position():
 
 
 def test_randomiser_rotation():
-    """Test our randomiser generates rotation angles
-    between a specified range (between 10° and 90°)."""
+    """
+    Test our randomiser generates rotation angles
+    between a specified range (between 10° and 90°).
+    """
 
     # Define range of values we randomise over
     lower_bound = 10.0
@@ -174,8 +182,10 @@ def test_randomiser_rotation():
 
 
 def test_random_seed():
-    """Test whether changing the seed works by checking
-    random numbers are the same after setting the same seed."""
+    """
+    Test whether changing the seed works by checking
+    random numbers are the same after setting the same seed.
+    """
 
     # Run randomisation 5 times and save some numbers
     bpy.data.scenes["Scene"].seed_properties.seed_toggle = True
@@ -209,8 +219,10 @@ def test_bool_delta_rotation():
 
 
 def test_per_frame():
-    """Test if we can replicate a sequence of
-    random numbers using the same seed when running an animation."""
+    """
+    Test if we can replicate a sequence of
+    random numbers using the same seed when running an animation.
+    """
 
     # Record the first few x positions
     # (randomly generated) in a sequence of frames
