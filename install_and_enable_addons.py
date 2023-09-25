@@ -25,6 +25,7 @@ def main():
     import sys
 
     # get Python args (passed after "--")
+
     argv = sys.argv
     if "--" not in argv:
         argv = []
