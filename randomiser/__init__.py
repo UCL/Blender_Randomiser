@@ -1,4 +1,4 @@
-from . import material, transform, geometry, seed, random_all, define_prop
+from . import material, transform, geometry, seed, define_prop  # random_all
 
 bl_info = {
     "name": "Randomisations panel",
@@ -20,7 +20,8 @@ def register():
     # transform.register()
     material.register()
     geometry.register()
-    random_all.register()
+    define_prop.register()
+    # random_all.register()
 
 
 def unregister():
@@ -28,7 +29,8 @@ def unregister():
     # transform.unregister()
     material.unregister()
     geometry.unregister()
-    random_all.unregister()
+    define_prop.unregister()
+    # random_all.unregister()
 
 
 if __name__ == "__main__":
