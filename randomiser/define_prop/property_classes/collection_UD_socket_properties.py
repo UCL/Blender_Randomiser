@@ -1,4 +1,5 @@
 import re
+from array import array
 
 import bpy
 import numpy as np
@@ -191,7 +192,17 @@ def constrain_min_closure(m_str):
         # self is a 'SocketProperties' object
         min_array = np.array(getattr(self, "min_" + m_str))
         max_array = np.array(getattr(self, "max_" + m_str))
+        # min_array.tolist()
+        # max_array.tolist()
+        print("MIN CLOSURE min_array ", type(min_array))
+        print("MIN CLOSURE max_array ", type(max_array))
+
+        print("MIN CLOSURE min_array FIRST", type(min_array[0]))
+        print("MIN CLOSURE max_array FIRST", type(max_array[0]))
         if any(min_array > max_array):
+            where_cond = np.where(min_array > max_array, max_array, min_array)
+            print("np.where", where_cond)
+            print("np.where type = ", type(where_cond))
             setattr(
                 self,
                 "min_" + m_str,
@@ -233,11 +244,156 @@ def constrain_max_closure(m_str):
         # self is a 'SocketProperties' object
         min_array = np.array(getattr(self, "min_" + m_str))
         max_array = np.array(getattr(self, "max_" + m_str))
+        print("MAX CLOSURE min_array ", min_array)
+        print("MAX CLOSURE max_array ", max_array)
         if any(max_array < min_array):
             setattr(
                 self,
                 "max_" + m_str,
                 np.where(max_array < min_array, min_array, max_array),
+            )
+        return
+
+    return lambda slf, ctx: constrain_max(slf, ctx, m_str)
+
+
+def constrain_min_closure_int(m_str):
+    """Constain min value with closure
+
+    Parameters
+    ----------
+    m_str : str
+            string specifying the socket attribute (e.g., int_1d)
+
+    Returns
+    -------
+    _type_
+        lambda function evaluated at the specified m_str
+
+    """
+
+    def constrain_min(self, context, m_str):
+        """Constrain min value
+
+        If min > max --> min is reset to max value
+        (i.e., no randomisation)
+
+        Parameters
+        ----------
+        context : _type_
+            _description_
+        m_str : str
+            string specifying the socket attribute (e.g., int_1d)
+        """
+        # self is a 'SocketProperties' object
+        # min_array = getattr(self, "min_" + m_str)
+        # max_array = getattr(self, "max_" + m_str)
+        min_array = np.array(getattr(self, "min_" + m_str))
+        max_array = np.array(getattr(self, "max_" + m_str))
+
+        # print("MIN CLOSURE min_array ", type(min_array))
+        # MAX RECURSION DEPTH EXCEEDED WHILE CALLING A PYTHON OBJECT
+        # print("MIN CLOSURE max_array ", type(max_array))
+
+        # min_array = ast.literal_eval(str(min_array))
+        # max_array = ast.literal_eval(str(max_array))
+        # min_array = np.array(min_array)
+        # max_array = np.array(max_array)
+
+        # min_array = [pyt_int.item() for pyt_int in min_array]
+        # max_array = [pyt_int.item() for pyt_int in max_array]
+
+        # print("MIN CLOSURE min_array FIRST", type(min_array[0]))
+        # print("MIN CLOSURE max_array FIRST", type(max_array[0]))
+
+        # min_array = np.asarray(min_array,dtype="int")
+        # max_array = np.asarray(max_array,dtype="int")
+        min_array = array("i", min_array)
+        max_array = array("i", max_array)
+        # min_array = np.array(min_array)
+        # max_array = np.array(max_array)
+
+        # print("MIN CLOSURE min_array ", type(min_array))
+        # print("MIN CLOSURE max_array ", type(max_array))
+
+        # print("MIN CLOSURE min_array FIRST", type(min_array[0]))
+        # print("MIN CLOSURE max_array FIRST", type(max_array[0]))
+        # print(min_array > max_array)
+
+        cond_min = [min > max for min, max in zip(min_array, max_array)]
+        # if (min_array > max_array).all():
+        if any(cond_min):
+            cond = np.where(cond_min, max_array, min_array)
+            print("np.where result = ", cond)
+            print("np.where type = ", type(cond))
+
+            setattr(
+                self,
+                "min_" + m_str,
+                getattr(self, "max_" + m_str),
+            )
+
+            # try:
+            #     setattr(
+            #         self,
+            #         "min_" + m_str,
+            #         int(min_array[0]),
+            #     )
+            # except:
+            #     print("int(min_array[0]) DID NOT WORK")
+
+            # try:
+            #     setattr(
+            #         self,
+            #         "min_" + m_str,
+            #         getattr(self, "max_" + m_str),
+            #     )
+            # except:
+            #     print('getattr(self, "min_" + m_str) DID NOT WORK')
+
+        return
+
+    return lambda slf, ctx: constrain_min(slf, ctx, m_str)
+
+
+def constrain_max_closure_int(m_str):
+    """Constain max value with closure
+
+    Parameters
+    ----------
+    m_str : str
+        string specifying the socket attribute (e.g., float_1d)
+
+    Returns
+    -------
+    _type_
+        lambda function evaluated at the specified m_str
+
+    """
+
+    def constrain_max(self, context, m_str):
+        """Constrain max value
+
+        if max < min --> max is reset to min value
+        (i.e., no randomisation)
+
+        Parameters
+        ----------
+        context : _type_
+            _description_
+        m_str : str
+            string specifying the socket attribute (e.g., float_1d)
+        """
+        # self is a 'SocketProperties' object
+        min_array = np.array(getattr(self, "min_" + m_str))
+        max_array = np.array(getattr(self, "max_" + m_str))
+
+        cond_max = [max < min for max, min in zip(max_array, min_array)]
+        if any(cond_max):
+            setattr(
+                self,
+                "max_" + m_str,
+                getattr(self, "min_" + m_str),
             )
         return
 
@@ -372,14 +528,24 @@ class SocketProperties(bpy.types.PropertyGroup):
 
     # ----------------------------
     # int_1d
-    int_1d_str = "int_1d"
-    min_int_1d: bpy.props.IntVectorProperty(  # type: ignore
-        size=1, update=constrain_min_closure(int_1d_str)
-    )
+    # int_1d_str = "int_1d"
+    # min_int_1d: bpy.props.IntVectorProperty(  # type: ignore
+    #     size=1, update=constrain_min_closure(int_1d_str)
+    # )
 
-    max_int_1d: bpy.props.IntVectorProperty(  # type: ignore
-        size=1, update=constrain_max_closure(int_1d_str)
+    # max_int_1d: bpy.props.IntVectorProperty(  # type: ignore
+    #     size=1, update=constrain_max_closure(int_1d_str)
+    # )
+    int_1d_str = "int_1d"
+    min_int_1d_PROP = bpy.props.IntVectorProperty(  # type: ignore
+        size=1, update=constrain_min_closure_int(int_1d_str)
     )
+    min_int_1d: min_int_1d_PROP  # type: ignore
+
+    max_int_1d_PROP = bpy.props.IntVectorProperty(  # type: ignore
+        size=1, update=constrain_max_closure_int(int_1d_str)
+    )
+    max_int_1d: max_int_1d_PROP  # type: ignore
 
     # ----------------------------
     # bool_1d
