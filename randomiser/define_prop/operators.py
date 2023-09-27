@@ -202,10 +202,10 @@ class RandomiseAllUDProps(bpy.types.Operator):
         for UD_str in self.list_subpanel_UD_props_names:
             # get collection of socket properties for this GNG
             # ATT socket properties do not include the actual socket object
-            if cs.socket_props_per_UD.collection[
-                UD_str
-            ].update_sockets_collection:
-                print("Collection of UD props sockets updated")
+            # if cs.socket_props_per_UD.collection[
+            #     UD_str
+            # ].update_sockets_collection:
+            #     print("Collection of UD props sockets updated")
 
             cs.socket_props_per_UD.collection[UD_str].collection
 
