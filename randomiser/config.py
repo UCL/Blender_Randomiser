@@ -72,7 +72,7 @@ MAP_PROPS_TO_INI_MIN_MAX = {
     # bpy.types.NodeSocketFloat: {"min": -np.inf, "max": np.inf},
     Vector: {"min": -np.inf, "max": np.inf},
     float: {"min": -np.inf, "max": np.inf},
-    int: {"min": int(-10), "max": int(10)},
+    int: {"min": int(-2147483648), "max": int(2147483647)},
     bool: {"min": False, "max": True},
     # bpy.types.NodeSocketInt: {
     #     "min": int(-1000),  # -2147483648
