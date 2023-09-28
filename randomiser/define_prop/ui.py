@@ -61,7 +61,8 @@ def draw_sockets_list_UD(
     row_split.column(align=True)
 
     # input node name
-    col1.label(text=list_UD_props_sorted)  # UD.name
+    print(list_UD_props_sorted)
+    col1.label(text=sockets_props_collection.name)  # UD.name
     col1.alignment = "CENTER"
 
     # min label
