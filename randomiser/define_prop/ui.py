@@ -83,9 +83,10 @@ def draw_sockets_list_UD(
     row = layout.row()
     row_split = row.split()
     col1 = row_split.column(align=True)
-    col2 = row_split.column(align=True)
+    row_split.column(align=True)
     col3 = row_split.column(align=True)
     col4 = row_split.column(align=True)
+    col5 = row_split.column(align=True)
     row_split.column(align=True)
 
     # UD prop name
@@ -93,11 +94,23 @@ def draw_sockets_list_UD(
     col1.label(text="value")  # text=sckt.name)
 
     # socket current value
-    # col2.prop(
-    #     UD,
-    #     "default_value", #####Default value not found
-    #     icon_only=True,
-    # )
+    # if "bpy.context.scene" in full_str:
+    #     col2.prop(
+    #         getattr(
+    #             bpy.context.scene,
+    #             attribute_only_str
+    #         )
+    #     # sockets_props_collection,
+    #     # "default_value", #####Default value not found
+    #     # icon_only=True,
+    #     )
+    # elif "bpy.data.objects" in full_str:
+    #     col2.prop(
+    #         getattr(
+    #             bpy.data.objects["Cube"],
+    #             attribute_only_str
+    #         )
+    #     )
     # col2.enabled = False  # current value is not editable
 
     # # socket min and max columns
@@ -157,8 +170,7 @@ def draw_sockets_list_UD(
             # e.g. min_float_1d so m_str + "_" + float_1d
 
     # randomisation toggle
-    # col5.prop(
-    col2.prop(
+    col5.prop(
         sockets_props_collection,  # [socket_id],
         "bool_randomise",
         icon_only=True,
