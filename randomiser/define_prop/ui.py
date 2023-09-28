@@ -46,7 +46,7 @@ def draw_sockets_list_UD(
     # selected in the graph it moves to the bottom of the panel.
     list_UD_props_sorted = list_UD_props
     # sorted(list_UD_props, key=lambda x: x.name)
-    print("IN draw_sockets_list_UD ==== ", list_UD_props_sorted)
+    # print("IN draw_sockets_list_UD ==== ", list_UD_props_sorted)
     # for i_n, UD_str in enumerate(list_UD_props_sorted):
     row = layout.row()
 
@@ -61,7 +61,8 @@ def draw_sockets_list_UD(
     row_split.column(align=True)
 
     # input node name
-    col1.label(text=list_UD_props_sorted)  # UD.name
+    print(list_UD_props_sorted)
+    col1.label(text=sockets_props_collection.name)  # UD.name
     col1.alignment = "CENTER"
 
     # min label
@@ -82,9 +83,10 @@ def draw_sockets_list_UD(
     row = layout.row()
     row_split = row.split()
     col1 = row_split.column(align=True)
-    col2 = row_split.column(align=True)
+    row_split.column(align=True)
     col3 = row_split.column(align=True)
     col4 = row_split.column(align=True)
+    col5 = row_split.column(align=True)
     row_split.column(align=True)
 
     # UD prop name
@@ -92,11 +94,23 @@ def draw_sockets_list_UD(
     col1.label(text="value")  # text=sckt.name)
 
     # socket current value
-    # col2.prop(
-    #     UD,
-    #     "default_value", #####Default value not found
-    #     icon_only=True,
-    # )
+    # if "bpy.context.scene" in full_str:
+    #     col2.prop(
+    #         getattr(
+    #             bpy.context.scene,
+    #             attribute_only_str
+    #         )
+    #     # sockets_props_collection,
+    #     # "default_value", #####Default value not found
+    #     # icon_only=True,
+    #     )
+    # elif "bpy.data.objects" in full_str:
+    #     col2.prop(
+    #         getattr(
+    #             bpy.data.objects["Cube"],
+    #             attribute_only_str
+    #         )
+    #     )
     # col2.enabled = False  # current value is not editable
 
     # # socket min and max columns
@@ -141,11 +155,11 @@ def draw_sockets_list_UD(
     else:  # bpy.types.NodeSocketBool:
         for m_str, col in zip(["min", "max"], [col3, col4]):
             attr_type = attr_get_type(bpy.context.scene, attribute_only_str)[0]
-            print(
-                "sockets_props_collection ???????",
-                sockets_props_collection,
-            )
-            print("type ??????????? ", attribute_only_str, attr_type)
+            # print(
+            #     "sockets_props_collection ???????",
+            #     sockets_props_collection,
+            # )
+            # print("type ??????????? ", attribute_only_str, attr_type)
             col.prop(
                 sockets_props_collection,  # [socket_id],
                 m_str + "_" + cs.UD_prop_to_attr[attr_type],
@@ -156,8 +170,7 @@ def draw_sockets_list_UD(
             # e.g. min_float_1d so m_str + "_" + float_1d
 
     # randomisation toggle
-    # col5.prop(
-    col2.prop(
+    col5.prop(
         sockets_props_collection,  # [socket_id],
         "bool_randomise",
         icon_only=True,
@@ -483,8 +496,8 @@ class SubPanelRandomUD(
             self.subpanel_UD_idx
         ]  # .collection
 
-        print("sockets_props_collection = ", sockets_props_collection)
-        print(" and name ========== ", sockets_props_collection.name)
+        # print("sockets_props_collection = ", sockets_props_collection)
+        # print(" and name ========== ", sockets_props_collection.name)
 
         # # Get list of input nodes to randomise for this subpanel's GNG
         # [sckt.name.split("_")[0] for sckt in sockets_props_collection]
@@ -497,7 +510,7 @@ class SubPanelRandomUD(
             list_parent_nodes_str[0] + ".", ""
         )
 
-        print("list_parent_nodes_str = ", attribute_only_str)
+        # print("list_parent_nodes_str = ", attribute_only_str)
 
         # full_list = [prop.name for prop in list(C.scene.custom)]
         list_all_UD_props = [
@@ -512,15 +525,15 @@ class SubPanelRandomUD(
             # bpy.data.node_groups[subpanel_gng.name].nodes[nd_str]
             # for nd_str in list_parent_nodes_str
         ]
-        print("list_all_UD_props ====== ", list_all_UD_props)
-        print(
-            "bpy.context.scene.custom_index == ",
-            bpy.context.scene.custom_index,
-        )
+        # print("list_all_UD_props ====== ", list_all_UD_props)
+        # print(
+        #     "bpy.context.scene.custom_index == ",
+        #     bpy.context.scene.custom_index,
+        # )
         list_current_UD_props = list_all_UD_props[
             bpy.context.scene.custom_index
         ].name
-        print("list_current_UD_props =======", list_current_UD_props)
+        # print("list_current_UD_props =======", list_current_UD_props)
 
         # Draw sockets to randomise per input node, including their
         # current value and min/max boundaries
