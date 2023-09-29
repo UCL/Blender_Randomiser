@@ -154,12 +154,44 @@ def draw_sockets_list_UD(
     # (may not need other cases)
     else:  # bpy.types.NodeSocketBool:
         for m_str, col in zip(["min", "max"], [col3, col4]):
-            attr_type = attr_get_type(bpy.context.scene, attribute_only_str)[0]
+            print(
+                "DRAW SOCKETS LIST sockets_props_collection.name ====== ",
+                sockets_props_collection.name,
+            )
+            if "[" in sockets_props_collection.name:
+                print(
+                    "DRAW SOCKETS LIST sockets_props_collection.name ====== ",
+                    sockets_props_collection.name,
+                )
+                print(
+                    "DRAW SOCKETS LIST attribute_only_str ====== ",
+                    attribute_only_str,
+                )
+                attr_type = attr_get_type(
+                    bpy.context.scene.objects["Cube"], attribute_only_str
+                )[0]
+                print("DRAW SOCKETS LIST attr_type ====== ", attr_type)
+            else:
+                print(
+                    "DRAW SOCKETS LIST sockets_props_collection.name ====== ",
+                    sockets_props_collection.name,
+                )
+                print(
+                    "DRAW SOCKETS LIST attribute_only_str ====== ",
+                    attribute_only_str,
+                )
+                attr_type = attr_get_type(
+                    bpy.context.scene, attribute_only_str
+                )[0]
+                print("DRAW SOCKETS LIST attr_type ====== ", attr_type)
+
             # print(
             #     "sockets_props_collection ???????",
             #     sockets_props_collection,
             # )
             # print("type ??????????? ", attribute_only_str, attr_type)
+
+            print("ERROR HERE in line 172 of ui.py")
             col.prop(
                 sockets_props_collection,  # [socket_id],
                 m_str + "_" + cs.UD_prop_to_attr[attr_type],
@@ -178,13 +210,26 @@ def draw_sockets_list_UD(
 
 
 def attr_get_type(obj, path):
+    # if '[' in path:
+    #     print(' [ is in path')
+
     if "." in path:
         # gives us: ('modifiers["Subsurf"]', 'levels')
         # len_path = len(full_str.rsplit(".", config.MAX_NUMBER_OF_SUBPANELS))
         path_prop, path_attr = path.rsplit(".", 1)
 
+        print("if statement ==== ")
+        print(
+            "FROM rsplit . path_prop for resolve = ",
+            path_prop,
+            " and path_attr  for getattr = ",
+            path_attr,
+        )
+        print("obj used for path_resolve = ", obj)
+
         # same as: prop = obj.modifiers["Subsurf"]
         prop = obj.path_resolve(path_prop)
+        print("prop from path_resolve  for get_attr = ", prop)
     else:
         prop = obj
         # single attribute such as name, location... etc
@@ -204,7 +249,12 @@ def attr_get_type(obj, path):
 
 
 def get_attr_only_str(full_str):
-    len_path = len(full_str.rsplit(".", config.MAX_NUMBER_OF_SUBPANELS))
+    if "[" in full_str:
+        mod = 1
+    else:
+        mod = 0
+
+    len_path = len(full_str.rsplit(".", config.MAX_NUMBER_OF_SUBPANELS)) - mod
     list_parent_nodes_str = full_str.rsplit(".", len_path - 3)
     attribute_only_str = full_str.replace(list_parent_nodes_str[0] + ".", "")
 
@@ -414,11 +464,11 @@ class SubPanelRandomUD(
             if "bpy.context.scene" in full_str:
                 prop_type, action, prop, path_attr = attr_get_type(
                     bpy.context.scene, attribute_only_str
-                )
+                )[0]
             elif "bpy.data.objects" in full_str:
                 prop_type, action, prop, path_attr = attr_get_type(
                     bpy.data.objects["Cube"], attribute_only_str
-                )
+                )[0]
 
             print("prop_type", prop_type)
             print("action", action)
@@ -504,27 +554,44 @@ class SubPanelRandomUD(
 
         # Get list of input nodes to randomise for this subpanel's GNG
         full_str = sockets_props_collection.name
-        len_path = len(full_str.rsplit(".", config.MAX_NUMBER_OF_SUBPANELS))
-        list_parent_nodes_str = full_str.rsplit(".", len_path - 3)
-        attribute_only_str = full_str.replace(
-            list_parent_nodes_str[0] + ".", ""
-        )
+        attribute_only_str = get_attr_only_str(full_str)
+
+        # len_path = len(full_str.rsplit(".", config.MAX_NUMBER_OF_SUBPANELS))
+        # list_parent_nodes_str = full_str.rsplit(".", len_path - 3)
+        # attribute_only_str = full_str.replace(
+        #     list_parent_nodes_str[0] + ".", ""
+        # )
 
         # print("list_parent_nodes_str = ", attribute_only_str)
 
         # full_list = [prop.name for prop in list(C.scene.custom)]
-        list_all_UD_props = [
-            UD_str
-            for UD_str in list(bpy.context.scene.custom)
-            if attr_get_type(
-                bpy.context.scene, get_attr_only_str(UD_str.name)
-            )[1]
-            != "dummy"
-            # bpy.context.scene.custom[UD_str]
-            # for UD_str in list_parent_UD_str
-            # bpy.data.node_groups[subpanel_gng.name].nodes[nd_str]
-            # for nd_str in list_parent_nodes_str
-        ]
+        list_all_UD_props = []
+        for UD_str in bpy.context.scene.custom:
+            print("ERROR ====== UD_str", UD_str)
+            if "[" in UD_str.name:
+                if (
+                    attr_get_type(
+                        bpy.data.objects["Cube"],
+                        get_attr_only_str(UD_str.name),
+                    )[1]
+                    != "dummy"
+                ):
+                    list_all_UD_props.append(UD_str)
+            elif (
+                attr_get_type(
+                    bpy.context.scene, get_attr_only_str(UD_str.name)
+                )[1]
+                != "dummy"
+            ):
+                list_all_UD_props.append(UD_str)
+        # list_all_UD_props = [
+        #     UD_str
+        #     for UD_str in list(bpy.context.scene.custom)
+        #     if attr_get_type(
+        #         bpy.context.scene, get_attr_only_str(UD_str.name)
+        #     )[1]
+        #     != "dummy"
+        # ]
         # print("list_all_UD_props ====== ", list_all_UD_props)
         # print(
         #     "bpy.context.scene.custom_index == ",

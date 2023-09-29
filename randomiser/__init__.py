@@ -18,8 +18,8 @@ bl_info = {
 def register():
     seed.register()
     # transform.register()
-    material.register()
-    geometry.register()
+    # material.register()
+    # geometry.register()
     define_prop.register()
     # random_all.register()
 
@@ -27,8 +27,8 @@ def register():
 def unregister():
     seed.unregister()
     # transform.unregister()
-    material.unregister()
-    geometry.unregister()
+    # material.unregister()
+    # geometry.unregister()
     define_prop.unregister()
     # random_all.unregister()
 
