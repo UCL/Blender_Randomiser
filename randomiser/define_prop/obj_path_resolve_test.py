@@ -1,5 +1,3 @@
-import bpy
-
 # %%
 full_str = "bpy.data.objects['Cube'].location"
 # path_prop, path_attr = full_str.rsplit("[]", 1)
@@ -58,85 +56,77 @@ def attr_get_type(obj, path):
     # setattr(prop, path_attr, value)
 
 
-print("CAMERA.LOCATION !!!!!!!!!!!!!!!")
-print("INPUTS ======")
-attr_str = "camera.location"
-print("bpy.context.scene as obj and str = ", attr_str)
-action_type, action, prop, path_attr = attr_get_type(
-    bpy.context.scene, attr_str
-)
-print("OUTPUTS ===== ")
-print("type(action) = ", action_type)
-print("action = ", action)
-print("prop = ", prop)
-print("path_attr = ", path_attr)
+# print("CAMERA.LOCATION !!!!!!!!!!!!!!!")
+# print("INPUTS ======")
+# attr_str = "camera.location"
+# print("bpy.context.scene as obj and str = ", attr_str)
+# action_type, action, prop, path_attr = attr_get_type(
+#    bpy.context.scene, attr_str
+# )
+# print("OUTPUTS ===== ")
+# print("type(action) = ", action_type)
+# print("action = ", action)
+# print("prop = ", prop)
+# print("path_attr = ", path_attr)
 
-print("FRAME_CURRENT !!!!!!!!!!!!!!!")
-print("INPUTS ======")
-attr_str = "frame_current"
-print("bpy.context.scene as obj and str = ", attr_str)
-action_type, action, prop, path_attr = attr_get_type(
-    bpy.context.scene, attr_str
-)
-print("OUTPUTS ===== ")
-print("type(action) = ", action_type)
-print("action = ", action)
-print("prop = ", prop)
-print("path_attr = ", path_attr)
+##print("FRAME_CURRENT !!!!!!!!!!!!!!!")
+##print("INPUTS ======")
+##attr_str = "frame_current"
+##print("bpy.context.scene as obj and str = ", attr_str)
+##action_type, action, prop, path_attr = attr_get_type(
+##    bpy.context.scene, attr_str
+##)
+##print("OUTPUTS ===== ")
+##print("type(action) = ", action_type)
+##print("action = ", action)
+##print("prop = ", prop)
+##print("path_attr = ", path_attr)
 
 
-# bpy.context.scene.objects['Cube'].collision.absorption
-# bpy.data.objects['Cube'].location
-# bpy.data.objects['Cube'].rotation_euler.x
-print("bpy.data.objects[Cube].location !!!!!!!!!!!!!!!")
-print("INPUTS ======")
-# attr_str = 'location'
+## bpy.context.scene.objects['Cube'].collision.absorption
+## bpy.data.objects['Cube'].location
+## bpy.data.objects['Cube'].rotation_euler.x
+# print("bpy.data.objects[Cube] + string !!!!!!!!!!!!!!!")
+# print("INPUTS ======")
+##attr_str = 'location'
 # attr_str = 'rotation_euler.x'
-attr_str = "collision.absorption"
-print("bpy.context.scene as obj and str = ", attr_str)
-action_type, action, prop, path_attr = attr_get_type(
-    bpy.data.objects["Cube"], attr_str
-)
-print("OUTPUTS ===== ")
-print("type(action) = ", action_type)
-print("action = ", action)
-print("prop = ", prop)
-print("path_attr = ", path_attr)
-
-# def attr_get_type(obj, path):
-# type_object='objectsdfas'
-
-# if type_object=='objdfdsects':
-
-# print("[Cube] HERE")
-
-# elif "." in path:
-
-# path_prop, path_attr = path.rsplit(".", 1)
+##attr_str = "collision.absorption"
+# print("bpy.data.objects[Cube] as obj and str = ", attr_str)
+# action_type, action, prop, path_attr = attr_get_type(
+#    bpy.data.objects["Cube"], attr_str
+# )
+# print("OUTPUTS ===== ")
+# print("type(action) = ", action_type)
+# print("action = ", action)
+# print("prop = ", prop)
+# print("path_attr = ", path_attr)
 
 
-# prop = obj.path_resolve(path_prop)
+def get_attr_only_str(full_str):
+    if "[" in full_str:
+        len_path = len(full_str.rsplit(".", 100)) - 1
+        print("len_path = ", len_path)
+        list_parent_nodes_str = full_str.rsplit(".", len_path - 3)
+        print("list_parent_nodes_str = ", list_parent_nodes_str)
+        attribute_only_str = full_str.replace(
+            list_parent_nodes_str[0] + ".", ""
+        )
+    else:
+        len_path = len(full_str.rsplit(".", 100))
+        print("len_path = ", len_path)
+        list_parent_nodes_str = full_str.rsplit(".", len_path - 3)
+        print("list_parent_nodes_str = ", list_parent_nodes_str)
+        attribute_only_str = full_str.replace(
+            list_parent_nodes_str[0] + ".", ""
+        )
 
-# elif type_object=='objects':
-
-# pdb.set_trace
-
-# prop = obj
+    return attribute_only_str
 
 
-# path_attr = path
+full_str = "bpy.context.scene.objects['Cube'].collision.absorption"
+attr_only_str = get_attr_only_str(full_str)
+print("attr_only_str = ", attr_only_str)
 
-
-#
-
-# try:
-
-# action = getattr(prop, path_attr)
-
-# except Exception:
-
-# action = "dummy"
-
-#
-
-# return type(action), action, prop, path_attr
+# full_str='bpy.context.scene.camera.location'
+# attr_only_str=get_attr_only_str(full_str)
+# print('attr_only_str = ', attr_only_str)

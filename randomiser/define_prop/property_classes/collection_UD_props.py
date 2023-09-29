@@ -160,29 +160,48 @@ class ColUDParentProps(bpy.types.PropertyGroup):
 
         # get_attr_only_strbpy.context.scene.custom
         # self is the collection of node groups
-        list_UD_props = [
-            UD
-            for UD in bpy.context.scene.custom
-            if (
+        list_UD_props = []
+        for UD in bpy.context.scene.custom:
+            if "[" in UD.name:
+                print("ERROR ======= UD.name", UD.name)
+                print("ERROR ======== attr_str", get_attr_only_str(UD.name))
+                if (
+                    attr_get_type(
+                        bpy.data.objects["Cube"], get_attr_only_str(UD.name)
+                    )[1]
+                    != "dummy"
+                ):
+                    list_UD_props.append(UD)
+            elif (
                 attr_get_type(bpy.context.scene, get_attr_only_str(UD.name))[1]
                 != "dummy"
-            )
-            # != "dummy"
-            # if attr_get_type(bpy.context.scene,UD)[2] != 'dummy'
-            # nd
-            # for nd in bpy.data.node_groups
-            # if nd.type == "GEOMETRY"
-            # and (
-            #     any(
-            #         [
-            #             ni.name.lower().startswith(
-            #                 config.DEFAULT_RANDOM_KEYWORD
-            #             )
-            #             for ni in nd.nodes
-            #         ]
-            #     )
-            # )
-        ]
+            ):
+                list_UD_props.append(UD)
+
+        # list_UD_props = [
+        #     UD
+        #     for UD in bpy.context.scene.custom
+        #     if (
+        #         attr_get_type(bpy.context.scene,
+        # get_attr_only_str(UD.name))[1]
+        #         != "dummy"
+        #     )
+        #     # != "dummy"
+        #     # if attr_get_type(bpy.context.scene,UD)[2] != 'dummy'
+        #     # nd
+        #     # for nd in bpy.data.node_groups
+        #     # if nd.type == "GEOMETRY"
+        #     # and (
+        #     #     any(
+        #     #         [
+        #     #             ni.name.lower().startswith(
+        #     #                 config.DEFAULT_RANDOM_KEYWORD
+        #     #             )
+        #     #             for ni in nd.nodes
+        #     #         ]
+        #     #     )
+        #     # )
+        # ]
         # print("type list_UD_props ========== ", type(list_UD_props[0]))
         # # sort by name
         # list_node_groups = sorted(
