@@ -242,6 +242,10 @@ def attr_get_type(obj, path):
     except Exception:
         # print("Property does not exist")
         action = "dummy"
+        prop = "dummy"
+        path_attr = "dummy"
+        print(action, prop, path_attr)
+        print(type(action))
     # action = getattr(prop, path_attr)
 
     return type(action), action, prop, path_attr
@@ -249,7 +253,9 @@ def attr_get_type(obj, path):
 
 
 def get_attr_only_str(full_str):
-    if "[" in full_str:
+    if "data" in full_str:
+        mod = 0
+    elif "[" in full_str:
         mod = 1
     else:
         mod = 0
@@ -592,7 +598,7 @@ class SubPanelRandomUD(
         #     )[1]
         #     != "dummy"
         # ]
-        # print("list_all_UD_props ====== ", list_all_UD_props)
+        print("list_all_UD_props ====== ", list_all_UD_props)
         # print(
         #     "bpy.context.scene.custom_index == ",
         #     bpy.context.scene.custom_index,
