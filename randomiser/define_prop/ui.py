@@ -466,6 +466,7 @@ class SubPanelRandomUD(
 
             full_str = sockets_props_collection.name
             attribute_only_str = get_attr_only_str(full_str)
+            print("SUBPANEL poll attribute_only_str ", attribute_only_str)
 
             if "bpy.context.scene" in full_str:
                 prop_type, action, prop, path_attr = attr_get_type(

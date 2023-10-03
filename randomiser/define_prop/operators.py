@@ -2,6 +2,7 @@ import random
 
 import bpy
 import numpy as np
+from mathutils import Vector
 
 from .ui import attr_get_type, get_attr_only_str
 
@@ -48,6 +49,8 @@ def attr_set_val(obj, path, min_val, max_val, UD_type):
         # vec = Vector([rand_x, rand_y, rand_z])
 
         # bpy.data.objects["Camera"].rotation_euler[0] = vec[0]
+    elif UD_type == Vector:
+        print("HELLO 3D VECTOR FLOAT!!!!!")
     else:
         print("HELLO INTEGER!!!!!!!!!!!!!!!!!!!!")
         value = random.randint(min_val, max_val)
@@ -366,6 +369,8 @@ class RandomiseAllUDProps(bpy.types.Operator):
             )
 
             if "bpy.context.scene" in full_str:
+                print("bpy.context.scene")
+                print("OPS EXECUTE attribute_only_str ", attribute_only_str)
                 attr_set_val(
                     bpy.context.scene,
                     attribute_only_str,
@@ -374,6 +379,8 @@ class RandomiseAllUDProps(bpy.types.Operator):
                     attr_type,
                 )
             elif "bpy.data.objects" in full_str:
+                print("bpy.context.scene")
+                print("OPS EXECUTE attribute_only_str ", attribute_only_str)
                 attr_set_val(
                     bpy.data.objects["Cube"],
                     attribute_only_str,
