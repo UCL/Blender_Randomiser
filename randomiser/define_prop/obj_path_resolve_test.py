@@ -2,25 +2,27 @@ import random
 
 import bpy
 import numpy as np
-
-# from random import random
 from mathutils import Vector
 
-# %%
-full_str = "bpy.data.objects['Cube'].location"
-# path_prop, path_attr = full_str.rsplit("[]", 1)
-x = full_str.split(".")
-# print(path_prop)
-for i in x:
-    print(i)
-    if "[" in i:
-        ii = i.split("[")
-        fiinal = ii[1]
-        fiinal = fiinal[:-1]
-        print("fiinal= ", fiinal)
 
-print(type(fiinal))
-print(fiinal)
+# %%
+def get_obj_str(full_str):
+    full_str = "bpy.data.objects['Cube'].location"
+    # path_prop, path_attr = full_str.rsplit("[]", 1)
+    x = full_str.split(".")
+    # print(path_prop)
+    for i in x:
+        print(i)
+        if "[" in i:
+            ii = i.split("[")
+            fiinal = ii[1]
+            fiinal = fiinal[:-1]
+            print("fiinal= ", fiinal)
+
+    print(type(fiinal))
+    print(fiinal)
+    return fiinal
+
 
 # %%
 
@@ -210,7 +212,6 @@ prop_type, action, prop, path_attr = attr_get_type(
     bpy.context.scene, attr_only_str
 )
 
-
 min_val = np.array(
     getattr(
         bpy.context.scene.socket_props_per_UD.collection[0],
@@ -253,7 +254,6 @@ print("action getattr = ", action)
 prop_type, action, prop, path_attr = attr_get_type(
     bpy.context.scene, attr_only_str
 )
-
 
 min_val = np.array(
     getattr(
@@ -313,10 +313,32 @@ print(min_val)
 print(max_val)
 print(prop_type)
 
-attr_set_val(
-    bpy.data.objects["Cube"],
-    attr_only_str,
-    min_val,
-    max_val,
-    prop_type,
-)
+objects_in_scene = []
+for i, key in enumerate(bpy.data.objects):
+    print(i)
+    print(key.name)
+    objects_in_scene.append(key.name)
+
+
+if "[" in full_str:
+    # obj=bpy.data.objects.get(fiinal)
+    obj_str = get_obj_str(full_str)
+
+    print("obj_str = ", obj_str)
+    for i, obj in enumerate(objects_in_scene):
+        print(obj)
+        print(i)
+        #        regex=re.compile(r'^test-\d+$')
+
+        if obj in obj_str:
+            print("Yay found cube")
+            print(i)
+            idx = i
+
+    attr_set_val(
+        bpy.data.objects[idx],
+        attr_only_str,
+        min_val,
+        max_val,
+        prop_type,
+    )
