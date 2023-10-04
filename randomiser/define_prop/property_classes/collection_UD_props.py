@@ -1,7 +1,7 @@
 import bpy
 
 from ..property_classes.collection_UD_socket_properties import SocketProperties
-from ..ui import attr_get_type, get_attr_only_str
+from ..ui import attr_get_type, get_attr_only_str, get_obj_str
 
 
 # ---------------------------------------------------
@@ -161,13 +161,35 @@ class ColUDParentProps(bpy.types.PropertyGroup):
         # get_attr_only_strbpy.context.scene.custom
         # self is the collection of node groups
         list_UD_props = []
+        objects_in_scene = []
+        for i, key in enumerate(bpy.data.objects):
+            # print(i)
+            # print(key.name)
+            objects_in_scene.append(key.name)
         for UD in bpy.context.scene.custom:
             if "[" in UD.name:
-                print("ERROR ======= UD.name", UD.name)
-                print("ERROR ======== attr_str", get_attr_only_str(UD.name))
+                # print("ERROR ======= UD.name", UD.name)
+                # print("ERROR ======== attr_str", get_attr_only_str(UD.name))
+                obj_str = get_obj_str(UD.name)
+                # print(obj_str)
+
+                for i, obj in enumerate(objects_in_scene):
+                    #        regex=re.compile(r'^test-\d+$')
+
+                    if obj in obj_str:
+                        print("Yay found cube")
+                        idx = i
+
+                # if (
+                #     attr_get_type(
+                #         bpy.data.objects["Cube"], get_attr_only_str(UD.name)
+                #     )[1]
+                #     != "dummy"
+                # ):
+
                 if (
                     attr_get_type(
-                        bpy.data.objects["Cube"], get_attr_only_str(UD.name)
+                        bpy.data.objects[idx], get_attr_only_str(UD.name)
                     )[1]
                     != "dummy"
                 ):
@@ -208,6 +230,7 @@ class ColUDParentProps(bpy.types.PropertyGroup):
         #     list_materials,
         #     key=lambda mat: mat.name.lower()
         # )
+        print(list_UD_props)
         return list_UD_props
 
 

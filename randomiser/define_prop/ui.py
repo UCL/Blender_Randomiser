@@ -153,6 +153,10 @@ def draw_sockets_list_UD(
     ##### REFACTOR EASY CASE FIRST
     # (may not need other cases)
     else:  # bpy.types.NodeSocketBool:
+        objects_in_scene = []
+        for key in bpy.data.objects:
+            objects_in_scene.append(key.name)
+
         for m_str, col in zip(["min", "max"], [col3, col4]):
             print(
                 "DRAW SOCKETS LIST sockets_props_collection.name ====== ",
@@ -167,8 +171,22 @@ def draw_sockets_list_UD(
                     "DRAW SOCKETS LIST attribute_only_str ====== ",
                     attribute_only_str,
                 )
+
+                obj_str = get_obj_str(sockets_props_collection.name)
+                # print(obj_str)
+
+                for i, obj in enumerate(objects_in_scene):
+                    #        regex=re.compile(r'^test-\d+$')
+
+                    if obj in obj_str:
+                        print("Yay found cube")
+
+                        idx = i
+                # attr_type = attr_get_type(
+                #     bpy.context.scene.objects["Cube"], attribute_only_str
+                # )[0]
                 attr_type = attr_get_type(
-                    bpy.context.scene.objects["Cube"], attribute_only_str
+                    bpy.data.objects[idx], attribute_only_str
                 )[0]
                 print("DRAW SOCKETS LIST attr_type ====== ", attr_type)
             else:
@@ -207,6 +225,18 @@ def draw_sockets_list_UD(
         "bool_randomise",
         icon_only=True,
     )
+
+
+def get_obj_str(full_str):
+    x = full_str.split(".")
+    # print(path_prop)
+    for i in x:
+        if "[" in i:
+            ii = i.split("[")
+            object_str = ii[1]
+            object_str = object_str[:-1]
+
+    return object_str
 
 
 def attr_get_type(obj, path):
@@ -468,13 +498,32 @@ class SubPanelRandomUD(
             attribute_only_str = get_attr_only_str(full_str)
             print("SUBPANEL poll attribute_only_str ", attribute_only_str)
 
-            if "bpy.context.scene" in full_str:
+            objects_in_scene = []
+            for key in bpy.data.objects:
+                objects_in_scene.append(key.name)
+
+            if "[" in full_str:
+                obj_str = get_obj_str(full_str)
+                # print(obj_str)
+
+                for i, obj in enumerate(objects_in_scene):
+                    #        regex=re.compile(r'^test-\d+$')
+
+                    if obj in obj_str:
+                        print("Yay found ", obj)
+
+                        idx = i
+
+                prop_type, action, prop, path_attr = attr_get_type(
+                    bpy.data.objects[idx], attribute_only_str
+                )[0]
+                # prop_type, action, prop, path_attr = attr_get_type(
+                #     bpy.data.objects["Cube"], attribute_only_str
+                # )[0]
+
+            elif "bpy.context.scene" in full_str:
                 prop_type, action, prop, path_attr = attr_get_type(
                     bpy.context.scene, attribute_only_str
-                )[0]
-            elif "bpy.data.objects" in full_str:
-                prop_type, action, prop, path_attr = attr_get_type(
-                    bpy.data.objects["Cube"], attribute_only_str
                 )[0]
 
             print("prop_type", prop_type)
@@ -575,10 +624,33 @@ class SubPanelRandomUD(
         list_all_UD_props = []
         for UD_str in bpy.context.scene.custom:
             print("ERROR ====== UD_str", UD_str)
+            objects_in_scene = []
+            for key in bpy.data.objects:
+                objects_in_scene.append(key.name)
+
             if "[" in UD_str.name:
+                obj_str = get_obj_str(UD_str.name)
+                # print(obj_str)
+
+                for i, obj in enumerate(objects_in_scene):
+                    #        regex=re.compile(r'^test-\d+$')
+
+                    if obj in obj_str:
+                        print("Yay found cube")
+
+                        idx = i
+
+                # if (
+                #     attr_get_type(
+                #         bpy.data.objects["Cube"],
+                #         get_attr_only_str(UD_str.name),
+                #     )[1]
+                #     != "dummy"
+                # ):
+
                 if (
                     attr_get_type(
-                        bpy.data.objects["Cube"],
+                        bpy.data.objects[idx],
                         get_attr_only_str(UD_str.name),
                     )[1]
                     != "dummy"

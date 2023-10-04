@@ -4,7 +4,7 @@ import bpy
 import numpy as np
 from mathutils import Vector
 
-from .ui import attr_get_type, get_attr_only_str
+from .ui import attr_get_type, get_attr_only_str, get_obj_str
 
 
 def attr_set_val(obj, path, min_val, max_val, UD_type):
@@ -30,31 +30,19 @@ def attr_set_val(obj, path, min_val, max_val, UD_type):
     # action = getattr(prop, path_attr)
 
     print("attr_set_val type ========================= ", UD_type)
-    # if UD_type==float:
-    #     min_array = np.array(getattr(self, "min_" + m_str))
-    #     max_array = np.array(getattr(self, "max_" + m_str))
 
     if UD_type == float:
-        print("HELLO FLOAT!!!!!!!")
-        # if rand_posx:
-        #     getattr(context.scene.camera, value_str)[0] = uniform(
-        #         loc_x_range[0], loc_x_range[1]
-        #     )
-
-        # if rand_rotz:
-        #     rand_z = uniform(rot_z_range[0], rot_z_range[1])
-        # else:
-        #     rand_z = uniform(0.0, 0.0)
-
-        # vec = Vector([rand_x, rand_y, rand_z])
-
-        # bpy.data.objects["Camera"].rotation_euler[0] = vec[0]
+        print("HELLO 1D FLOAT!!!!!!!")
+        value = random.uniform(min_val, max_val)
+        print(value)
     elif UD_type == Vector:
         print("HELLO 3D VECTOR FLOAT!!!!!")
+        value = random.uniform(min_val, max_val)
+        print(value)
     else:
         print("HELLO INTEGER!!!!!!!!!!!!!!!!!!!!")
         value = random.randint(min_val, max_val)
-    # value = 1
+        print(value)
 
     setattr(prop, path_attr, value)
 
@@ -343,13 +331,32 @@ class RandomiseAllUDProps(bpy.types.Operator):
             full_str = sockets_props_collection.name
             attribute_only_str = get_attr_only_str(full_str)
 
-            if "bpy.context.scene" in full_str:
+            print("ATTRIBUTE ONLY STRING ======== ", attribute_only_str)
+
+            objects_in_scene = []
+            for key in bpy.data.objects:
+                objects_in_scene.append(key.name)
+
+            if "[" in full_str:
+                print("bpy.context.scene")
+                print("OPS EXECUTE attribute_only_str ", attribute_only_str)
+                obj_str = get_obj_str(full_str)
+                # print(obj_str)
+
+                for i, obj in enumerate(objects_in_scene):
+                    #        regex=re.compile(r'^test-\d+$')
+
+                    if obj in obj_str:
+                        print("Yay found cube")
+
+                        idx = i
+
+                attr_type = attr_get_type(
+                    bpy.data.objects[idx], attribute_only_str
+                )[0]
+            elif "bpy.context.scene" in full_str:
                 attr_type = attr_get_type(
                     bpy.context.scene, attribute_only_str
-                )[0]
-            elif "bpy.data.objects" in full_str:
-                attr_type = attr_get_type(
-                    bpy.data.objects["Cube"], attribute_only_str
                 )[0]
 
             # get min value for this socket
@@ -368,21 +375,23 @@ class RandomiseAllUDProps(bpy.types.Operator):
                 )
             )
 
-            if "bpy.context.scene" in full_str:
+            if "[" in full_str:
                 print("bpy.context.scene")
                 print("OPS EXECUTE attribute_only_str ", attribute_only_str)
+
                 attr_set_val(
-                    bpy.context.scene,
+                    bpy.data.objects[idx],
                     attribute_only_str,
                     min_val,
                     max_val,
                     attr_type,
                 )
-            elif "bpy.data.objects" in full_str:
+
+            elif "bpy.context.scene" in full_str:
                 print("bpy.context.scene")
                 print("OPS EXECUTE attribute_only_str ", attribute_only_str)
                 attr_set_val(
-                    bpy.data.objects["Cube"],
+                    bpy.context.scene,
                     attribute_only_str,
                     min_val,
                     max_val,
