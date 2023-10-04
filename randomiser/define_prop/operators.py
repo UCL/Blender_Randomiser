@@ -1,4 +1,5 @@
 import random
+from random import seed
 
 import bpy
 import numpy as np
@@ -314,6 +315,13 @@ class RandomiseAllUDProps(bpy.types.Operator):
             _description_
         """
         cs = context.scene
+
+        previous_seed = cs.seed_properties.seed_previous
+        current_seed = cs.seed_properties.seed
+        seed_enabled = cs.seed_properties.seed_toggle
+        if (previous_seed != current_seed) and (seed_enabled is True):
+            seed(current_seed)
+            cs.seed_properties.seed_previous = current_seed
 
         # For every GNG with a subpanel - REFACTORING BASED ON NEW CODE
         print(
