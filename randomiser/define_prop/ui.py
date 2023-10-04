@@ -61,7 +61,7 @@ def draw_sockets_list_UD(
     row_split.column(align=True)
 
     # input node name
-    print(list_UD_props_sorted)
+    # print(list_UD_props_sorted)
     col1.label(text=sockets_props_collection.name)  # UD.name
     col1.alignment = "CENTER"
 
@@ -179,7 +179,7 @@ def draw_sockets_list_UD(
                     #        regex=re.compile(r'^test-\d+$')
 
                     if obj in obj_str:
-                        print("Yay found cube")
+                        # print("Yay found cube")
 
                         idx = i
                 # attr_type = attr_get_type(
@@ -248,18 +248,18 @@ def attr_get_type(obj, path):
         # len_path = len(full_str.rsplit(".", config.MAX_NUMBER_OF_SUBPANELS))
         path_prop, path_attr = path.rsplit(".", 1)
 
-        print("if statement ==== ")
-        print(
-            "FROM rsplit . path_prop for resolve = ",
-            path_prop,
-            " and path_attr  for getattr = ",
-            path_attr,
-        )
-        print("obj used for path_resolve = ", obj)
+        # print("if statement ==== ")
+        # print(
+        #     "FROM rsplit . path_prop for resolve = ",
+        #     path_prop,
+        #     " and path_attr  for getattr = ",
+        #     path_attr,
+        # )
+        # print("obj used for path_resolve = ", obj)
 
         # same as: prop = obj.modifiers["Subsurf"]
         prop = obj.path_resolve(path_prop)
-        print("prop from path_resolve  for get_attr = ", prop)
+        # print("prop from path_resolve  for get_attr = ", prop)
     else:
         prop = obj
         # single attribute such as name, location... etc
@@ -274,8 +274,8 @@ def attr_get_type(obj, path):
         action = "dummy"
         prop = "dummy"
         path_attr = "dummy"
-        print(action, prop, path_attr)
-        print(type(action))
+        # print(action, prop, path_attr)
+        # print(type(action))
     # action = getattr(prop, path_attr)
 
     return type(action), action, prop, path_attr
@@ -510,7 +510,7 @@ class SubPanelRandomUD(
                     #        regex=re.compile(r'^test-\d+$')
 
                     if obj in obj_str:
-                        print("Yay found ", obj)
+                        # print("Yay found ", obj)
 
                         idx = i
 
@@ -526,10 +526,10 @@ class SubPanelRandomUD(
                     bpy.context.scene, attribute_only_str
                 )[0]
 
-            print("prop_type", prop_type)
-            print("action", action)
-            print("prop", prop)
-            print("path_attr", path_attr)
+            # print("prop_type", prop_type)
+            # print("action", action)
+            # print("prop", prop)
+            # print("path_attr", path_attr)
 
         else:
             action = "dummy"
@@ -623,7 +623,7 @@ class SubPanelRandomUD(
         # full_list = [prop.name for prop in list(C.scene.custom)]
         list_all_UD_props = []
         for UD_str in bpy.context.scene.custom:
-            print("ERROR ====== UD_str", UD_str)
+            # print("ERROR ====== UD_str", UD_str)
             objects_in_scene = []
             for key in bpy.data.objects:
                 objects_in_scene.append(key.name)
@@ -636,7 +636,7 @@ class SubPanelRandomUD(
                     #        regex=re.compile(r'^test-\d+$')
 
                     if obj in obj_str:
-                        print("Yay found cube")
+                        # print("Yay found cube")
 
                         idx = i
 
@@ -671,7 +671,7 @@ class SubPanelRandomUD(
         #     )[1]
         #     != "dummy"
         # ]
-        print("list_all_UD_props ====== ", list_all_UD_props)
+        # print("list_all_UD_props ====== ", list_all_UD_props)
         # print(
         #     "bpy.context.scene.custom_index == ",
         #     bpy.context.scene.custom_index,
