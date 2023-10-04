@@ -244,6 +244,7 @@ class RandomiseAllUDProps(bpy.types.Operator):
         ]
         # for every GNG: save sockets to randomise
         self.sockets_to_randomise_per_UD = {}
+        self.sockets_to_randomise_per_UD = []
         for UD_str in self.list_subpanel_UD_props_names:
             # if cs.socket_props_per_UD.collection[
             #     UD_str
@@ -286,10 +287,9 @@ class RandomiseAllUDProps(bpy.types.Operator):
             #         "randomisation toggle set to False",
             #     )
 
-            self.sockets_to_randomise_per_UD[UD_str] = []
             sckt = cs.socket_props_per_UD.collection[UD_str].name
             if cs.socket_props_per_UD.collection[UD_str].bool_randomise:
-                self.sockets_to_randomise_per_UD[UD_str].append(sckt)
+                self.sockets_to_randomise_per_UD.append(sckt)
 
             print(
                 "INVOKE ==== sockets to randomise ",
@@ -326,9 +326,10 @@ class RandomiseAllUDProps(bpy.types.Operator):
         # For every GNG with a subpanel - REFACTORING BASED ON NEW CODE
         print(
             "EXECUTE list_subpanel_prop_names ==== ",
-            self.list_subpanel_UD_props_names,
+            self.sockets_to_randomise_per_UD,
         )
-        for UD_str in self.list_subpanel_UD_props_names:
+        # for UD_str in self.list_subpanel_UD_props_names:
+        for UD_str in self.sockets_to_randomise_per_UD:
             # get collection of socket properties for this material
             # NOTE: socket properties do not include the actual socket object
             sockets_props_collection = cs.socket_props_per_UD.collection[

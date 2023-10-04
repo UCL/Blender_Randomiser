@@ -177,7 +177,7 @@ class ColUDParentProps(bpy.types.PropertyGroup):
                     #        regex=re.compile(r'^test-\d+$')
 
                     if obj in obj_str:
-                        print("Yay found cube")
+                        # print("Yay found cube")
                         idx = i
 
                 # if (
@@ -230,7 +230,7 @@ class ColUDParentProps(bpy.types.PropertyGroup):
         #     list_materials,
         #     key=lambda mat: mat.name.lower()
         # )
-        print(list_UD_props)
+        # print(list_UD_props)
         return list_UD_props
 
 
