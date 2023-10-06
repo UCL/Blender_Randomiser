@@ -2,6 +2,124 @@ from random import seed
 
 import bpy
 
+### GEOMETRY
+
+# Actual Geom values followed by Min_Max
+# Node group called "Geometry Nodes"
+bpy.data.node_groups["Geometry Nodes"].nodes["RandomConeDepth"].outputs[
+    0
+].default_value
+bpy.data.scenes["Scene"].socket_props_per_gng.collection[0].collection[
+    0
+].min_float_1d[0]
+bpy.data.scenes["Scene"].socket_props_per_gng.collection[0].collection[
+    0
+].max_float_1d[0]
+
+bpy.data.node_groups["Geometry Nodes"].nodes["RandomRadiusBottom"].outputs[
+    0
+].default_value
+bpy.data.scenes["Scene"].socket_props_per_gng.collection[0].collection[
+    1
+].min_float_1d[0]
+bpy.data.scenes["Scene"].socket_props_per_gng.collection[0].collection[
+    1
+].max_float_1d[0]
+
+
+# Node group called "NodeGroup" which is associated
+# with "Geometry Nodes" node group
+bpy.data.node_groups["NodeGroup"].nodes["RandomConeDepth.001"].outputs[
+    0
+].default_value
+bpy.data.scenes["Scene"].socket_props_per_gng.collection[1].collection[
+    0
+].min_float_1d[0]
+bpy.data.scenes["Scene"].socket_props_per_gng.collection[1].collection[
+    0
+].max_float_1d[0]
+
+bpy.data.node_groups["NodeGroup"].nodes["RandomRadiusBottom.001"].outputs[
+    0
+].default_value
+bpy.data.scenes["Scene"].socket_props_per_gng.collection[1].collection[
+    1
+].min_float_1d[0]
+bpy.data.scenes["Scene"].socket_props_per_gng.collection[1].collection[
+    1
+].max_float_1d[0]
+
+# Separate node group called "Geometry Nodes.001"
+bpy.data.node_groups["Geometry Nodes.001"].nodes["RandomSize"].outputs[
+    0
+].default_value
+bpy.data.scenes["Scene"].socket_props_per_gng.collection[2].collection[
+    0
+].min_float_1d[0]
+bpy.data.scenes["Scene"].socket_props_per_gng.collection[2].collection[
+    0
+].max_float_1d[0]
+
+
+### MATERIALS
+# Actual Mat values followed by Min_Max
+# Material called "Material" containing node_tree.nodes
+bpy.data.materials["Material"].node_tree.nodes["RandomMetallic"].outputs[
+    0
+].default_value
+bpy.data.scenes["Scene"].socket_props_per_material.collection[1].collection[
+    1
+].min_float_1d[0]
+bpy.data.scenes["Scene"].socket_props_per_material.collection[1].collection[
+    1
+].max_float_1d[0]
+
+bpy.data.materials["Material"].node_tree.nodes["RandomBaseRGB"].outputs[
+    0
+].default_value
+# bpy.data.scenes['Scene'].socket_props_per_material.collection[1].collection[3].min_rgba_4d[0-3]
+# bpy.data.scenes['Scene'].socket_props_per_material.collection[1].collection[3].max_rgba_4d[0-3]
+
+
+# Node group called "NodeGroup.001" which is associated
+# with "Material" material
+bpy.data.node_groups["NodeGroup.001"].nodes["RandomMetallic.001"].outputs[
+    0
+].default_value
+bpy.data.scenes["Scene"].socket_props_per_gng.collection[1].collection[
+    0
+].min_float_1d[0]
+bpy.data.scenes["Scene"].socket_props_per_gng.collection[1].collection[
+    0
+].max_float_1d[0]
+
+bpy.data.node_groups["NodeGroup.001"].nodes["RandomBaseRGB.001"].outputs[
+    0
+].default_value
+# bpy.data.scenes['Scene'].socket_props_per_material.collection[1].collection[2].min_rgba_4d[0-3]
+# bpy.data.scenes['Scene'].socket_props_per_material.collection[1].collection[2].max_rgba_4d[0-3]
+
+
+# Separate material called "Material.001" containing node_tree.nodes
+bpy.data.materials["Material.001"].node_tree.nodes["RandomMetallic"].outputs[
+    0
+].default_value
+bpy.data.scenes["Scene"].socket_props_per_gng.collection[0].collection[
+    0
+].min_float_1d[0]
+bpy.data.scenes["Scene"].socket_props_per_gng.collection[0].collection[
+    0
+].max_float_1d[0]
+
+bpy.data.materials["Material.001"].node_tree.nodes["RandomBaseRGB"].outputs[
+    0
+].default_value
+# bpy.data.scenes['Scene'].socket_props_per_material.collection[0].collection[1].min_rgba_4d[0-3]
+# bpy.data.scenes['Scene'].socket_props_per_material.collection[0].collection[1].max_rgba_4d[0-3]
+
+
+# Min-max Geom values
+
 if bpy.data.scenes["Scene"].seed_properties.seed_toggle:  # = True
     seed(bpy.data.scenes["Scene"].seed_properties.seed)
 
@@ -24,6 +142,7 @@ else:
     value_str = "rotation_euler"
 
 geom = []
+mat = []
 for idx in range(tot_frame_no):
     bpy.app.handlers.frame_change_pre[0]("dummy")
     bpy.data.scenes["Scene"].frame_current = idx
@@ -44,6 +163,15 @@ for idx in range(tot_frame_no):
         .default_value
     )
 
+    bpy.ops.node.randomise_all_material_sockets("INVOKE_DEFAULT")
+    mat.append(
+        bpy.data.materials["Material"]
+        .node_tree.nodes["RandomMetallic"]
+        .outputs[0]
+        .default_value
+    )
+
+
 data = {
     "location_str": loc_value_str,
     "loc_x": x_pos_vals,
@@ -54,6 +182,7 @@ data = {
     "rot_y": y_rot_vals,
     "rot_z": z_rot_vals,
     "geometry": geom,
+    "materials": mat,
 }
 print(data)
 # path_to_file = pathlib.Path.home() / "tmp" / "transform_test.json"
@@ -77,6 +206,7 @@ print(data)
 #### SUBPANEL materials
 
 
+##### Function called by main code
 def get_material_nodes_to_randomise_indep(
     material_str: str = "Material",
     node2randomise_prefix: str = "random",
@@ -119,6 +249,7 @@ def get_material_nodes_to_randomise_indep(
     return list_input_nodes
 
 
+### Called by get_material_nodes_to_randomise_indep
 def get_nodes_to_randomise_from_list(
     list_candidate_nodes: list,
     node2randomise_prefix: str = "random",
@@ -165,6 +296,8 @@ def get_nodes_to_randomise_from_list(
     return list_input_nodes
 
 
+#### MAIN CODE TO REPLICATE FROM ui.py Get material nodes
+# (in our case want to automate node socket, no need to draw socket)
 # Get list of input nodes to randomise
 # for this subpanel's material
 cs = bpy.context.scene
@@ -197,6 +330,86 @@ def draw_sockets_list(
 
 
 #            col1.label(text=sckt.name)
+
+#### MAIN CODE TO REPLICATE ui.py GEOM
+cs = bpy.context.scene
+
+# get this subpanel's GNG
+subpanel_gng = cs.socket_props_per_gng.collection[0]  # self.subpanel_gng_idx
+
+# get (updated) collection of socket props for this GNG
+sockets_props_collection = cs.socket_props_per_gng.collection[
+    subpanel_gng.name
+].collection
+
+# Get list of input nodes to randomise for this subpanel's GNG
+list_parent_nodes_str = [
+    sckt.name.split("_")[0] for sckt in sockets_props_collection
+]
+
+list_input_nodes = [
+    bpy.data.node_groups[subpanel_gng.name].nodes[nd_str]
+    for nd_str in list_parent_nodes_str
+]
+
+# Draw sockets to randomise per input node, including their
+# current value and min/max boundaries
+draw_sockets_list(
+    cs,
+    list_input_nodes,
+)
+
+
+##### NEW CODE refactoring code from above
+print("NEW CODE material starts here")
+cs = bpy.context.scene
+subpanel_material = cs.socket_props_per_material.collection[0]
+list_input_nodes = get_material_nodes_to_randomise_indep(
+    subpanel_material.name
+)
+
+list_input_nodes_sorted = sorted(list_input_nodes, key=lambda x: x.name)
+for i_n, nd in enumerate(list_input_nodes_sorted):
+    # add sockets for this node in the subseq rows
+    for sckt in nd.outputs:
+        print(
+            getattr(
+                sckt,
+                "default_value",
+            )
+        )
+
+print(len(list_input_nodes_sorted))
+
+print("NEW CODE geometry starts here")
+cs = bpy.context.scene
+# get this subpanel's GNG
+subpanel_gng = cs.socket_props_per_gng.collection[0]  # self.subpanel_gng_idx
+# get (updated) collection of socket props for this GNG
+sockets_props_collection = cs.socket_props_per_gng.collection[
+    subpanel_gng.name
+].collection
+# Get list of input nodes to randomise for this subpanel's GNG
+list_parent_nodes_str = [
+    sckt.name.split("_")[0] for sckt in sockets_props_collection
+]
+list_input_nodes = [
+    bpy.data.node_groups[subpanel_gng.name].nodes[nd_str]
+    for nd_str in list_parent_nodes_str
+]
+
+list_input_nodes_sorted = sorted(list_input_nodes, key=lambda x: x.name)
+for i_n, nd in enumerate(list_input_nodes_sorted):
+    # add sockets for this node in the subseq rows
+    for sckt in nd.outputs:
+        print(
+            getattr(
+                sckt,
+                "default_value",
+            )
+        )
+
+print(len(list_input_nodes_sorted))
 
 
 # socket current value
