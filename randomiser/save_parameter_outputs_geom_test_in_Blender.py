@@ -128,13 +128,9 @@ bpy.data.materials["Material.001"].node_tree.nodes["RandomBaseRGB"].outputs[
 # bpy.data.scenes['Scene'].socket_props_per_material.collection[0].collection[1].max_rgba_4d[0-3]
 
 
-# Min-max Geom values
-
+### ALL
 if bpy.data.scenes["Scene"].seed_properties.seed_toggle:  # = True
     seed(bpy.data.scenes["Scene"].seed_properties.seed)
-
-
-### ALL
 tot_frame_no = bpy.context.scene.rand_all_properties.tot_frame_no
 
 ### TRANSFORMS
