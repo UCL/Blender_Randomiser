@@ -1,9 +1,13 @@
+import json
+import pathlib
 from random import seed
 
 import bpy
 
 ### GEOMETRY
-
+# collection[N].collection[S]
+# [N] = 0, 1, 2 for each node group (even NG within NG)
+# [S] = 0, 1 etc. for each socket within node group
 # Actual Geom values followed by Min_Max
 # Node group called "Geometry Nodes"
 bpy.data.node_groups["Geometry Nodes"].nodes["RandomConeDepth"].outputs[
@@ -62,6 +66,12 @@ bpy.data.scenes["Scene"].socket_props_per_gng.collection[2].collection[
 
 
 ### MATERIALS
+# collection[N].collection[S]
+# [N] = 0 "Material.001"
+# [S] = 0 RandomMetallic, = 1 RandomBaseRGB
+# [N] = 1 "Material" and "NodeGroup.001"
+# [S] = 0 "RandomMetallic.001", 1 = RandomMetallic
+# [S] = 2 "RandomBaseRGB.001", 3 RandomBaseRGB
 # Actual Mat values followed by Min_Max
 # Material called "Material" containing node_tree.nodes
 bpy.data.materials["Material"].node_tree.nodes["RandomMetallic"].outputs[
@@ -86,10 +96,10 @@ bpy.data.materials["Material"].node_tree.nodes["RandomBaseRGB"].outputs[
 bpy.data.node_groups["NodeGroup.001"].nodes["RandomMetallic.001"].outputs[
     0
 ].default_value
-bpy.data.scenes["Scene"].socket_props_per_gng.collection[1].collection[
+bpy.data.scenes["Scene"].socket_props_per_material.collection[1].collection[
     0
 ].min_float_1d[0]
-bpy.data.scenes["Scene"].socket_props_per_gng.collection[1].collection[
+bpy.data.scenes["Scene"].socket_props_per_material.collection[1].collection[
     0
 ].max_float_1d[0]
 
@@ -104,10 +114,10 @@ bpy.data.node_groups["NodeGroup.001"].nodes["RandomBaseRGB.001"].outputs[
 bpy.data.materials["Material.001"].node_tree.nodes["RandomMetallic"].outputs[
     0
 ].default_value
-bpy.data.scenes["Scene"].socket_props_per_gng.collection[0].collection[
+bpy.data.scenes["Scene"].socket_props_per_material.collection[0].collection[
     0
 ].min_float_1d[0]
-bpy.data.scenes["Scene"].socket_props_per_gng.collection[0].collection[
+bpy.data.scenes["Scene"].socket_props_per_material.collection[0].collection[
     0
 ].max_float_1d[0]
 
@@ -123,8 +133,13 @@ bpy.data.materials["Material.001"].node_tree.nodes["RandomBaseRGB"].outputs[
 if bpy.data.scenes["Scene"].seed_properties.seed_toggle:  # = True
     seed(bpy.data.scenes["Scene"].seed_properties.seed)
 
-bpy.data.scenes["Scene"].frame_current = 0
+
+### ALL
 tot_frame_no = bpy.context.scene.rand_all_properties.tot_frame_no
+
+### TRANSFORMS
+bpy.data.scenes["Scene"].frame_current = 0
+
 x_pos_vals = []
 y_pos_vals = []
 z_pos_vals = []
@@ -141,8 +156,9 @@ else:
     loc_value_str = "location"
     value_str = "rotation_euler"
 
-geom = []
-mat = []
+
+geom_single_test = []
+mat_single_test = []
 for idx in range(tot_frame_no):
     bpy.app.handlers.frame_change_pre[0]("dummy")
     bpy.data.scenes["Scene"].frame_current = idx
@@ -156,7 +172,7 @@ for idx in range(tot_frame_no):
     z_rot_vals.append(getattr(bpy.context.scene.camera, value_str)[2])
 
     bpy.ops.node.randomise_all_geometry_sockets("INVOKE_DEFAULT")
-    geom.append(
+    geom_single_test.append(
         bpy.data.node_groups[0]
         .nodes["RandomConeDepth"]
         .outputs[0]
@@ -164,13 +180,121 @@ for idx in range(tot_frame_no):
     )
 
     bpy.ops.node.randomise_all_material_sockets("INVOKE_DEFAULT")
-    mat.append(
+    mat_single_test.append(
         bpy.data.materials["Material"]
         .node_tree.nodes["RandomMetallic"]
         .outputs[0]
         .default_value
     )
 
+
+### GEOMETRY
+bpy.data.scenes["Scene"].frame_current = 0
+# geom ={'0': []}
+# print(geom)
+# for i in range(len(bpy.context.scene.socket_props_per_gng.collection)):
+#     if i>=1:
+#         geom[str(i)]=[]
+
+# print(geom)
+
+# mat ={'0': []}
+# for i in range(len(bpy.context.scene.socket_props_per_material.collection)):
+#     if i>=1:
+#         mat[str(i)]=[]
+
+# all_geom=[]
+# bpy.data.scenes["Scene"].socket_props_per_gng.collection[0].name
+# bpy.data.scenes["Scene"].socket_props_per_gng.collection[0].collection[0].name
+all_geom_dict = {}
+cs = bpy.context.scene
+for gng_idx in range(len(cs.socket_props_per_gng.collection)):
+    # get this subpanel's GNG
+    subpanel_gng = cs.socket_props_per_gng.collection[gng_idx]
+    tmp_GNG = subpanel_gng.name
+    print(tmp_GNG)
+
+    sockets_props_collection = cs.socket_props_per_gng.collection[
+        subpanel_gng.name
+    ].collection
+
+    list_parent_nodes_str = [
+        sckt.name.split("_")[0] for sckt in sockets_props_collection
+    ]
+    list_input_nodes = [
+        bpy.data.node_groups[subpanel_gng.name].nodes[nd_str]
+        for nd_str in list_parent_nodes_str
+    ]
+
+    list_input_nodes_sorted = sorted(list_input_nodes, key=lambda x: x.name)
+    for i_n, nd in enumerate(list_input_nodes_sorted):
+        # add sockets for this node in the subseq rows
+        for sckt in nd.outputs:
+            print("i_n", i_n)
+            print("nd", nd)
+            print(
+                getattr(
+                    sckt,
+                    "default_value",
+                )
+            )
+
+            tmp_values = []
+            for idx in range(tot_frame_no):
+                bpy.app.handlers.frame_change_pre[0]("dummy")
+                bpy.data.scenes["Scene"].frame_current = idx
+                bpy.ops.node.randomise_all_geometry_sockets(
+                    "INVOKE_DEFAULT"
+                )  # issue
+                # w/ this being called so often -
+                # might need moved to diff for loop?
+                tmp_values.append(
+                    getattr(
+                        sckt,
+                        "default_value",
+                    )
+                )
+
+            print(tmp_values)
+            tmp_sck = nd.name
+            all_geom_dict[tmp_GNG] = tmp_sck
+            GNG_sck_values_str = tmp_GNG + tmp_sck
+            GNG_sck_values_str = "Values " + GNG_sck_values_str
+            print(GNG_sck_values_str)
+            all_geom_dict[GNG_sck_values_str] = tmp_values
+
+    # for sck_idx in range(len(subpanel_gng.collection)):
+    #     tmp_sck = subpanel_gng.collection[sck_idx].name
+    #     if "_Value" in tmp_sck:
+    #         tmp_sck=tmp_sck.replace("_Value", "")
+
+    #     print(tmp_sck)
+    #     tmp_values = []
+
+    # for idx in range(tot_frame_no):
+    #     bpy.app.handlers.frame_change_pre[0]("dummy")
+    #     bpy.data.scenes["Scene"].frame_current = idx
+    #     bpy.ops.node.randomise_all_geometry_sockets("INVOKE_DEFAULT") # issue
+    # w/ this being called so often - might need moved to diff for loop?
+    #     tmp_values.append(
+    #         bpy.data.node_groups[tmp_GNG]
+    #         .nodes[tmp_sck]
+    #         .outputs[0]
+    #         .default_value
+    #     )
+
+    # print(tmp_values)
+    # all_geom_dict[tmp_GNG] = tmp_sck
+    # GNG_sck_values_str = tmp_GNG + tmp_sck
+    # GNG_sck_values_str = 'Values ' + GNG_sck_values_str
+    # print(GNG_sck_values_str)
+    # all_geom_dict[GNG_sck_values_str] = tmp_values
+
+
+print(all_geom_dict)
+
+#### THIS IS FINE AS IT IS (dict within dict
+# for geometry and materials
 
 data = {
     "location_str": loc_value_str,
@@ -181,18 +305,18 @@ data = {
     "rot_x": x_rot_vals,
     "rot_y": y_rot_vals,
     "rot_z": z_rot_vals,
-    "geometry": geom,
-    "materials": mat,
+    "geometry": all_geom_dict,
+    "materials": mat_single_test,
 }
-print(data)
-# path_to_file = pathlib.Path.home() / "tmp" / "transform_test.json"
-# print(path_to_file)
+# print(data)
+path_to_file = pathlib.Path.home() / "tmp" / "transform_test.json"
+print(path_to_file)
 
-# with open(path_to_file, "w") as out_file_obj:
-#     # convert the dictionary into text
-#     text = json.dumps(data, indent=4)
-#     # write the text into the file
-#     out_file_obj.write(text)
+with open(path_to_file, "w") as out_file_obj:
+    # convert the dictionary into text
+    text = json.dumps(data, indent=4)
+    # write the text into the file
+    out_file_obj.write(text)
 
 
 # path_to_file = pathlib.Path.home() / "tmp" / "input_parameters.json"
