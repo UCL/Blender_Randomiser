@@ -14,10 +14,12 @@ Example:
 
 """
 
+import json
 from pathlib import Path
 from random import seed
 
 import bpy
+import numpy as np
 
 
 def main():
@@ -69,6 +71,15 @@ def main():
         help="an integer for the randomisation seed",
     )
 
+    parser.add_argument(
+        "-i",
+        "--input",
+        nargs="*",
+        type=str,  # types: string, int, long, choice, float and complex.
+        metavar="INPUT_JSON_FILE",  # A name for argument in usage messages.
+        help="Input .json file to set the min-max values for each panel",
+    )
+
     # build parser object
     args = parser.parse_args(argv)
 
@@ -106,6 +117,112 @@ def main():
         bpy.context.scene.seed_properties.seed = args.seed[0]
         seed(args.seed[0])
         bpy.context.scene.seed_properties.seed_toggle = True
+
+    if args.input is not None:
+        print("Yay!!!!!")
+        print(args.input)
+        path_to_file = args.input[0]
+        with open(path_to_file, "r") as in_file_obj:
+            text = in_file_obj.read()
+            # convert the text into a dictionary
+            data = json.loads(text)
+
+        print(data["camera_pos_x_min"][0])
+
+        loc_value_str = data["loc_value_str"]
+        value_str = data["value_str"]
+        if (
+            loc_value_str == "delta_location"
+            and value_str == "delta_rotation_euler"
+        ):
+            bpy.context.scene.randomise_camera_props.bool_delta = True
+        else:
+            loc_value_str = "location"
+            value_str = "rotation_euler"
+            bpy.context.scene.randomise_camera_props.bool_delta = False
+
+        # bpy.data.objects['Camera'].location[0] = data["location"][0]
+        getattr(bpy.context.scene.camera, loc_value_str)[0] = data["location"][
+            0
+        ]
+        bpy.context.scene.randomise_camera_props.camera_pos_x_max[0] = data[
+            "camera_pos_x_max"
+        ][0]
+        bpy.context.scene.randomise_camera_props.camera_pos_x_min[0] = data[
+            "camera_pos_x_min"
+        ][0]
+
+        # bpy.data.objects['Camera'].location[1] = data["location"][1]
+        getattr(bpy.context.scene.camera, loc_value_str)[1] = data["location"][
+            1
+        ]
+        bpy.context.scene.randomise_camera_props.camera_pos_y_max[0] = data[
+            "camera_pos_y_max"
+        ][0]
+        bpy.context.scene.randomise_camera_props.camera_pos_y_min[0] = data[
+            "camera_pos_y_min"
+        ][0]
+
+        # bpy.data.objects['Camera'].location[2] = data["location"][2]
+        getattr(bpy.context.scene.camera, loc_value_str)[2] = data["location"][
+            2
+        ]
+        bpy.context.scene.randomise_camera_props.camera_pos_z_max[0] = data[
+            "camera_pos_z_max"
+        ][0]
+        bpy.context.scene.randomise_camera_props.camera_pos_z_min[0] = data[
+            "camera_pos_z_min"
+        ][0]
+
+        deg2rad = np.pi / 180
+
+        rotation_mode = bpy.data.objects["Camera"].rotation_mode
+        if rotation_mode in {"QUATERNION", "AXIS_ANGLE"}:
+            bpy.data.objects["Camera"].rotation_mode = "XYZ"
+
+        # bpy.data.objects['Camera'].rotation_euler[0]
+        getattr(bpy.context.scene.camera, value_str)[0] = (
+            data["rotation_euler"][0] * deg2rad
+        )
+        bpy.context.scene.randomise_camera_props.camera_rot_x_max[0] = data[
+            "camera_rot_x_max"
+        ][0]
+        bpy.context.scene.randomise_camera_props.camera_rot_x_min[0] = data[
+            "camera_rot_x_min"
+        ][0]
+
+        # bpy.data.objects['Camera'].rotation_euler[1]
+        getattr(bpy.context.scene.camera, value_str)[1] = (
+            data["rotation_euler"][1] * deg2rad
+        )
+        bpy.context.scene.randomise_camera_props.camera_rot_y_max[0] = data[
+            "camera_rot_y_max"
+        ][0]
+        bpy.context.scene.randomise_camera_props.camera_rot_y_min[0] = data[
+            "camera_rot_y_min"
+        ][0]
+
+        # bpy.data.objects['Camera'].rotation_euler[2]
+        getattr(bpy.context.scene.camera, value_str)[2] = (
+            data["rotation_euler"][2] * deg2rad
+        )
+        bpy.context.scene.randomise_camera_props.camera_rot_z_max[0] = data[
+            "camera_rot_z_max"
+        ][0]
+        bpy.context.scene.randomise_camera_props.camera_rot_z_min[0] = data[
+            "camera_rot_z_min"
+        ][0]
+
+        ## TO DO - invoke geometry and materials like in testing
+        # to allow setting of min-max values
+        # also dealing with multiple materials and sockets like in export
+        # assign initial value
+        # for m_str in ["min", "max"]:
+        #     setattr(
+        #         sckt_prop,
+        #         m_str + "_" + socket_attrib_str,
+        #         (ini_min_max_values[m_str],) * n_dim,
+        #     )
 
 
 if __name__ == "__main__":

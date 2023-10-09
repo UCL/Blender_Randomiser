@@ -1,0 +1,50 @@
+{
+    "loc_value_str": "location",
+    "location": [
+        4,
+        8,
+        1
+    ],
+    "camera_pos_x_min": [
+        1
+    ],
+    "camera_pos_x_max": [
+        5
+    ],
+    "camera_pos_y_min": [
+        7
+    ],
+    "camera_pos_y_max": [
+        11
+    ],
+    "camera_pos_z_min": [
+        -1
+    ],
+    "camera_pos_z_max": [
+        3
+    ],
+    "value_str": "rotation_euler",
+    "rotation_euler": [
+        45,
+        90,
+        10
+    ],
+    "camera_rot_x_min": [
+        0
+    ],
+    "camera_rot_x_max": [
+        90
+    ],
+    "camera_rot_y_min": [
+        45
+    ],
+    "camera_rot_y_max": [
+        135
+    ],
+    "camera_rot_z_min": [
+        -45
+    ],
+    "camera_rot_z_max": [
+        30
+    ]
+}
