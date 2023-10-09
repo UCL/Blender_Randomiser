@@ -341,12 +341,14 @@ class ApplySaveParams(bpy.types.Operator):
             "rot_y": y_rot_vals,
             "rot_z": z_rot_vals,
             "geometry": all_geom_dict,
-            "materaisl": all_mat_dict,
+            "materials": all_mat_dict,
         }
 
         path_to_file = (
             pathlib.Path.home() / "tmp" / "transform_geom_mat_test.json"
         )
+
+        path_to_file = "transform_geom_mat_test.json"
 
         with open(path_to_file, "w") as out_file_obj:
             # convert the dictionary into text
