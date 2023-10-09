@@ -342,3 +342,50 @@ if "[" in full_str:
         max_val,
         prop_type,
     )
+
+
+####Tom examples -  bpy.data.objects["Cube"].location[0]
+# bpy.data.objects["Cube"].rotation_euler
+full_str = "bpy.data.cameras['Camera'].dof.aperture_fstop"
+attr_only_str = get_attr_only_str(full_str)
+print("attr_only_str = ", attr_only_str)
+
+
+path_prop, path_attr = "dof.aperture_fstop".rsplit(".", 1)
+prop = bpy.data.cameras["Camera"].path_resolve(path_prop)
+action = getattr(prop, path_attr)
+print("prop = ", prop)
+print("action getattr = ", action)
+
+prop_type, action, prop, path_attr = attr_get_type(
+    bpy.data.cameras["Camera"], attr_only_str
+)
+
+
+# min_val = np.array(
+#    getattr(
+#        bpy.context.scene.socket_props_per_UD.collection[0],
+#        "min_float_3d",
+#    )
+# )
+
+# max_val = np.array(
+#    getattr(
+#        bpy.context.scene.socket_props_per_UD.collection[0],
+#        "max_float_3d",
+#    )
+# )
+# print(min_val)
+# print(max_val)
+# print(prop_type)
+## min_val = bpy.context.scene.socket_props_per_UD.
+# collection[0].min_float_1d[0]
+## max_val = bpy.context.scene.socket_props_per_UD.
+# collection[0].max_float_1d[0]
+# attr_set_val(
+#    bpy.context.scene,
+#    attr_only_str,
+#    min_val,
+#    max_val,
+#    prop_type,
+# )
