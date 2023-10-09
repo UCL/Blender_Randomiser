@@ -418,13 +418,13 @@ class SubPanelUDUIlist(TemplatePanel):
         col.operator(
             "custom.list_action", icon="ZOOM_OUT", text=""
         ).action = "REMOVE"
-        col.separator()
-        col.operator(
-            "custom.list_action", icon="TRIA_UP", text=""
-        ).action = "UP"
-        col.operator(
-            "custom.list_action", icon="TRIA_DOWN", text=""
-        ).action = "DOWN"
+        # col.separator()
+        # col.operator(
+        #     "custom.list_action", icon="TRIA_UP", text=""
+        # ).action = "UP"
+        # col.operator(
+        #     "custom.list_action", icon="TRIA_DOWN", text=""
+        # ).action = "DOWN"
 
         row = layout.row()
         col = row.column(align=True)
