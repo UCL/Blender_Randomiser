@@ -53,13 +53,11 @@ class CUSTOM_OT_actions(bpy.types.Operator):
 
     bl_idname = "custom.list_action"
     bl_label = "List Actions"
-    bl_description = "Move items up and down, add and remove"
+    bl_description = "Add and remove items"
     bl_options = {"REGISTER"}
 
     action_prop = bpy.props.EnumProperty(
         items=(
-            ("UP", "Up", ""),
-            ("DOWN", "Down", ""),
             ("REMOVE", "Remove", ""),
             ("ADD", "Add", ""),
         )
@@ -75,27 +73,27 @@ class CUSTOM_OT_actions(bpy.types.Operator):
         except IndexError:
             pass
         else:
-            if self.action == "DOWN" and idx < len(scn.custom) - 1:
-                scn.custom[idx + 1].name
-                scn.custom.move(idx, idx + 1)
-                scn.custom += 1
-                info = 'Item "%s" moved to position %d' % (
-                    item.name,
-                    scn.custom + 1,
-                )
-                self.report({"INFO"}, info)
+            # if self.action == "DOWN" and idx < len(scn.custom) - 1:
+            #     scn.custom[idx + 1].name
+            #     scn.custom.move(idx, idx + 1)
+            #     scn.custom += 1
+            #     info = 'Item "%s" moved to position %d' % (
+            #         item.name,
+            #         scn.custom + 1,
+            #     )
+            #     self.report({"INFO"}, info)
 
-            elif self.action == "UP" and idx >= 1:
-                scn.custom[idx - 1].name
-                scn.custom.move(idx, idx - 1)
-                scn.custom_index -= 1
-                info = 'Item "%s" moved to position %d' % (
-                    item.name,
-                    scn.custom_index + 1,
-                )
-                self.report({"INFO"}, info)
+            # elif self.action == "UP" and idx >= 1:
+            #     scn.custom[idx - 1].name
+            #     scn.custom.move(idx, idx - 1)
+            #     scn.custom_index -= 1
+            #     info = 'Item "%s" moved to position %d' % (
+            #         item.name,
+            #         scn.custom_index + 1,
+            #     )
+            #     self.report({"INFO"}, info)
 
-            elif self.action == "REMOVE":
+            if self.action == "REMOVE":
                 info = 'Item "%s" removed from list' % (scn.custom[idx].name)
                 scn.custom_index -= 1
                 scn.custom.remove(idx)
