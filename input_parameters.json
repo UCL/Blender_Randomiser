@@ -70,5 +70,28 @@
     "Values Geometry Nodes.001RandomSize.001" : {
         "min": 2,
         "max": 4
+    },
+    "Values Material.001RandomBaseRGB_Color" : {
+        "min": 0.2,
+        "max": 0.8
+    },
+    "Values Material.001RandomMetallic" : {
+        "min": 100,
+        "max": 1000
+    },
+    "Values MaterialRandomBaseRGB_Color" : {
+        "min": 0.4,
+        "max": 0.7
+    },
+    "Values MaterialRandomMetallic" : {
+        "min": 10,
+        "max": 100
+    },
+    "Values MaterialNodeGroup.001_RandomBaseRGB.001_Color" : {
+        "min": 0.1,
+        "max": 0.9
+    },"Values MaterialNodeGroup.001_RandomMetallic.001" : {
+        "min": -100,
+        "max": 50
     }
 }
