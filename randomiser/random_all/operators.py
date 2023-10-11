@@ -289,6 +289,7 @@ class ApplySaveParams(bpy.types.Operator):
             )
             for i_n, nd in enumerate(list_input_nodes_sorted):
                 # add sockets for this node in the subseq rows
+                print("nd.name", nd.name)
                 for sckt in nd.outputs:
                     print(nd.name)
                     print(
@@ -325,7 +326,19 @@ class ApplySaveParams(bpy.types.Operator):
                         print(tmp_values)
                         tmp_sck = nd.name
                         all_mat_dict[tmp_mat] = tmp_sck
-                        MAT_sck_values_str = tmp_mat + tmp_sck
+                        if (
+                            list_input_nodes_sorted[i_n]
+                            in list_nodes2rand_in_groups
+                        ):
+                            for ng in bpy.data.node_groups:
+                                print("ng in bpy.data.node_groups", ng.name)
+                                MAT_sck_values_str = (
+                                    tmp_mat + ng.name + tmp_sck
+                                )
+
+                        else:
+                            MAT_sck_values_str = tmp_mat + tmp_sck
+
                         MAT_sck_values_str = "Values " + MAT_sck_values_str
                         print(MAT_sck_values_str)
                         all_mat_dict[MAT_sck_values_str] = tmp_values
