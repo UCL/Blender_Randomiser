@@ -235,6 +235,7 @@ def main():
         #         (ini_min_max_values[m_str],) * n_dim,
         #     )
 
+        ### GEOMETRY
         if args.output is not None:
             out_path_to_file = args.output[0]
             with open(out_path_to_file, "r") as in_file_obj:
@@ -246,18 +247,20 @@ def main():
 
         else:
             print("no output file to pull names from")
-        # set up some of the properties that will be needed for testing
+
+        # from testing function
         for obj in bpy.data.objects:
             if "Cube" in str(obj):
                 pass
             elif "Sphere" in str(obj):
                 pass
         # obj = bpy.data.objects[3] #Sphere
+
         bpy.context.view_layer.objects.active = obj
         bpy.context.scene.socket_props_per_gng.update_gngs_collection
         bpy.ops.node.randomise_all_geometry_sockets("INVOKE_DEFAULT")
 
-        # set range for randomise in blender properties
+        # Based on ouput file dictionary keys
         sckts_list = []
         sckts_list.append("Values Geometry NodesRandomRadiusBottom")
         sckts_list.append("Values Geometry NodesRandomConeDepth")
@@ -269,6 +272,7 @@ def main():
         for current_sckt in sckts_list:
             print("input min-max from json ====== ", data[current_sckt])
 
+        # Based on random_all_save_params mainly
         cs = bpy.context.scene
         for gng_idx in range(len(cs.socket_props_per_gng.collection)):
             # get this subpanel's GNG
@@ -347,6 +351,139 @@ def main():
 
                 # assign initial value
                 for m_str in ["min", "max"]:
+                    setattr(
+                        sckt,  # sckt_prop,
+                        m_str + "_" + socket_attrib_str,
+                        (ini_min_max_values[m_str],) * n_dim,
+                    )
+
+        ### MATERIALS
+        if args.output is not None:
+            out_path_to_file = args.output[0]
+            with open(out_path_to_file, "r") as in_file_obj:
+                text = in_file_obj.read()
+                # convert the text into a dictionary
+                out_data = json.loads(text)
+
+            print(out_data["materials"])
+
+        else:
+            print("no output file to pull names from")
+
+        # from testing function
+
+        # for obj in bpy.data.objects:
+        #     if "Cube" in str(obj):
+        #         pass
+        #     elif "Sphere" in str(obj):
+        #         pass
+        # # obj = bpy.data.objects[3] #Sphere
+
+        # bpy.context.view_layer.objects.active = obj
+        bpy.context.scene.socket_props_per_material.update_materials_collection
+        bpy.ops.node.randomise_all_material_sockets("INVOKE_DEFAULT")
+
+        # Based on ouput file dictionary keys
+        mat_sckts_list = []
+        mat_sckts_list.append("Values Material.001RandomMetallic")
+        mat_sckts_list.append("Values MaterialRandomMetallic")
+        mat_sckts_list.append(
+            "Values MaterialNodeGroup.001_RandomMetallic.001"
+        )
+        # COLOR min_max =====  {'min': 0.0, 'max': 1.0}
+        # type(sckt) <class 'bpy.types.NodeSocketColor'>
+
+        # for current_sckt in mat_sckts_list:
+        #     print("input MAT min-max from json ====== ", data[current_sckt])
+
+        # Based on random_all_save_params and collection_socket_properties
+        for mat_idx in range(len(cs.socket_props_per_material.collection)):
+            # get this subpanel's GNG
+            subpanel_material = cs.socket_props_per_material.collection[
+                mat_idx
+            ]
+            tmp_mat = subpanel_material.name
+            print(tmp_mat)
+
+            # cs.socket_props_per_gng.collection[
+            #     subpanel_gng.name
+            # ].update_input_json
+
+            # then force an update in the sockets per material
+            # subpanel_material_name = subpanel_material.name
+            cs.socket_props_per_material.collection[
+                subpanel_material.name
+            ].update_sockets_collection
+
+            print("TEST Collection of Materials updated")
+
+            # get (updated) collection of socket properties
+            # for the current material
+            # sockets_props_collection =
+            # cs.socket_props_per_material.collection[
+            #     subpanel_material.name
+            # ].collection
+
+            sockets_props_collection = subpanel_material.collection
+
+            for sckt in sockets_props_collection:
+                #        geom_current = {}
+                print("sckt in sckt_prop = ", sckt)
+                print(type(sckt))
+                tmp_sck = sckt.name
+                print(sckt.name)
+
+                for s in subpanel_material.candidate_sockets:
+                    # build socket id from scratch
+                    socket_id = s.node.name + "_" + s.name
+                    print("socket_id ===== ")
+                    print(socket_id)
+
+                    if s.node.id_data.name in bpy.data.node_groups:
+                        socket_id = s.node.id_data.name + "_" + socket_id
+
+                    if socket_id == tmp_sck:
+                        sckt_val = s
+                        break
+
+                    print("sckt_val ====== ", sckt_val)
+
+                # for this socket type, get the name of the attribute
+                # holding the min/max properties
+                socket_attrib_str = bpy.context.scene.socket_type_to_attr[
+                    type(sckt_val)
+                ]
+
+                # extract last number between '_' and 'd/D' in the
+                # attribute name, to determine the shape of the array
+                # TODO: there is probably a nicer way to do this...
+                n_dim = int(
+                    re.findall(r"_(\d+)(?:d|D)", socket_attrib_str)[-1]
+                )
+                # ---------------------------
+
+                # get dictionary with initial min/max values
+                # for this socket type
+                #        ini_min_max_values = (
+                #            bpy.context.scene.socket_type_to_ini_min_max[type(sckt_val)]
+                #        )
+
+                if "_Value" in tmp_sck:
+                    tmp_sck = tmp_sck.replace("_Value", "")
+                    print(tmp_sck)
+                mat_sck_values_str = subpanel_material.name + tmp_sck
+                mat_sck_values_str = "Values " + mat_sck_values_str
+                print(mat_sck_values_str)
+
+                ini_min_max_values = data[mat_sck_values_str]
+
+                print(ini_min_max_values)
+                print(sckt_prop)
+                print(socket_attrib_str)
+                print(n_dim)
+
+                # assign initial value
+                for m_str in ["max", "min"]:
                     setattr(
                         sckt,  # sckt_prop,
                         m_str + "_" + socket_attrib_str,
