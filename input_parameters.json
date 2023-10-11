@@ -46,5 +46,29 @@
     ],
     "camera_rot_z_max": [
         30
-    ]
+    ],
+    "Values Geometry NodesRandomRadiusBottom": {
+        "min": 1,
+        "max": 3
+    },
+    "Values Geometry NodesRandomConeDepth" : {
+        "min": 2,
+        "max": 8
+    },
+    "Values NodeGroupRandomRadiusBottom.001": {
+        "min": 3,
+        "max": 6
+    },
+    "Values NodeGroupRandomConeDepth.001" : {
+        "min": 4,
+        "max": 6
+    },
+    "Values Geometry Nodes.001RandomSize": {
+        "min": 1,
+        "max": 2
+    },
+    "Values Geometry Nodes.001RandomSize.001" : {
+        "min": 2,
+        "max": 4
+    }
 }

@@ -15,6 +15,7 @@ Example:
 """
 
 import json
+import re
 from pathlib import Path
 from random import seed
 
@@ -78,6 +79,16 @@ def main():
         type=str,  # types: string, int, long, choice, float and complex.
         metavar="INPUT_JSON_FILE",  # A name for argument in usage messages.
         help="Input .json file to set the min-max values for each panel",
+    )
+
+    parser.add_argument(
+        "-o",
+        "--output",
+        nargs="*",
+        type=str,  # types: string, int, long, choice, float and complex.
+        metavar="OUTPUT_JSON_FILE",
+        # A name for argument in usage messages.
+        help="Output .json save path and/or .json file for geom/mat names",
     )
 
     # build parser object
@@ -223,6 +234,124 @@ def main():
         #         m_str + "_" + socket_attrib_str,
         #         (ini_min_max_values[m_str],) * n_dim,
         #     )
+
+        if args.output is not None:
+            out_path_to_file = args.output[0]
+            with open(out_path_to_file, "r") as in_file_obj:
+                text = in_file_obj.read()
+                # convert the text into a dictionary
+                out_data = json.loads(text)
+
+            print(out_data["geometry"])
+
+        else:
+            print("no output file to pull names from")
+        # set up some of the properties that will be needed for testing
+        for obj in bpy.data.objects:
+            if "Cube" in str(obj):
+                pass
+            elif "Sphere" in str(obj):
+                pass
+        # obj = bpy.data.objects[3] #Sphere
+        bpy.context.view_layer.objects.active = obj
+        bpy.context.scene.socket_props_per_gng.update_gngs_collection
+        bpy.ops.node.randomise_all_geometry_sockets("INVOKE_DEFAULT")
+
+        # set range for randomise in blender properties
+        sckts_list = []
+        sckts_list.append("Values Geometry NodesRandomRadiusBottom")
+        sckts_list.append("Values Geometry NodesRandomConeDepth")
+        sckts_list.append("Values NodeGroupRandomRadiusBottom.001")
+        sckts_list.append("Values NodeGroupRandomConeDepth.001")
+        sckts_list.append("Values Geometry Nodes.001RandomSize")
+        sckts_list.append("Values Geometry Nodes.001RandomSize.001")
+
+        for current_sckt in sckts_list:
+            print("input min-max from json ====== ", data[current_sckt])
+
+        cs = bpy.context.scene
+        for gng_idx in range(len(cs.socket_props_per_gng.collection)):
+            # get this subpanel's GNG
+            subpanel_gng = cs.socket_props_per_gng.collection[gng_idx]
+            print(subpanel_gng.name)
+
+            cs.socket_props_per_gng.collection[
+                subpanel_gng.name
+            ].update_input_json
+
+            # force an update in the sockets for this GNG
+            cs.socket_props_per_gng.collection[
+                subpanel_gng.name
+            ].update_sockets_collection
+            print("TEST Collection of Geometry Node Groups updated")
+
+            sckt_prop = subpanel_gng.collection
+
+            for sckt in subpanel_gng.collection:
+                #        geom_current = {}
+                print("sckt in sckt_prop = ", sckt)
+                print(type(sckt))
+                tmp_sck = sckt.name
+                print(sckt.name)
+
+                #        if "_Value" in tmp_sck:
+                #            tmp_sck=tmp_sck.replace("_Value", "")
+                #            print(tmp_sck)
+                #        print(type(tmp_sck))
+
+                #        sckt_cand = subpanel_gng.candidate_sockets
+                #
+                for s in subpanel_gng.candidate_sockets:
+                    # build socket id from scratch
+                    socket_id = s.node.name + "_" + s.name
+                    print("socket_id ===== ")
+                    print(socket_id)
+
+                    if socket_id == tmp_sck:
+                        sckt_val = s
+                        break
+
+                # for this socket type, get the name of the attribute
+                # holding the min/max properties
+                socket_attrib_str = bpy.context.scene.socket_type_to_attr[
+                    type(sckt_val)
+                ]
+
+                # extract last number between '_' and 'd/D' in the
+                # attribute name, to determine the shape of the array
+                # TODO: there is probably a nicer way to do this...
+                n_dim = int(
+                    re.findall(r"_(\d+)(?:d|D)", socket_attrib_str)[-1]
+                )
+                # ---------------------------
+
+                # get dictionary with initial min/max values
+                # for this socket type
+                #        ini_min_max_values = (
+                #            bpy.context.scene.socket_type_to_ini_min_max[type(sckt_val)]
+                #        )
+
+                if "_Value" in tmp_sck:
+                    tmp_sck = tmp_sck.replace("_Value", "")
+                    print(tmp_sck)
+                GNG_sck_values_str = subpanel_gng.name + tmp_sck
+                GNG_sck_values_str = "Values " + GNG_sck_values_str
+                print(GNG_sck_values_str)
+
+                ini_min_max_values = data[GNG_sck_values_str]
+
+                print(ini_min_max_values)
+                print(sckt_prop)
+                print(socket_attrib_str)
+                print(n_dim)
+
+                # assign initial value
+                for m_str in ["min", "max"]:
+                    setattr(
+                        sckt,  # sckt_prop,
+                        m_str + "_" + socket_attrib_str,
+                        (ini_min_max_values[m_str],) * n_dim,
+                    )
 
 
 if __name__ == "__main__":
