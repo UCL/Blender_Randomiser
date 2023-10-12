@@ -1,10 +1,5 @@
 {
     "loc_value_str": "location",
-    "location": [
-        4,
-        8,
-        1
-    ],
     "camera_pos_x_min": [
         1
     ],
@@ -24,11 +19,6 @@
         3
     ],
     "value_str": "rotation_euler",
-    "rotation_euler": [
-        45,
-        90,
-        10
-    ],
     "camera_rot_x_min": [
         0
     ],

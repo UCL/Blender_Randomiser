@@ -20,7 +20,6 @@ from pathlib import Path
 from random import seed
 
 import bpy
-import numpy as np
 
 
 def main():
@@ -130,15 +129,12 @@ def main():
         bpy.context.scene.seed_properties.seed_toggle = True
 
     if args.input is not None:
-        print("Yay!!!!!")
-        print(args.input)
+        print("Input file for setting min-max boundaries")
         path_to_file = args.input[0]
         with open(path_to_file, "r") as in_file_obj:
             text = in_file_obj.read()
             # convert the text into a dictionary
             data = json.loads(text)
-
-        print(data["camera_pos_x_min"][0])
 
         loc_value_str = data["loc_value_str"]
         value_str = data["value_str"]
@@ -152,10 +148,6 @@ def main():
             value_str = "rotation_euler"
             bpy.context.scene.randomise_camera_props.bool_delta = False
 
-        # bpy.data.objects['Camera'].location[0] = data["location"][0]
-        getattr(bpy.context.scene.camera, loc_value_str)[0] = data["location"][
-            0
-        ]
         bpy.context.scene.randomise_camera_props.camera_pos_x_max[0] = data[
             "camera_pos_x_max"
         ][0]
@@ -163,10 +155,6 @@ def main():
             "camera_pos_x_min"
         ][0]
 
-        # bpy.data.objects['Camera'].location[1] = data["location"][1]
-        getattr(bpy.context.scene.camera, loc_value_str)[1] = data["location"][
-            1
-        ]
         bpy.context.scene.randomise_camera_props.camera_pos_y_max[0] = data[
             "camera_pos_y_max"
         ][0]
@@ -174,10 +162,6 @@ def main():
             "camera_pos_y_min"
         ][0]
 
-        # bpy.data.objects['Camera'].location[2] = data["location"][2]
-        getattr(bpy.context.scene.camera, loc_value_str)[2] = data["location"][
-            2
-        ]
         bpy.context.scene.randomise_camera_props.camera_pos_z_max[0] = data[
             "camera_pos_z_max"
         ][0]
@@ -185,16 +169,10 @@ def main():
             "camera_pos_z_min"
         ][0]
 
-        deg2rad = np.pi / 180
-
         rotation_mode = bpy.data.objects["Camera"].rotation_mode
         if rotation_mode in {"QUATERNION", "AXIS_ANGLE"}:
             bpy.data.objects["Camera"].rotation_mode = "XYZ"
 
-        # bpy.data.objects['Camera'].rotation_euler[0]
-        getattr(bpy.context.scene.camera, value_str)[0] = (
-            data["rotation_euler"][0] * deg2rad
-        )
         bpy.context.scene.randomise_camera_props.camera_rot_x_max[0] = data[
             "camera_rot_x_max"
         ][0]
@@ -202,10 +180,6 @@ def main():
             "camera_rot_x_min"
         ][0]
 
-        # bpy.data.objects['Camera'].rotation_euler[1]
-        getattr(bpy.context.scene.camera, value_str)[1] = (
-            data["rotation_euler"][1] * deg2rad
-        )
         bpy.context.scene.randomise_camera_props.camera_rot_y_max[0] = data[
             "camera_rot_y_max"
         ][0]
@@ -213,27 +187,12 @@ def main():
             "camera_rot_y_min"
         ][0]
 
-        # bpy.data.objects['Camera'].rotation_euler[2]
-        getattr(bpy.context.scene.camera, value_str)[2] = (
-            data["rotation_euler"][2] * deg2rad
-        )
         bpy.context.scene.randomise_camera_props.camera_rot_z_max[0] = data[
             "camera_rot_z_max"
         ][0]
         bpy.context.scene.randomise_camera_props.camera_rot_z_min[0] = data[
             "camera_rot_z_min"
         ][0]
-
-        ## TO DO - invoke geometry and materials like in testing
-        # to allow setting of min-max values
-        # also dealing with multiple materials and sockets like in export
-        # assign initial value
-        # for m_str in ["min", "max"]:
-        #     setattr(
-        #         sckt_prop,
-        #         m_str + "_" + socket_attrib_str,
-        #         (ini_min_max_values[m_str],) * n_dim,
-        #     )
 
         ### GEOMETRY
         if args.output is not None:
@@ -243,41 +202,36 @@ def main():
                 # convert the text into a dictionary
                 out_data = json.loads(text)
 
-            print(out_data["geometry"])
+            out_data["geometry"]
+            print("Output file for key names provided")
+
+            # Based on ouput file dictionary keys
+            ## TO DO - use output file keys and type of values
+            # to replicated code below
 
         else:
-            print("no output file to pull names from")
+            print(
+                "No Output file for key names \
+                provided - generate from .blend file objects"
+            )
 
         # from testing function
         for obj in bpy.data.objects:
             if "Cube" in str(obj):
-                pass
+                active_obj = obj
             elif "Sphere" in str(obj):
-                pass
+                active_obj = obj
         # obj = bpy.data.objects[3] #Sphere
 
-        bpy.context.view_layer.objects.active = obj
+        bpy.context.view_layer.objects.active = active_obj
         bpy.context.scene.socket_props_per_gng.update_gngs_collection
         bpy.ops.node.randomise_all_geometry_sockets("INVOKE_DEFAULT")
-
-        # Based on ouput file dictionary keys
-        sckts_list = []
-        sckts_list.append("Values Geometry NodesRandomRadiusBottom")
-        sckts_list.append("Values Geometry NodesRandomConeDepth")
-        sckts_list.append("Values NodeGroupRandomRadiusBottom.001")
-        sckts_list.append("Values NodeGroupRandomConeDepth.001")
-        sckts_list.append("Values Geometry Nodes.001RandomSize")
-        sckts_list.append("Values Geometry Nodes.001RandomSize.001")
-
-        for current_sckt in sckts_list:
-            print("input min-max from json ====== ", data[current_sckt])
 
         # Based on random_all_save_params mainly
         cs = bpy.context.scene
         for gng_idx in range(len(cs.socket_props_per_gng.collection)):
             # get this subpanel's GNG
             subpanel_gng = cs.socket_props_per_gng.collection[gng_idx]
-            print(subpanel_gng.name)
 
             cs.socket_props_per_gng.collection[
                 subpanel_gng.name
@@ -287,29 +241,14 @@ def main():
             cs.socket_props_per_gng.collection[
                 subpanel_gng.name
             ].update_sockets_collection
-            print("TEST Collection of Geometry Node Groups updated")
-
-            sckt_prop = subpanel_gng.collection
+            print("INPUT Collection of Geometry Node Groups updated")
 
             for sckt in subpanel_gng.collection:
-                #        geom_current = {}
-                print("sckt in sckt_prop = ", sckt)
-                print(type(sckt))
                 tmp_sck = sckt.name
-                print(sckt.name)
 
-                #        if "_Value" in tmp_sck:
-                #            tmp_sck=tmp_sck.replace("_Value", "")
-                #            print(tmp_sck)
-                #        print(type(tmp_sck))
-
-                #        sckt_cand = subpanel_gng.candidate_sockets
-                #
                 for s in subpanel_gng.candidate_sockets:
                     # build socket id from scratch
                     socket_id = s.node.name + "_" + s.name
-                    print("socket_id ===== ")
-                    print(socket_id)
 
                     if socket_id == tmp_sck:
                         sckt_val = s
@@ -329,25 +268,12 @@ def main():
                 )
                 # ---------------------------
 
-                # get dictionary with initial min/max values
-                # for this socket type
-                #        ini_min_max_values = (
-                #            bpy.context.scene.socket_type_to_ini_min_max[type(sckt_val)]
-                #        )
-
                 if "_Value" in tmp_sck:
                     tmp_sck = tmp_sck.replace("_Value", "")
-                    print(tmp_sck)
                 GNG_sck_values_str = subpanel_gng.name + tmp_sck
                 GNG_sck_values_str = "Values " + GNG_sck_values_str
-                print(GNG_sck_values_str)
 
                 ini_min_max_values = data[GNG_sck_values_str]
-
-                print(ini_min_max_values)
-                print(sckt_prop)
-                print(socket_attrib_str)
-                print(n_dim)
 
                 # assign initial value
                 for m_str in ["min", "max"]:
@@ -365,36 +291,21 @@ def main():
                 # convert the text into a dictionary
                 out_data = json.loads(text)
 
-            print(out_data["materials"])
+            out_data["materials"]
+            print("Output file for key names provided")
+
+            # Based on ouput file dictionary keys
+            ## TO DO - use output file keys and type of values
+            # to replicated code below
 
         else:
-            print("no output file to pull names from")
+            print(
+                "No Output file for key names \
+                provided - generate from .blend file objects"
+            )
 
-        # from testing function
-
-        # for obj in bpy.data.objects:
-        #     if "Cube" in str(obj):
-        #         pass
-        #     elif "Sphere" in str(obj):
-        #         pass
-        # # obj = bpy.data.objects[3] #Sphere
-
-        # bpy.context.view_layer.objects.active = obj
         bpy.context.scene.socket_props_per_material.update_materials_collection
         bpy.ops.node.randomise_all_material_sockets("INVOKE_DEFAULT")
-
-        # Based on ouput file dictionary keys
-        mat_sckts_list = []
-        mat_sckts_list.append("Values Material.001RandomMetallic")
-        mat_sckts_list.append("Values MaterialRandomMetallic")
-        mat_sckts_list.append(
-            "Values MaterialNodeGroup.001_RandomMetallic.001"
-        )
-        # COLOR min_max =====  {'min': 0.0, 'max': 1.0}
-        # type(sckt) <class 'bpy.types.NodeSocketColor'>
-
-        # for current_sckt in mat_sckts_list:
-        #     print("input MAT min-max from json ====== ", data[current_sckt])
 
         # Based on random_all_save_params and collection_socket_properties
         for mat_idx in range(len(cs.socket_props_per_material.collection)):
@@ -402,8 +313,6 @@ def main():
             subpanel_material = cs.socket_props_per_material.collection[
                 mat_idx
             ]
-            tmp_mat = subpanel_material.name
-            print(tmp_mat)
 
             # cs.socket_props_per_gng.collection[
             #     subpanel_gng.name
@@ -415,7 +324,7 @@ def main():
                 subpanel_material.name
             ].update_sockets_collection
 
-            print("TEST Collection of Materials updated")
+            print("INPUT Collection of Materials updated")
 
             # get (updated) collection of socket properties
             # for the current material
@@ -427,17 +336,11 @@ def main():
             sockets_props_collection = subpanel_material.collection
 
             for sckt in sockets_props_collection:
-                #        geom_current = {}
-                print("sckt in sckt_prop = ", sckt)
-                print(type(sckt))
                 tmp_sck = sckt.name
-                print(sckt.name)
 
                 for s in subpanel_material.candidate_sockets:
                     # build socket id from scratch
                     socket_id = s.node.name + "_" + s.name
-                    print("socket_id ===== ")
-                    print(socket_id)
 
                     if s.node.id_data.name in bpy.data.node_groups:
                         socket_id = s.node.id_data.name + "_" + socket_id
@@ -445,8 +348,6 @@ def main():
                     if socket_id == tmp_sck:
                         sckt_val = s
                         break
-
-                    print("sckt_val ====== ", sckt_val)
 
                 # for this socket type, get the name of the attribute
                 # holding the min/max properties
@@ -462,25 +363,13 @@ def main():
                 )
                 # ---------------------------
 
-                # get dictionary with initial min/max values
-                # for this socket type
-                #        ini_min_max_values = (
-                #            bpy.context.scene.socket_type_to_ini_min_max[type(sckt_val)]
-                #        )
-
                 if "_Value" in tmp_sck:
                     tmp_sck = tmp_sck.replace("_Value", "")
-                    print(tmp_sck)
+
                 mat_sck_values_str = subpanel_material.name + tmp_sck
                 mat_sck_values_str = "Values " + mat_sck_values_str
-                print(mat_sck_values_str)
 
                 ini_min_max_values = data[mat_sck_values_str]
-
-                print(ini_min_max_values)
-                print(sckt_prop)
-                print(socket_attrib_str)
-                print(n_dim)
 
                 # assign initial value
                 for m_str in ["max", "min"]:
