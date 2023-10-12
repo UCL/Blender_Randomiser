@@ -138,17 +138,94 @@ def set_update_collection(self, value):
 
                 # get dictionary with initial min/max values
                 # for this socket type
-                ini_min_max_values = (
-                    bpy.context.scene.socket_type_to_ini_min_max[type(sckt)]
-                )
 
-                # assign initial value
-                for m_str in ["min", "max"]:
-                    setattr(
-                        sckt_prop,
-                        m_str + "_" + socket_attrib_str,
-                        (ini_min_max_values[m_str],) * n_dim,
+                # sckt_prop.input_json = True
+
+                # if sckt_prop.input_json:
+                #     print("sckt_prop.input_json is True")
+                #     ini_min_max_values = (
+                #         bpy.context.scene.socket_type_to_ini_min_max[type(sckt)]
+                #     )
+                # else:
+                #     print("sckt_prop.input_json is False")
+                #     ini_min_max_values = (
+                #         bpy.context.scene.socket_type_to_ini_min_max[type(sckt)]
+                #     )
+
+                if self.input_json:
+                    print("Initial values have already been set by .json")
+
+                else:
+                    print("Using default initial values for the bounds")
+                    ini_min_max_values = (
+                        bpy.context.scene.socket_type_to_ini_min_max[
+                            type(sckt)
+                        ]
                     )
+
+                    # assign initial value
+                    for m_str in ["min", "max"]:
+                        setattr(
+                            sckt_prop,
+                            m_str + "_" + socket_attrib_str,
+                            (ini_min_max_values[m_str],) * n_dim,
+                        )
+
+
+def get_input_json(self):
+    """Getter function for the update_sockets_collection attribute
+    of the collection of socket properties class (ColSocketProperties)
+
+    It will run when the property value is 'get' and
+    it will update the collection of socket properties if required
+
+    Returns
+    -------
+    boolean
+        returns True if the collection of socket properties is updated,
+        otherwise it returns False
+    """
+    # if there is a difference between
+    # sets of sockets in graph and in the collection:
+    # edit the set of sockets in the collection
+    if self.input_json:
+        set_input_json(self, True)
+        return True
+    else:
+        return False
+
+
+def set_input_json(self, value):
+    """
+    Setter function for the update_sockets_collection attribute
+    of the collection of socket properties class (ColSocketProperties)
+
+    It will run when the property value is 'set'.
+
+    It will update the collection of socket properties as follows:
+        - For the set of sockets that exist only in either
+        the collection or the graph:
+            - if the socket exists only in the collection: remove from
+            collection
+            - if the socket exists only in the node graph: add to collection
+            with initial values
+        - For the rest of sockets: leave untouched
+
+    Parameters
+    ----------
+    value : boolean
+        if True, the collection of socket properties is
+        overwritten to consider the latest data
+    """
+
+    if value:
+        print("if value is True")
+        self.input_json = True
+    else:
+        print("else value is false")
+        self.input_json = False
+
+    print(self.input_json)
 
 
 # ----------------------------------------------
@@ -171,6 +248,16 @@ class ColGeomSocketProperties(bpy.types.PropertyGroup):
     # collection of socket properties for this GNG
     collection: bpy.props.CollectionProperty(  # type: ignore
         type=SocketProperties
+    )
+
+    input_json: bpy.props.BoolProperty(  # type: ignore
+        default=False,
+    )
+
+    update_input_json: bpy.props.BoolProperty(  # type: ignore
+        default=False,
+        get=get_input_json,
+        set=set_input_json,
     )
 
     # helper attribute to update collection of socket properties

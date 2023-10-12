@@ -1,0 +1,87 @@
+{
+    "loc_value_str": "location",
+    "camera_pos_x_min": [
+        1
+    ],
+    "camera_pos_x_max": [
+        5
+    ],
+    "camera_pos_y_min": [
+        7
+    ],
+    "camera_pos_y_max": [
+        11
+    ],
+    "camera_pos_z_min": [
+        -1
+    ],
+    "camera_pos_z_max": [
+        3
+    ],
+    "value_str": "rotation_euler",
+    "camera_rot_x_min": [
+        0
+    ],
+    "camera_rot_x_max": [
+        90
+    ],
+    "camera_rot_y_min": [
+        45
+    ],
+    "camera_rot_y_max": [
+        135
+    ],
+    "camera_rot_z_min": [
+        -45
+    ],
+    "camera_rot_z_max": [
+        30
+    ],
+    "Values Geometry NodesRandomRadiusBottom": {
+        "min": 1,
+        "max": 3
+    },
+    "Values Geometry NodesRandomConeDepth" : {
+        "min": 2,
+        "max": 8
+    },
+    "Values NodeGroupRandomRadiusBottom.001": {
+        "min": 3,
+        "max": 6
+    },
+    "Values NodeGroupRandomConeDepth.001" : {
+        "min": 4,
+        "max": 6
+    },
+    "Values Geometry Nodes.001RandomSize": {
+        "min": 1,
+        "max": 2
+    },
+    "Values Geometry Nodes.001RandomSize.001" : {
+        "min": 2,
+        "max": 4
+    },
+    "Values Material.001RandomBaseRGB_Color" : {
+        "min": 0.2,
+        "max": 0.8
+    },
+    "Values Material.001RandomMetallic" : {
+        "min": 100,
+        "max": 1000
+    },
+    "Values MaterialRandomBaseRGB_Color" : {
+        "min": 0.4,
+        "max": 0.7
+    },
+    "Values MaterialRandomMetallic" : {
+        "min": 10,
+        "max": 100
+    },
+    "Values MaterialNodeGroup.001_RandomBaseRGB.001_Color" : {
+        "min": 0.1,
+        "max": 0.9
+    },"Values MaterialNodeGroup.001_RandomMetallic.001" : {
+        "min": -100,
+        "max": 50
+    }
+}
