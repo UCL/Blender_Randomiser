@@ -354,13 +354,20 @@ class RandomiseAllUDProps(bpy.types.Operator):
                     #        regex=re.compile(r'^test-\d+$')
 
                     if obj in obj_str:
-                        print("Yay found cube")
+                        current_obj = obj
+                        # print("Found ", current_obj)
 
                         idx = i
 
-                attr_type = attr_get_type(
-                    bpy.data.objects[idx], attribute_only_str
-                )[0]
+                if "Camera" in current_obj:
+                    attr_type = attr_get_type(
+                        bpy.data.cameras[idx], attribute_only_str
+                    )[0]
+                else:
+                    attr_type = attr_get_type(
+                        bpy.data.objects[idx], attribute_only_str
+                    )[0]
+
             elif "bpy.context.scene" in full_str:
                 attr_type = attr_get_type(
                     bpy.context.scene, attribute_only_str
@@ -386,13 +393,23 @@ class RandomiseAllUDProps(bpy.types.Operator):
                 print("bpy.context.scene")
                 print("OPS EXECUTE attribute_only_str ", attribute_only_str)
 
-                attr_set_val(
-                    bpy.data.objects[idx],
-                    attribute_only_str,
-                    min_val,
-                    max_val,
-                    attr_type,
-                )
+                if "Camera" in full_str:
+                    attr_set_val(
+                        bpy.data.cameras[idx],
+                        attribute_only_str,
+                        min_val,
+                        max_val,
+                        attr_type,
+                    )
+
+                else:
+                    attr_set_val(
+                        bpy.data.objects[idx],
+                        attribute_only_str,
+                        min_val,
+                        max_val,
+                        attr_type,
+                    )
 
             elif "bpy.context.scene" in full_str:
                 print("bpy.context.scene")
