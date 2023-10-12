@@ -177,7 +177,8 @@ class ColUDParentProps(bpy.types.PropertyGroup):
                     #        regex=re.compile(r'^test-\d+$')
 
                     if obj in obj_str:
-                        # print("Yay found cube")
+                        current_obj = obj
+                        # print("Found ", current_obj)
                         idx = i
 
                 # if (
@@ -186,14 +187,26 @@ class ColUDParentProps(bpy.types.PropertyGroup):
                 #     )[1]
                 #     != "dummy"
                 # ):
+                print("CAMERA??????", current_obj)
+                print("Camera")
+                if "Camera" in current_obj:
+                    if (
+                        attr_get_type(
+                            bpy.data.cameras[idx], get_attr_only_str(UD.name)
+                        )[1]
+                        != "dummy"
+                    ):
+                        list_UD_props.append(UD)
 
-                if (
-                    attr_get_type(
-                        bpy.data.objects[idx], get_attr_only_str(UD.name)
-                    )[1]
-                    != "dummy"
-                ):
-                    list_UD_props.append(UD)
+                else:
+                    if (
+                        attr_get_type(
+                            bpy.data.objects[idx], get_attr_only_str(UD.name)
+                        )[1]
+                        != "dummy"
+                    ):
+                        list_UD_props.append(UD)
+
             elif (
                 attr_get_type(bpy.context.scene, get_attr_only_str(UD.name))[1]
                 != "dummy"

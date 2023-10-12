@@ -179,15 +179,21 @@ def draw_sockets_list_UD(
                     #        regex=re.compile(r'^test-\d+$')
 
                     if obj in obj_str:
-                        # print("Yay found cube")
+                        current_obj = obj
+                        # print("Found ", current_obj)
 
                         idx = i
                 # attr_type = attr_get_type(
                 #     bpy.context.scene.objects["Cube"], attribute_only_str
                 # )[0]
-                attr_type = attr_get_type(
-                    bpy.data.objects[idx], attribute_only_str
-                )[0]
+                if "Camera" in current_obj:
+                    attr_type = attr_get_type(
+                        bpy.data.cameras[idx], attribute_only_str
+                    )[0]
+                else:
+                    attr_type = attr_get_type(
+                        bpy.data.objects[idx], attribute_only_str
+                    )[0]
                 print("DRAW SOCKETS LIST attr_type ====== ", attr_type)
             else:
                 print(
@@ -510,16 +516,23 @@ class SubPanelRandomUD(
                     #        regex=re.compile(r'^test-\d+$')
 
                     if obj in obj_str:
-                        # print("Yay found ", obj)
+                        current_obj = obj
+                        # print("Found ", current_obj)
 
                         idx = i
 
-                prop_type, action, prop, path_attr = attr_get_type(
-                    bpy.data.objects[idx], attribute_only_str
-                )[0]
-                # prop_type, action, prop, path_attr = attr_get_type(
-                #     bpy.data.objects["Cube"], attribute_only_str
-                # )[0]
+                if "Camera" in current_obj:
+                    prop_type, action, prop, path_attr = attr_get_type(
+                        bpy.data.cameras[idx], attribute_only_str
+                    )[0]
+
+                else:
+                    prop_type, action, prop, path_attr = attr_get_type(
+                        bpy.data.objects[idx], attribute_only_str
+                    )[0]
+                    # prop_type, action, prop, path_attr = attr_get_type(
+                    #     bpy.data.objects["Cube"], attribute_only_str
+                    # )[0]
 
             elif "bpy.context.scene" in full_str:
                 prop_type, action, prop, path_attr = attr_get_type(
@@ -636,7 +649,8 @@ class SubPanelRandomUD(
                     #        regex=re.compile(r'^test-\d+$')
 
                     if obj in obj_str:
-                        # print("Yay found cube")
+                        current_obj = obj
+                        # print("Found ", current_obj)
 
                         idx = i
 
@@ -648,14 +662,26 @@ class SubPanelRandomUD(
                 #     != "dummy"
                 # ):
 
-                if (
-                    attr_get_type(
-                        bpy.data.objects[idx],
-                        get_attr_only_str(UD_str.name),
-                    )[1]
-                    != "dummy"
-                ):
-                    list_all_UD_props.append(UD_str)
+                if "Camera" in current_obj:
+                    if (
+                        attr_get_type(
+                            bpy.data.cameras[idx],
+                            get_attr_only_str(UD_str.name),
+                        )[1]
+                        != "dummy"
+                    ):
+                        list_all_UD_props.append(UD_str)
+
+                else:
+                    if (
+                        attr_get_type(
+                            bpy.data.objects[idx],
+                            get_attr_only_str(UD_str.name),
+                        )[1]
+                        != "dummy"
+                    ):
+                        list_all_UD_props.append(UD_str)
+
             elif (
                 attr_get_type(
                     bpy.context.scene, get_attr_only_str(UD_str.name)
