@@ -240,7 +240,7 @@ class ApplySaveParams(bpy.types.Operator):
 
                     print(tmp_values)
                     tmp_sck = nd.name
-                    all_geom_dict[tmp_GNG] = tmp_sck
+                    # all_geom_dict[tmp_GNG] = tmp_sck
                     GNG_sck_values_str = tmp_GNG + tmp_sck
                     GNG_sck_values_str = "Values " + GNG_sck_values_str
                     print(GNG_sck_values_str)
@@ -325,7 +325,7 @@ class ApplySaveParams(bpy.types.Operator):
 
                         print(tmp_values)
                         tmp_sck = nd.name
-                        all_mat_dict[tmp_mat] = tmp_sck
+                        # all_mat_dict[tmp_mat] = tmp_sck
                         if (
                             list_input_nodes_sorted[i_n]
                             in list_nodes2rand_in_groups

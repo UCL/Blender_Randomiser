@@ -128,8 +128,6 @@ def set_update_collection(self, value):
                     type(sckt)
                 ]
 
-                print("type(sckt) = ", type(sckt))
-
                 # extract last number between '_' and 'd/D' in the
                 # attribute name, to determine the shape of the array
                 # TODO: there is probably a nicer way to do this...
@@ -172,10 +170,6 @@ def set_update_collection(self, value):
                             m_str + "_" + socket_attrib_str,
                             (ini_min_max_values[m_str],) * n_dim,
                         )
-                    print("ASSIGNMENTS ========= ")
-                    print(ini_min_max_values)
-                    print(sckt_prop)
-                    print(socket_attrib_str)
 
 
 def get_input_json(self):
