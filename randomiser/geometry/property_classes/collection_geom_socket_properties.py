@@ -158,7 +158,7 @@ def set_update_collection(self, value):
                     print("Initial values have already been set by .json")
 
                 else:
-                    print("input_json is False")
+                    print("Using default initial values for the bounds")
                     ini_min_max_values = (
                         bpy.context.scene.socket_type_to_ini_min_max[
                             type(sckt)

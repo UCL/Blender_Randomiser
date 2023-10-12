@@ -1,5 +1,5 @@
+import datetime
 import json
-import pathlib
 from random import seed
 
 import bpy
@@ -357,11 +357,12 @@ class ApplySaveParams(bpy.types.Operator):
             "materials": all_mat_dict,
         }
 
-        path_to_file = (
-            pathlib.Path.home() / "tmp" / "transform_geom_mat_test.json"
-        )
-
-        path_to_file = "transform_geom_mat_test.json"
+        ct = datetime.datetime.now()
+        ts = ct.timestamp()
+        ts_str = str(ts)
+        file_ext = ".json"
+        path_to_file = "output_randomisations_per_frame" + ts_str
+        path_to_file = path_to_file + file_ext
 
         with open(path_to_file, "w") as out_file_obj:
             # convert the dictionary into text
