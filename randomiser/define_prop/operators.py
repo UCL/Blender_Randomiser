@@ -3,7 +3,7 @@ from random import seed
 
 import bpy
 import numpy as np
-from mathutils import Vector
+from mathutils import Euler, Vector
 
 from .ui import attr_get_type, get_attr_only_str, get_obj_str
 
@@ -39,6 +39,12 @@ def attr_set_val(obj, path, min_val, max_val, UD_type):
     elif UD_type == Vector:
         print("HELLO 3D VECTOR FLOAT!!!!!")
         value = random.uniform(min_val, max_val)
+        print(value)
+    elif UD_type == Euler:
+        print("HELLO Euler!!!!!")
+        deg2rad = np.pi / 180
+        value = random.uniform(min_val, max_val)
+        value = value * deg2rad
         print(value)
     else:
         print("HELLO INTEGER!!!!!!!!!!!!!!!!!!!!")

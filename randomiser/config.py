@@ -1,7 +1,7 @@
 # Parameters shared across materials modules
 import bpy
 import numpy as np
-from mathutils import Vector
+from mathutils import Euler, Vector
 
 # MAX_NUMBER_OF_SUBPANELS: upper limit for the expected
 # number of *materials* in a scene.
@@ -16,7 +16,7 @@ MAX_NUMBER_OF_SUBPANELS = 100
 # will be defined as classes, but only those panels with
 # index < total number of group nodes per material
 # will be displayed.
-MAX_NUMBER_OF_SUBSUBPANELS = 100
+MAX_NUMBER_OF_SUBSUBPANELS = 10
 
 
 # Keyword to search for in nodes' names, to identify nodes to randomise
@@ -62,6 +62,7 @@ MAP_PROPS_TO_ATTR = {
     float: "float_1d",
     int: "int_1d",
     bool: "bool_1d",
+    Euler: "euler",
     # bpy.types.NodeSocketInt: "int_1d"
     # bpy.props.IntProperty,
     # bpy.types.NodeSocketColor: "rgba_4d",  # "float_4d", if
@@ -74,6 +75,7 @@ MAP_PROPS_TO_INI_MIN_MAX = {
     float: {"min": -np.inf, "max": np.inf},
     int: {"min": int(-2147483648), "max": int(2147483647)},
     bool: {"min": False, "max": True},
+    Euler: {"min": -np.inf, "max": np.inf},
     # bpy.types.NodeSocketInt: {
     #     "min": int(-1000),  # -2147483648
     #     "max": int(1000),  # 2147483647
