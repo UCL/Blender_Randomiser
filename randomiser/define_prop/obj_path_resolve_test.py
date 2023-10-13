@@ -1,4 +1,5 @@
 import random
+import re
 
 import bpy
 import numpy as np
@@ -28,38 +29,81 @@ def get_obj_str(full_str):
 
 
 def attr_get_type(obj, path):
-    if "." in path:
-        # gives us: ('modifiers["Subsurf"]', 'levels')
-        # len_path = len(full_str.rsplit(".", config.MAX_NUMBER_OF_SUBPANELS))
-        path_prop, path_attr = path.rsplit(".", 1)
+    # if '[' in path:
+    #     print(' [ is in path')
 
-        print("if statement ==== ")
-        print(
-            "FROM rsplit . path_prop for resolve = ",
-            path_prop,
-            " and path_attr  for getattr = ",
-            path_attr,
-        )
-        print("obj used for path_resolve = ", obj)
-
-        # same as: prop = obj.modifiers["Subsurf"]
-        prop = obj.path_resolve(path_prop)
-        print("prop from path_resolve  for get_attr = ", prop)
+    a = re.findall("\[(.*?)\]", path)
+    if a:
+        nums = list(map(int, a[0].split(",")))
+        print(nums)
+        print(type(str(nums[0])))
     else:
-        print("else statement ==== ")
-        prop = obj
-        print("prop = obj ", prop)
-        # single attribute such as name, location... etc
-        path_attr = path
-        print("path_attr = path ", path_attr)
+        nums = []
+
+    print("len", len(nums))
+
+    if len(nums) > 0:
+        print("Number is ", nums)
+        print("type(Number) is ", type(nums[0]))
+
+        num_str = str(nums[0])
+
+        tmp_UD_name = path
+        tmp_UD_name = tmp_UD_name.replace("[" + num_str + "]", "")
+        new_attribute_only_str = path.replace("[" + num_str + "]", "")
+
+        print("new_attribute_only_str", new_attribute_only_str)
+        path = new_attribute_only_str
+
+        if "." in path:
+            # gives us: ('modifiers["Subsurf"]', 'levels')
+            path_prop, path_attr = path.rsplit(".", 1)
+
+            # same as: prop = obj.modifiers["Subsurf"]
+            prop = obj.path_resolve(path_prop)
+        else:
+            prop = obj
+            # single attribute such as name, location... etc
+            path_attr = path
+
+    else:
+        if "." in path:
+            # gives us: ('modifiers["Subsurf"]', 'levels')
+            path_prop, path_attr = path.rsplit(".", 1)
+
+            # same as: prop = obj.modifiers["Subsurf"]
+            prop = obj.path_resolve(path_prop)
+        else:
+            prop = obj
+            # single attribute such as name, location... etc
+            path_attr = path
 
     # same as: prop.levels = value
 
+    print("prop = ", prop)
+    print("path_attr = ", path_attr)
+
     try:
-        action = getattr(prop, path_attr)
+        #        action = getattr(prop, path_attr)
+        #        print('action = ', action)
+        #        print('type(action) = ', type(action))
+        if len(nums) > 0:
+            action = getattr(prop, path_attr)
+            print("action = ", action)
+            action = action[0]
+            print("action = ", action)
+            print("type(action) = ", type(action))
+        else:
+            action = getattr(prop, path_attr)
+            print("action = ", action)
+            print("type(action) = ", type(action))
     except Exception:
         # print("Property does not exist")
         action = "dummy"
+        prop = "dummy"
+        path_attr = "dummy"
+        # print(action, prop, path_attr)
+        # print(type(action))
     # action = getattr(prop, path_attr)
 
     return type(action), action, prop, path_attr
@@ -362,6 +406,24 @@ prop_type, action, prop, path_attr = attr_get_type(
 )
 
 
+full_str = "bpy.data.objects['Cube'].location[0]"
+attr_only_str = get_attr_only_str(full_str)
+print("attr_only_str = ", attr_only_str)
+
+
+path_prop = "location"
+path_attr = "location[0]"
+prop = bpy.data.objects[1].path_resolve("location")
+print(prop)
+action = prop[0]
+# print("prop = ", prop)
+# print("action getattr = ", action)
+
+
+attr_type = attr_get_type(bpy.data.objects[idx], attr_only_str)[0]
+
+print("attr_type", attr_type)
+
 # min_val = np.array(
 #    getattr(
 #        bpy.context.scene.socket_props_per_UD.collection[0],
@@ -389,3 +451,53 @@ prop_type, action, prop, path_attr = attr_get_type(
 #    max_val,
 #    prop_type,
 # )
+
+# import re
+# objects_in_scene=[]
+# for i, key in enumerate(bpy.data.objects):
+#    # print(i)
+#    # print(key.name)
+#    objects_in_scene.append(key.name)
+
+# UD_name = "bpy.data.objects['Cube'].location[0]"
+# print("ERROR ======= UD.name", UD_name)
+# tmp_attr = get_attr_only_str(UD_name)
+# print("ERROR ======== attr_str", tmp_attr)
+# a = re.findall('\[(.*?)\]', tmp_attr)
+# if a:
+#    nums = list(map(int, a[0].split(',')))
+#    print(nums)
+#    print(type(str(nums[0])))
+# else:
+#    nums = []
+#
+# print("len", len(nums))
+
+# if len(nums)>0:
+#    print('Number is ', nums)
+#    print('type(Number) is ', type(nums[0]))
+#
+#    num_str=str(nums[0])
+#
+#    attribute_only_str = tmp_attr.replace("[" + num_str + "]", "")
+#
+#    print("new_UD_name", attribute_only_str)
+#
+#    obj_str = get_obj_str(UD_name)
+#    print("obj_str", obj_str)
+#
+#
+# else:
+#    obj_str = get_obj_str(UD_name)
+#    print("obj_str", obj_str)
+#
+# for i, obj in enumerate(objects_in_scene):
+#        #        regex=re.compile(r'^test-\d+$')
+
+#    if obj in obj_str:
+#        current_obj = obj
+#        print("Found ", current_obj)
+#        idx = i
+
+# print("location[0]??????", current_obj)
+# %%
