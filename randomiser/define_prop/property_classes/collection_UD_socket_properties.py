@@ -504,6 +504,14 @@ class SocketProperties(bpy.types.PropertyGroup):
         update=constrain_max_closure(float_3d_str)
     )
 
+    euler_str = "euler"
+    min_euler: bpy.props.FloatVectorProperty(  # type: ignore
+        update=constrain_min_closure(euler_str)
+    )
+    max_euler: bpy.props.FloatVectorProperty(  # type: ignore
+        update=constrain_max_closure(euler_str)
+    )
+
     # ---------------------
     # float 4d
     float_4d_str = "float_4d"
