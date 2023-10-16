@@ -192,17 +192,8 @@ def constrain_min_closure(m_str):
         # self is a 'SocketProperties' object
         min_array = np.array(getattr(self, "min_" + m_str))
         max_array = np.array(getattr(self, "max_" + m_str))
-        # min_array.tolist()
-        # max_array.tolist()
-        print("MIN CLOSURE min_array ", type(min_array))
-        print("MIN CLOSURE max_array ", type(max_array))
 
-        print("MIN CLOSURE min_array FIRST", type(min_array[0]))
-        print("MIN CLOSURE max_array FIRST", type(max_array[0]))
         if any(min_array > max_array):
-            where_cond = np.where(min_array > max_array, max_array, min_array)
-            print("np.where", where_cond)
-            print("np.where type = ", type(where_cond))
             setattr(
                 self,
                 "min_" + m_str,
@@ -244,8 +235,6 @@ def constrain_max_closure(m_str):
         # self is a 'SocketProperties' object
         min_array = np.array(getattr(self, "min_" + m_str))
         max_array = np.array(getattr(self, "max_" + m_str))
-        print("MAX CLOSURE min_array ", min_array)
-        print("MAX CLOSURE max_array ", max_array)
         if any(max_array < min_array):
             setattr(
                 self,
@@ -286,70 +275,19 @@ def constrain_min_closure_int(m_str):
             string specifying the socket attribute (e.g., int_1d)
         """
         # self is a 'SocketProperties' object
-        # min_array = getattr(self, "min_" + m_str)
-        # max_array = getattr(self, "max_" + m_str)
         min_array = np.array(getattr(self, "min_" + m_str))
         max_array = np.array(getattr(self, "max_" + m_str))
 
-        # print("MIN CLOSURE min_array ", type(min_array))
-        # MAX RECURSION DEPTH EXCEEDED WHILE CALLING A PYTHON OBJECT
-        # print("MIN CLOSURE max_array ", type(max_array))
-
-        # min_array = ast.literal_eval(str(min_array))
-        # max_array = ast.literal_eval(str(max_array))
-        # min_array = np.array(min_array)
-        # max_array = np.array(max_array)
-
-        # min_array = [pyt_int.item() for pyt_int in min_array]
-        # max_array = [pyt_int.item() for pyt_int in max_array]
-
-        # print("MIN CLOSURE min_array FIRST", type(min_array[0]))
-        # print("MIN CLOSURE max_array FIRST", type(max_array[0]))
-
-        # min_array = np.asarray(min_array,dtype="int")
-        # max_array = np.asarray(max_array,dtype="int")
         min_array = array("i", min_array)
         max_array = array("i", max_array)
-        # min_array = np.array(min_array)
-        # max_array = np.array(max_array)
-
-        # print("MIN CLOSURE min_array ", type(min_array))
-        # print("MIN CLOSURE max_array ", type(max_array))
-
-        # print("MIN CLOSURE min_array FIRST", type(min_array[0]))
-        # print("MIN CLOSURE max_array FIRST", type(max_array[0]))
-        # print(min_array > max_array)
 
         cond_min = [min > max for min, max in zip(min_array, max_array)]
-        # if (min_array > max_array).all():
         if any(cond_min):
-            cond = np.where(cond_min, max_array, min_array)
-            print("np.where result = ", cond)
-            print("np.where type = ", type(cond))
-
             setattr(
                 self,
                 "min_" + m_str,
                 getattr(self, "max_" + m_str),
             )
-
-            # try:
-            #     setattr(
-            #         self,
-            #         "min_" + m_str,
-            #         int(min_array[0]),
-            #     )
-            # except:
-            #     print("int(min_array[0]) DID NOT WORK")
-
-            # try:
-            #     setattr(
-            #         self,
-            #         "min_" + m_str,
-            #         getattr(self, "max_" + m_str),
-            #     )
-            # except:
-            #     print('getattr(self, "min_" + m_str) DID NOT WORK')
 
         return
 
@@ -461,27 +399,11 @@ class SocketProperties(bpy.types.PropertyGroup):
 
     """
 
-    # TODO: how to set attributes dynamically?
-    # TODO: I don't really get why this type definition is also an assignment?
-
-    # # collection of socket properties for this GNG
-    # collection: bpy.props.CollectionProperty()  # type: ignore
-
-    # # helper attribute to update collection of socket properties
-    # update_sockets_collection: bpy.props.BoolProperty(  # type: ignore
-    #     default=False,
-    #     get=get_update_collection,
-    #     set=set_update_collection,
-    # )
-
     # ---------------------
     # name of the socket
     # NOTE: if we make a Blender collection of this type of objects,
     # we will be able to access them by name
     name: bpy.props.StringProperty()  # type: ignore
-
-    # TODO: include the socket itself here to?
-    # socket: PointerProperty(type=bpy.types.NodeSocketStandard?)
 
     # ---------------------
     # float 1d
@@ -536,14 +458,6 @@ class SocketProperties(bpy.types.PropertyGroup):
 
     # ----------------------------
     # int_1d
-    # int_1d_str = "int_1d"
-    # min_int_1d: bpy.props.IntVectorProperty(  # type: ignore
-    #     size=1, update=constrain_min_closure(int_1d_str)
-    # )
-
-    # max_int_1d: bpy.props.IntVectorProperty(  # type: ignore
-    #     size=1, update=constrain_max_closure(int_1d_str)
-    # )
     int_1d_str = "int_1d"
     min_int_1d_PROP = bpy.props.IntVectorProperty(  # type: ignore
         size=1, update=constrain_min_closure_int(int_1d_str)
@@ -557,7 +471,6 @@ class SocketProperties(bpy.types.PropertyGroup):
 
     # ----------------------------
     # bool_1d
-    # bool_1d_str = "bool_1d"
     min_bool_1d: bpy.props.BoolVectorProperty(  # type: ignore
         size=1,
     )

@@ -1,15 +1,13 @@
 import bpy
 
 from .. import config
-from ..material.ui import TemplatePanel  # draw_sockets_list
+from ..material.ui import TemplatePanel
 
 
 # ---------------------------------------------------
 # Custom UIlist items
 # ----------------------------------------------------
 class CUSTOM_UL_items(bpy.types.UIList):
-    print("hello UIlist")
-
     def draw_item(
         self,
         context,
@@ -45,14 +43,8 @@ def draw_sockets_list_UD(
     # NOTE: if I don't sort the input nodes, everytime one of the nodes is
     # selected in the graph it moves to the bottom of the panel.
     list_UD_props_sorted = list_UD_props
-    # sorted(list_UD_props, key=lambda x: x.name)
-    # print("IN draw_sockets_list_UD ==== ", list_UD_props_sorted)
-    # for i_n, UD_str in enumerate(list_UD_props_sorted):
     row = layout.row()
 
-    # if first node: add labels for
-    # name, min, max and randomisation toggle
-    # if i_n == 0:
     row_split = row.split()
     col1 = row_split.column(align=True)
     row_split.column(align=True)
@@ -61,8 +53,7 @@ def draw_sockets_list_UD(
     row_split.column(align=True)
 
     # input node name
-    # print(list_UD_props_sorted)
-    col1.label(text=sockets_props_collection.name)  # UD.name
+    col1.label(text=sockets_props_collection.name)
     col1.alignment = "CENTER"
 
     # min label
@@ -72,13 +63,6 @@ def draw_sockets_list_UD(
     # max label
     col4.alignment = "CENTER"
     col4.label(text="max")
-
-    # if not first node: add just node name
-    # else:
-    #     row.separator(factor=1.0)  # add empty row before each node
-    #     row = layout.row()
-
-    #     row.label(text=UD_str) #UD.name
 
     row = layout.row()
     row_split = row.split()
@@ -92,33 +76,6 @@ def draw_sockets_list_UD(
     # UD prop name
     col1.alignment = "RIGHT"
     col1.label(text="value")  # text=sckt.name)
-
-    # socket current value
-    # if "bpy.context.scene" in full_str:
-    #     col2.prop(
-    #         getattr(
-    #             bpy.context.scene,
-    #             attribute_only_str
-    #         )
-    #     # sockets_props_collection,
-    #     # "default_value", #####Default value not found
-    #     # icon_only=True,
-    #     )
-    # elif "bpy.data.objects" in full_str:
-    #     col2.prop(
-    #         getattr(
-    #             bpy.data.objects["Cube"],
-    #             attribute_only_str
-    #         )
-    #     )
-    # col2.enabled = False  # current value is not editable
-
-    # # socket min and max columns
-    # socket_id = UD.name + "_" + sckt.name
-    # if (UD.id_data.name in bpy.data.node_groups) and (
-    #     bpy.data.node_groups[UD.id_data.name].type != "GEOMETRY"
-    # ):  # only for SHADER groups
-    #     socket_id = UD.id_data.name + "_" + socket_id
 
     # if socket is a color: format min/max as a color picker
     # and an array (color picker doesn't include alpha value)
@@ -150,42 +107,20 @@ def draw_sockets_list_UD(
 
     # if socket is not color type: format as a regular property
 
-    ##### REFACTOR EASY CASE FIRST
-    # (may not need other cases)
-    else:  # bpy.types.NodeSocketBool:
+    else:
         objects_in_scene = []
         for key in bpy.data.objects:
             objects_in_scene.append(key.name)
 
         for m_str, col in zip(["min", "max"], [col3, col4]):
-            print(
-                "DRAW SOCKETS LIST sockets_props_collection.name ====== ",
-                sockets_props_collection.name,
-            )
             if "[" in sockets_props_collection.name:
-                print(
-                    "DRAW SOCKETS LIST sockets_props_collection.name ====== ",
-                    sockets_props_collection.name,
-                )
-                print(
-                    "DRAW SOCKETS LIST attribute_only_str ====== ",
-                    attribute_only_str,
-                )
-
                 obj_str = get_obj_str(sockets_props_collection.name)
-                # print(obj_str)
 
                 for i, obj in enumerate(objects_in_scene):
-                    #        regex=re.compile(r'^test-\d+$')
-
                     if obj in obj_str:
                         current_obj = obj
-                        # print("Found ", current_obj)
-
                         idx = i
-                # attr_type = attr_get_type(
-                #     bpy.context.scene.objects["Cube"], attribute_only_str
-                # )[0]
+
                 if "Camera" in current_obj:
                     attr_type = attr_get_type(
                         bpy.data.cameras[idx], attribute_only_str
@@ -194,40 +129,20 @@ def draw_sockets_list_UD(
                     attr_type = attr_get_type(
                         bpy.data.objects[idx], attribute_only_str
                     )[0]
-                print("DRAW SOCKETS LIST attr_type ====== ", attr_type)
             else:
-                print(
-                    "DRAW SOCKETS LIST sockets_props_collection.name ====== ",
-                    sockets_props_collection.name,
-                )
-                print(
-                    "DRAW SOCKETS LIST attribute_only_str ====== ",
-                    attribute_only_str,
-                )
                 attr_type = attr_get_type(
                     bpy.context.scene, attribute_only_str
                 )[0]
-                print("DRAW SOCKETS LIST attr_type ====== ", attr_type)
 
-            # print(
-            #     "sockets_props_collection ???????",
-            #     sockets_props_collection,
-            # )
-            # print("type ??????????? ", attribute_only_str, attr_type)
-
-            print("ERROR HERE in line 172 of ui.py")
             col.prop(
-                sockets_props_collection,  # [socket_id],
+                sockets_props_collection,
                 m_str + "_" + cs.UD_prop_to_attr[attr_type],
                 icon_only=True,
             )
-            # np.array(getattr(self, m_str + "_min"))
-            # getattr(context.scene.camera, location)[0]
-            # e.g. min_float_1d so m_str + "_" + float_1d
 
     # randomisation toggle
     col5.prop(
-        sockets_props_collection,  # [socket_id],
+        sockets_props_collection,
         "bool_randomise",
         icon_only=True,
     )
@@ -235,7 +150,6 @@ def draw_sockets_list_UD(
 
 def get_obj_str(full_str):
     x = full_str.split(".")
-    # print(path_prop)
     for i in x:
         if "[" in i:
             ii = i.split("[")
@@ -246,26 +160,13 @@ def get_obj_str(full_str):
 
 
 def attr_get_type(obj, path):
-    # if '[' in path:
-    #     print(' [ is in path')
-
     if "." in path:
         # gives us: ('modifiers["Subsurf"]', 'levels')
         # len_path = len(full_str.rsplit(".", config.MAX_NUMBER_OF_SUBPANELS))
         path_prop, path_attr = path.rsplit(".", 1)
 
-        # print("if statement ==== ")
-        # print(
-        #     "FROM rsplit . path_prop for resolve = ",
-        #     path_prop,
-        #     " and path_attr  for getattr = ",
-        #     path_attr,
-        # )
-        # print("obj used for path_resolve = ", obj)
-
         # same as: prop = obj.modifiers["Subsurf"]
         prop = obj.path_resolve(path_prop)
-        # print("prop from path_resolve  for get_attr = ", prop)
     else:
         prop = obj
         # single attribute such as name, location... etc
@@ -280,12 +181,8 @@ def attr_get_type(obj, path):
         action = "dummy"
         prop = "dummy"
         path_attr = "dummy"
-        # print(action, prop, path_attr)
-        # print(type(action))
-    # action = getattr(prop, path_attr)
 
     return type(action), action, prop, path_attr
-    # setattr(prop, path_attr, value)
 
 
 def get_attr_only_str(full_str):
@@ -502,7 +399,6 @@ class SubPanelRandomUD(
 
             full_str = sockets_props_collection.name
             attribute_only_str = get_attr_only_str(full_str)
-            print("SUBPANEL poll attribute_only_str ", attribute_only_str)
 
             objects_in_scene = []
             for key in bpy.data.objects:
@@ -510,62 +406,39 @@ class SubPanelRandomUD(
 
             if "[" in full_str:
                 obj_str = get_obj_str(full_str)
-                # print(obj_str)
 
                 for i, obj in enumerate(objects_in_scene):
-                    #        regex=re.compile(r'^test-\d+$')
-
                     if obj in obj_str:
                         current_obj = obj
-                        # print("Found ", current_obj)
-
                         idx = i
 
                 if "Camera" in current_obj:
-                    prop_type, action, prop, path_attr = attr_get_type(
-                        bpy.data.cameras[idx], attribute_only_str
-                    )[0]
+                    action = attr_get_type(
+                        bpy.data.cameras[idx],
+                        get_attr_only_str(attribute_only_str),
+                    )[1]
 
                 else:
-                    prop_type, action, prop, path_attr = attr_get_type(
-                        bpy.data.objects[idx], attribute_only_str
-                    )[0]
-                    # prop_type, action, prop, path_attr = attr_get_type(
-                    #     bpy.data.objects["Cube"], attribute_only_str
-                    # )[0]
+                    action = attr_get_type(
+                        bpy.data.objects[idx],
+                        get_attr_only_str(attribute_only_str),
+                    )[1]
 
             elif "bpy.context.scene" in full_str:
-                prop_type, action, prop, path_attr = attr_get_type(
-                    bpy.context.scene, attribute_only_str
-                )[0]
-
-            # print("prop_type", prop_type)
-            # print("action", action)
-            # print("prop", prop)
-            # print("path_attr", path_attr)
+                action = attr_get_type(bpy.context.scene, attribute_only_str)[
+                    1
+                ]
 
         else:
             action = "dummy"
-            # bpy.ops.custom.list_action(action='UP')
-            # pdb.set_trace()
-            # print('action',action)
 
         return action != "dummy"
 
-    # , getattr(prop, path_attr, None)
-    # clc.subpanel defined in operators.py
-    # only display subpanels for which this is true
+    def draw_header(self, context):
+        """Define header for the UD subpanel
 
-    def draw_header(
-        self, context
-    ):  # maybe needed for the name of custom props
-        # but no need graph to be displayed
-        """Define header for the GNG subpanel
-
-        The header shows the name of the associated geometry node group
-        (GNG) inside a button. The button is linked to the view-graph
-        operator.
-
+        The header shows the name of the associated user defined
+        property
         Parameters
         ----------
         context : _type_
@@ -580,12 +453,6 @@ class SubPanelRandomUD(
         layout = self.layout
         layout.use_property_split = True
         layout.use_property_decorate = False
-        # layout.operator(
-        #     f"node.view_graph_for_gng_{self.subpanel_UD_prop_idx}",
-        #     text=subpanel_UD_prop.name,
-        #     emboss=True,
-        # )  #operator defined once node.view_graph_for_gng
-        # # - not needed for custom props?
 
     def draw(self, context):
         """Define the content to display in the GNG subpanel
@@ -600,67 +467,28 @@ class SubPanelRandomUD(
         # get this subpanel's GNG
         cs.socket_props_per_UD.collection[self.subpanel_UD_idx]
 
-        # print("subpanel_UD_prop = ", subpanel_UD_prop)
-        # print("self.subpanel_UD_idx = ", self.subpanel_UD_idx)
-
-        # # force an update
-        # (##### CHECK VALID PROPERTY orchecked elsewhere?)
-        # if cs.socket_props_per_UD[
-        #     self.subpanel_UD_idx
-        # ].update_collection:
-        #     print("Collection of UD properties updated")
-
-        # get (updated) collection of chosen propr for this subpanel
+        # get (updated) collection of chosen prop for this subpanel
         sockets_props_collection = cs.socket_props_per_UD.collection[
             self.subpanel_UD_idx
         ]  # .collection
-
-        # print("sockets_props_collection = ", sockets_props_collection)
-        # print(" and name ========== ", sockets_props_collection.name)
-
-        # # Get list of input nodes to randomise for this subpanel's GNG
-        # [sckt.name.split("_")[0] for sckt in sockets_props_collection]
 
         # Get list of input nodes to randomise for this subpanel's GNG
         full_str = sockets_props_collection.name
         attribute_only_str = get_attr_only_str(full_str)
 
-        # len_path = len(full_str.rsplit(".", config.MAX_NUMBER_OF_SUBPANELS))
-        # list_parent_nodes_str = full_str.rsplit(".", len_path - 3)
-        # attribute_only_str = full_str.replace(
-        #     list_parent_nodes_str[0] + ".", ""
-        # )
-
-        # print("list_parent_nodes_str = ", attribute_only_str)
-
-        # full_list = [prop.name for prop in list(C.scene.custom)]
         list_all_UD_props = []
         for UD_str in bpy.context.scene.custom:
-            # print("ERROR ====== UD_str", UD_str)
             objects_in_scene = []
             for key in bpy.data.objects:
                 objects_in_scene.append(key.name)
 
             if "[" in UD_str.name:
                 obj_str = get_obj_str(UD_str.name)
-                # print(obj_str)
 
                 for i, obj in enumerate(objects_in_scene):
-                    #        regex=re.compile(r'^test-\d+$')
-
                     if obj in obj_str:
                         current_obj = obj
-                        # print("Found ", current_obj)
-
                         idx = i
-
-                # if (
-                #     attr_get_type(
-                #         bpy.data.objects["Cube"],
-                #         get_attr_only_str(UD_str.name),
-                #     )[1]
-                #     != "dummy"
-                # ):
 
                 if "Camera" in current_obj:
                     if (
@@ -689,23 +517,10 @@ class SubPanelRandomUD(
                 != "dummy"
             ):
                 list_all_UD_props.append(UD_str)
-        # list_all_UD_props = [
-        #     UD_str
-        #     for UD_str in list(bpy.context.scene.custom)
-        #     if attr_get_type(
-        #         bpy.context.scene, get_attr_only_str(UD_str.name)
-        #     )[1]
-        #     != "dummy"
-        # ]
-        # print("list_all_UD_props ====== ", list_all_UD_props)
-        # print(
-        #     "bpy.context.scene.custom_index == ",
-        #     bpy.context.scene.custom_index,
-        # )
+
         list_current_UD_props = list_all_UD_props[
             bpy.context.scene.custom_index
         ].name
-        # print("list_current_UD_props =======", list_current_UD_props)
 
         # Draw sockets to randomise per input node, including their
         # current value and min/max boundaries
