@@ -17,20 +17,20 @@ bl_info = {
 
 def register():
     seed.register()
-    # transform.register()
-    # material.register()
-    # geometry.register()
+    transform.register()
+    material.register()
+    geometry.register()
     define_prop.register()
-    # random_all.register()
+    random_all.register()
 
 
 def unregister():
     seed.unregister()
-    # transform.unregister()
-    # material.unregister()
-    # geometry.unregister()
+    transform.unregister()
+    material.unregister()
+    geometry.unregister()
     define_prop.unregister()
-    # random_all.unregister()
+    random_all.unregister()
 
 
 if __name__ == "__main__":
