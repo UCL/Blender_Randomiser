@@ -13,7 +13,7 @@ The original and main use case of this add-on is for rendering synthetic (near) 
  - [**Materials**](/doc/Materials_geometry_panel.md)
 
  Additionally, there is a **user defined properties** panel where the user can specify the full path of a property they want to randomised and it will create a subpanel for each of these properties with min-max bounds. Examples include:
-  - bpy.context.scene.camera.location (Float 3D)
+  - bpy.data.objects["Cube"].location (Float 3D)
   - bpy.context.scene.frame_current (int 1D)
   - bpy.data.objects["Sphere"].scale (Float 3D)
   - bpy.data.objects["Cube"].collision.absorption (Float 1D)
