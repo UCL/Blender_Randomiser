@@ -8,9 +8,9 @@ Blender Randomiser is a Blender add-on that allows different Blender properties 
 ## Purpose
 
 The original and main use case of this add-on is for rendering synthetic (near) photo-realstic data for laparoscopic surgery, with a view to generating large scale labelled data sets for ML applications in surgery. With that context to replicate the different camera positions used in surgery as well as the shape and appearance of the tissues involved with surgery, the three main components (contained with separate UI panels) to be randomised are:
- - **Camera transforms** (location and Euler rotation)
- - **Geometry**
- - **Materials**
+ - **Camera transforms** (location and Euler rotation with toggle for randomising in absolute or relative i.e. delta terms)
+ - [**Geometry**](/doc/Materials_geometry_panel.md)
+ - [**Materials**](/doc/Materials_geometry_panel.md)
 
  Additionally, there is a **user defined properties** panel where the user can specify the full path of a property they want to randomised and it will create a subpanel for each of these properties with min-max bounds. Examples include:
   - bpy.context.scene.camera.location (Float 3D)
@@ -21,6 +21,7 @@ The original and main use case of this add-on is for rendering synthetic (near) 
   - bpy.data.objects["Cube"].rotation_euler (Euler)
 
   Other functionality includes:
+   - Toggle on/off button for including/excluding each property in the randomisation
    - Seed panel to set the random seed
    - Randomise properties per frame
    - Save Parameter panel with outputs saved to `.json` [file](/output_randomisations_per_frame1697116725.310647.json) with a timestamp
