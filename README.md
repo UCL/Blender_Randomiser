@@ -3,7 +3,7 @@
 
 Blender Randomiser is a Blender add-on that allows different Blender properties to be randomised between minimum and maximum bounds. This can be achieved either by:
  - Manually setting the bounds in the UI Randomiser panel located in the Geometry Nodes space
- - Using an input `.json` [file](/input_bounds.json) to set the bounds from the command line
+ - Using an input `.json` [file](/input_bounds.json) to [set the bounds from the command line](/doc/input_output.md)
 
 ## Purpose
 
@@ -28,7 +28,7 @@ The original and main use case of this add-on is for rendering synthetic (near) 
    - Toggle on/off button for including/excluding each property in the randomisation
    - Seed panel to set the random seed
    - Randomise properties per frame
-   - Save Parameter panel with outputs saved to `.json` [file](/output_randomisations_per_frame1697116725.310647.json) with a timestamp
+   - [Save Parameter panel](/doc/input_output.md) with outputs saved to `.json` [file](/output_randomisations_per_frame1697116725.310647.json) with a timestamp
 
 
  ## Installation
@@ -69,6 +69,7 @@ This will follow the same steps as above, but there are optional inputs as well:
 
  ## License and copyright
 
+ [BSD 3-Clause License](/LICENSE)
 
  ## Testing
 
