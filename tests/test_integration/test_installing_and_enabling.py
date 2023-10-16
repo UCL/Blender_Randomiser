@@ -210,14 +210,6 @@ def test_random_seed():
         assert bpy.data.objects["Camera"].location[0] == first_run[idx]
 
 
-def test_bool_delta_position():
-    pass
-
-
-def test_bool_delta_rotation():
-    pass
-
-
 def test_per_frame():
     """
     Test if we can replicate a sequence of
@@ -302,10 +294,6 @@ def test_randomiser_geometry():
             .default_value
             <= upper_bound
         )
-
-
-def test_modifier_act_on_object():
-    pass
 
 
 def test_random_seed_geometry():
@@ -471,6 +459,10 @@ def test_random_seed_materials():
             .default_value
             == first_run[idx]
         )
+
+
+def test_per_frame_materials():
+    pass
 
 
 # modified from the pytest-blender docs
