@@ -30,26 +30,20 @@ def attr_set_val(obj, path, min_val, max_val, UD_type):
         pass
     # action = getattr(prop, path_attr)
 
-    print("attr_set_val type ========================= ", UD_type)
-
     if UD_type == float:
-        print("HELLO 1D FLOAT!!!!!!!")
         value = random.uniform(min_val, max_val)
-        print(value)
+        print("1D float = ", value)
     elif UD_type == Vector:
-        print("HELLO 3D VECTOR FLOAT!!!!!")
         value = random.uniform(min_val, max_val)
-        print(value)
+        print("3D Vector float = ", value)
     elif UD_type == Euler:
-        print("HELLO Euler!!!!!")
         deg2rad = np.pi / 180
         value = random.uniform(min_val, max_val)
         value = value * deg2rad
-        print(value)
+        print("Euler = ", value)
     else:
-        print("HELLO INTEGER!!!!!!!!!!!!!!!!!!!!")
         value = random.randint(min_val, max_val)
-        print(value)
+        print("Integer = ", value)
 
     setattr(prop, path_attr, value)
 
