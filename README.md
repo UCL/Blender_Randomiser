@@ -20,6 +20,10 @@ The original and main use case of this add-on is for rendering synthetic (near) 
   - bpy.data.cameras["Camera"].dof.aperture_fstop (Float 1D)
   - bpy.data.objects["Cube"].rotation_euler (Euler)
 
+  It should be noted that bpy.data.objects["Cube"].location[0] or bpy.data.cameras["Camera"].location[0] will throw an error if trying to add to the UD panel. However, bpy.data.objects["Cube"].location will work fine and if you only want to change the x-location then you can leave the y-/z-location bounds as 0 (min) to 0 (max) and the Cube won't be moved in those directions.
+
+  Another example that will not work is if the object has a '.' in the middle of the name i.e. "Cube.001" so please remove this if you want to have multiple cubes in your scene.
+
   Other functionality includes:
    - Toggle on/off button for including/excluding each property in the randomisation
    - Seed panel to set the random seed
