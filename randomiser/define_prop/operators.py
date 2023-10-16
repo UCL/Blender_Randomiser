@@ -28,8 +28,8 @@ def attr_set_val(obj, path, min_val, max_val, UD_type):
     except Exception:
         # print("Property does not exist")
         pass
-    # action = getattr(prop, path_attr)
 
+    print("obj = ", path_attr)
     if UD_type == float:
         value = random.uniform(min_val, max_val)
         print("1D float = ", value)
@@ -235,7 +235,6 @@ class RandomiseAllUDProps(bpy.types.Operator):
         # NOTE: this list should have been updated already,
         # when drawing the panel
 
-        print("INVOKE!!!! ")
         cs = context.scene
         self.list_subpanel_UD_props_names = [
             UD.name for UD in cs.socket_props_per_UD.collection
@@ -244,55 +243,9 @@ class RandomiseAllUDProps(bpy.types.Operator):
         self.sockets_to_randomise_per_UD = {}
         self.sockets_to_randomise_per_UD = []
         for UD_str in self.list_subpanel_UD_props_names:
-            # if cs.socket_props_per_UD.collection[
-            #     UD_str
-            # ].update_UD_props_collection:
-            #     print("Collection of UD props updated")
-
-            # sockets_props_collection = cs.socket_props_per_gng.collection[
-            #     gng_str
-            # ].collection
-
-            # get candidate sockets for this GNG
-            # candidate_sockets = cs.socket_props_per_UD.collection[
-            #     UD_str
-            # ].candidate_sockets
-
-            #### REFACTOR to invalid prop instead of unlinked geom sckt
-            #### OPTION 1 for loop witin for loop cand_sockets
-            # if socket unlinked and randomisation toggle is True:
-            # modify socket props to set toggle to False
-            # self.socket_props_per_UD[UD_str] = []
-            # for sckt in candidate_sockets:
-            #     print('sck for loop ===== ', sckt)
-            #     if cs.socket_props_per_UD.collection[UD_str].bool_randomise:
-            #         self.sockets_to_randomise_per_UD[UD_str].append(sckt)
-
-            #### REFACTOR to invalid prop instead of unlinked geom sckt
-            #### OPTION 2 skip for loop for cand_sockets
-            # if this UD is selected to randomise but it is invalid property:
-            # set randomisation toggle to False
-            # if (not sckt.is_linked) and (
-            #     sockets_props_collection[sckt_id].bool_randomise
-            # ):
-            #     setattr(
-            #         sockets_props_collection[sckt_id],
-            #         "bool_randomise",
-            #         False,
-            #     )
-            #     print(
-            #         f"Socket {sckt_id} from {gng_str} is unlinked:",
-            #         "randomisation toggle set to False",
-            #     )
-
             sckt = cs.socket_props_per_UD.collection[UD_str].name
             if cs.socket_props_per_UD.collection[UD_str].bool_randomise:
                 self.sockets_to_randomise_per_UD.append(sckt)
-
-            print(
-                "INVOKE ==== sockets to randomise ",
-                list(self.sockets_to_randomise_per_UD),
-            )
 
         return self.execute(context)
 
@@ -321,42 +274,27 @@ class RandomiseAllUDProps(bpy.types.Operator):
             seed(current_seed)
             cs.seed_properties.seed_previous = current_seed
 
-        # For every GNG with a subpanel - REFACTORING BASED ON NEW CODE
-        print(
-            "EXECUTE list_subpanel_prop_names ==== ",
-            self.sockets_to_randomise_per_UD,
-        )
-        # for UD_str in self.list_subpanel_UD_props_names:
+        # For every UD prop with a subpanel
         for UD_str in self.sockets_to_randomise_per_UD:
-            # get collection of socket properties for this material
+            # get collection of socket properties for this UD prop
             # NOTE: socket properties do not include the actual socket object
             sockets_props_collection = cs.socket_props_per_UD.collection[
                 UD_str
             ]
 
-            # #### Modify to set_attr !!!!!!!
             full_str = sockets_props_collection.name
             attribute_only_str = get_attr_only_str(full_str)
-
-            print("ATTRIBUTE ONLY STRING ======== ", attribute_only_str)
 
             objects_in_scene = []
             for key in bpy.data.objects:
                 objects_in_scene.append(key.name)
 
             if "[" in full_str:
-                print("bpy.context.scene")
-                print("OPS EXECUTE attribute_only_str ", attribute_only_str)
                 obj_str = get_obj_str(full_str)
-                # print(obj_str)
 
                 for i, obj in enumerate(objects_in_scene):
-                    #        regex=re.compile(r'^test-\d+$')
-
                     if obj in obj_str:
                         current_obj = obj
-                        # print("Found ", current_obj)
-
                         idx = i
 
                 if "Camera" in current_obj:
@@ -390,9 +328,6 @@ class RandomiseAllUDProps(bpy.types.Operator):
             )
 
             if "[" in full_str:
-                print("bpy.context.scene")
-                print("OPS EXECUTE attribute_only_str ", attribute_only_str)
-
                 if "Camera" in full_str:
                     attr_set_val(
                         bpy.data.cameras[idx],
@@ -412,8 +347,6 @@ class RandomiseAllUDProps(bpy.types.Operator):
                     )
 
             elif "bpy.context.scene" in full_str:
-                print("bpy.context.scene")
-                print("OPS EXECUTE attribute_only_str ", attribute_only_str)
                 attr_set_val(
                     bpy.context.scene,
                     attribute_only_str,
@@ -422,137 +355,7 @@ class RandomiseAllUDProps(bpy.types.Operator):
                     attr_type,
                 )
 
-        # # get min value for this socket
-        #     min_val = np.array(
-        #         getattr(
-        #             sockets_props_collection[socket_id],
-        #             "min_" + cs.socket_type_to_attr[type(sckt)],
-        #         )
-        #     )
-
-        #     # get max value for this socket
-        #     max_val = np.array(
-        #         getattr(
-        #             sockets_props_collection[socket_id],
-        #             "max_" + cs.socket_type_to_attr[type(sckt)],
-        #         )
-        #     )
-
-        #     # set default value
-        #     # if socket type is boolean
-        #     #### WHERE IS DEFAULT VALUE - ADD TO UI.PY TO APPEAR ON PANEL
-        #     if type(sckt) == bpy.types.BoolProperty:
-        #         sckt.default_value = random.choice(
-        #             [bool(list(m_val)[0]) for m_val in [min_val, max_val]]
-        #         )  # 1d only
-        #         # TODO: change for a faster option?
-        #         # bool(random.getrandbits(1))F
-        #         # https://stackoverflow.com/questions/6824681/get-a-random-boolean-in-python
-
-        #     # if socket type is int
-        #     elif type(sckt) == bpy.types.IntProperty:
-        #         sckt.default_value = random.randint(max_val, min_val)
-
-        #     # for all other socket types
-        #     else:
-        #         # if type of the socket is NodeSocketColor,
-        #         # and max_val < min_val: switch them before randomising
-        #         # NOTE: these are not switched in the display panel
-        #         # (this is intended)
-        #         if (type(sckt) == bpy.types.NodeSocketColor) and any(
-        #             max_val < min_val
-        #         ):
-        #             max_val_new = np.where(
-        #                 max_val >= min_val, max_val, min_val
-        #             )
-        #             min_val_new = np.where(
-        #                 min_val < max_val, min_val, max_val
-        #             )
-
-        #             # TODO: is there a more elegant way?
-        #             # feels a bit clunky....
-        #             max_val = max_val_new
-        #             min_val = min_val_new
-
-        #         # assign randomised socket value
-        #         sckt.default_value = random.uniform(min_val, max_val)
-
         return {"FINISHED"}
-
-        # # sckt = list_UD_props_sorted  # UD.name
-        # sckt = sockets_props_collection.name
-        # # Loop through the sockets to randomise
-        # for sckt in self.sockets_to_randomise_per_UD[UD_str]:
-        #     socket_id = "sckt.node.name" + "_" + sckt.name
-
-        #         # get min value for this socket
-        #         min_val = np.array(
-        #             getattr(
-        #                 sockets_props_collection[socket_id],
-        #                 "min_" + cs.socket_type_to_attr[type(sckt)],
-        #             )
-        #         )
-
-        #         # get max value for this socket
-        #         max_val = np.array(
-        #             getattr(
-        #                 sockets_props_collection[socket_id],
-        #                 "max_" + cs.socket_type_to_attr[type(sckt)],
-        #             )
-        #         )
-
-        #         # set default value
-        #         # if socket type is boolean
-        #         if type(sckt) == bpy.types.BoolProperty:
-        #             sckt.default_value = random.choice(
-        #                 [bool(list(m_val)[0]) for m_val in
-        # [min_val, max_val]]
-        #             )  # 1d only
-        #             # TODO: change for a faster option?
-        #             # bool(random.getrandbits(1))F
-        #             # https://stackoverflow.com/questions/6824681/get-a-random-boolean-in-python
-
-        #         # if socket type is int
-        #         elif type(sckt) == bpy.types.IntProperty:
-        #             sckt.default_value = random.randint(max_val, min_val)
-
-        #         # for all other socket types
-        #         else:
-        #             # if type of the socket is NodeSocketColor,
-        #             # and max_val < min_val: switch them before randomising
-        #             # NOTE: these are not switched in the display panel
-        #             # (this is intended)
-        #             if (type(sckt) == bpy.types.NodeSocketColor) and any(
-        #                 max_val < min_val
-        #             ):
-        #                 max_val_new = np.where(
-        #                     max_val >= min_val, max_val, min_val
-        #                 )
-        #                 min_val_new = np.where(
-        #                     min_val < max_val, min_val, max_val
-        #                 )
-
-        #                 # TODO: is there a more elegant way?
-        #                 # feels a bit clunky....
-        #                 max_val = max_val_new
-        #                 min_val = min_val_new
-
-        #             # assign randomised socket value
-        #             sckt.default_value = random.uniform(min_val, max_val)
-
-        # return {"FINISHED"}
-
-
-# NOTE: without the persistent decorator,
-# the function is removed from the handlers' list
-# after it is first executed
-# @persistent
-# def randomise_geometry_nodes_per_frame(dummy):
-#     bpy.ops.node.randomise_all_geometry_sockets("INVOKE_DEFAULT")
-#     return
-
-
-# Graph function removed - not needed?
 
 
 # ---------------------
