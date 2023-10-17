@@ -53,7 +53,7 @@ Alternatively, install [manually](/docs/Install_addon_manually.md) via Blender s
 
  1. Launch a terminal at the cloned directory
     - You should be at the `Blender_Randomiser` directory
- 2. Run `pytest`
+ 2. Run `pytest` or `python -m pytest --blender-executable /Applications/Blender.app/Contents/MacOS/Blender`
     - This will run our [testing script](/tests/test_integration/test_installing_and_enabling.py) which currently tests the camera transforms, materials and geometry panels.
 
 
