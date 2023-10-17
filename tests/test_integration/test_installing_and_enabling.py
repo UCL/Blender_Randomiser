@@ -263,7 +263,7 @@ def test_randomiser_geometry():
     upper_bound = 3.0
 
     # set up some of the properties that will be needed for testing
-    obj = bpy.data.objects[3]
+    obj = bpy.data.objects[2]
     bpy.context.view_layer.objects.active = obj
     bpy.context.scene.socket_props_per_gng.update_gngs_collection
     bpy.ops.node.randomise_all_geometry_sockets("INVOKE_DEFAULT")

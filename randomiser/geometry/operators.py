@@ -34,6 +34,7 @@ class RandomiseAllGeometryNodes(bpy.types.Operator):
     )
     bl_label = "Randomise selected sockets"
     bl_options = {"REGISTER", "UNDO"}
+    testing = True
 
     @classmethod
     def poll(cls, context):
@@ -57,7 +58,7 @@ class RandomiseAllGeometryNodes(bpy.types.Operator):
 
         return len(context.scene.socket_props_per_gng.collection) > 0
 
-    def invoke(self, context, event):
+    def invoke_proxy(self, context):
         """Initialise parmeters before executing the operator
 
         The invoke() function runs before executing the operator.
@@ -133,6 +134,10 @@ class RandomiseAllGeometryNodes(bpy.types.Operator):
                 if sockets_props_collection[sckt_id].bool_randomise:
                     self.sockets_to_randomise_per_gng[gng_str].append(sckt)
 
+    def invoke(self, context, event):
+        self.testing = False
+        self.invoke_proxy(context)
+
         return self.execute(context)
 
     def execute(self, context):
@@ -151,6 +156,8 @@ class RandomiseAllGeometryNodes(bpy.types.Operator):
         _type_
             _description_
         """
+        if self.testing is True:
+            self.invoke_proxy(context)
 
         cs = context.scene
 
@@ -222,6 +229,8 @@ class RandomiseAllGeometryNodes(bpy.types.Operator):
 
                     # assign randomised socket value
                     sckt.default_value = random.uniform(min_val, max_val)
+
+        self.testing = True
 
         return {"FINISHED"}
 
