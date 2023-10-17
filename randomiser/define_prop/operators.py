@@ -3,6 +3,7 @@ from random import seed
 
 import bpy
 import numpy as np
+from bpy.app.handlers import persistent
 from mathutils import Euler, Vector
 
 from .ui import attr_get_type, get_attr_only_str, get_obj_str
@@ -161,7 +162,7 @@ class RandomiseAllUDProps(bpy.types.Operator):
     """
 
     # metadata
-    bl_idname = "opr.randomise_all_ud_sockets"  # this is appended to bpy.ops.
+    bl_idname = "node.randomise_all_ud_sockets"  # this is appended to bpy.ops.
     bl_label = "Randomise selected sockets"
     bl_options = {"REGISTER", "UNDO"}
 
@@ -334,6 +335,15 @@ class RandomiseAllUDProps(bpy.types.Operator):
         return {"FINISHED"}
 
 
+# NOTE: without the persistent decorator,
+# the function is removed from the handlers' list
+# after it is first executed
+@persistent
+def randomise_UD_props_per_frame(dummy):
+    bpy.ops.node.randomise_all_ud_sockets("INVOKE_DEFAULT")
+    return
+
+
 # ---------------------
 # Classes to register
 # ---------------------
@@ -352,9 +362,7 @@ def register():
     for cls in list_classes_to_register:
         bpy.utils.register_class(cls)
 
-    # bpy.app.handlers.frame_change_pre.append(
-    #     randomise_geometry_nodes_per_frame
-    # )
+    bpy.app.handlers.frame_change_pre.append(randomise_UD_props_per_frame)
 
     print("UD operators registered")
 
@@ -363,8 +371,6 @@ def unregister():
     for cls in list_classes_to_register:
         bpy.utils.unregister_class(cls)
 
-    # bpy.app.handlers.frame_change_pre.remove(
-    #     randomise_geometry_nodes_per_frame
-    # )
+    bpy.app.handlers.frame_change_pre.remove(randomise_UD_props_per_frame)
 
     print("UD operators unregistered")

@@ -564,7 +564,7 @@ class SubPanelRandomUDOperator(TemplatePanel):
         """
         column = self.layout.column(align=True)
         column.operator(
-            "opr.randomise_all_ud_sockets",
+            "node.randomise_all_ud_sockets",
             text="Randomise",
         )
 
