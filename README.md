@@ -1,18 +1,18 @@
 # Blender_Randomiser
 
 
-Blender Randomiser is a Blender add-on that allows different Blender properties to be randomised between minimum and maximum bounds. This can be achieved either by:
+Blender Randomiser is a Blender add-on that allows different scene properties to be randomised between some minimum and maximum bounds. The bounds can be defined either by:
  - Manually setting the bounds in the UI Randomiser panel located in the Geometry Nodes space
  - Using an input `.json` [file](/input_bounds.json) to [set the bounds from the command line](/doc/input_output.md)
 
 ## Purpose
 
-The original and main use case of this add-on is for rendering synthetic (near) photo-realstic data for laparoscopic surgery, with a view to generating large scale labelled data sets for ML applications in surgery. With that context to replicate the different camera positions used in surgery as well as the shape and appearance of the tissues involved with surgery, the three main components (contained with separate UI panels) to be randomised are:
+The add-on was originally developed to render a highly diverse and (near) photo-realistic synthetic dataset of laparoscopic surgery camera views. To replicate the different camera positions used in surgery as well as the shape and appearance of the tissues involved with surgery, we focused on three main components to randomise:
  - **Camera transforms** (location and Euler rotation with toggle for randomising in absolute or relative i.e. delta terms)
  - [**Geometry**](/doc/Materials_geometry_panel.md)
  - [**Materials**](/doc/Materials_geometry_panel.md)
-
- Additionally, there is a **user defined properties** panel where the user can specify the full path of a property they want to randomised and it will create a subpanel for each of these properties with min-max bounds. Examples include:
+In the add-on, these three components appear as separate UI panels.
+ Additionally, there is a **user-defined properties** panel where the user can specify the full Python path of a property to randomise.  When adding a user-defined property, a subpanel will be created to define its min and max bounds. Some examples of useful user-defined properties could be:
   - bpy.data.objects["Cube"].location (Float 3D)
   - bpy.context.scene.frame_current (int 1D)
   - bpy.data.objects["Sphere"].scale (Float 3D)
@@ -25,9 +25,9 @@ The original and main use case of this add-on is for rendering synthetic (near) 
   Another example that will not work is if the object has a '.' in the middle of the name i.e. "Cube.001" so please remove this if you want to have multiple cubes in your scene.
 
   Other functionality includes:
-   - Toggle on/off button for including/excluding each property in the randomisation
-   - Seed panel to set the random seed
-   - Randomise properties per frame
+   - Selection toggle for including/excluding individual properties of the panel in the randomisation
+   - Possibility of setting a randomisation seed for reproducibility
+   - Capability to randomise the desired properties at every frame of an animation
    - [Save Parameter panel](/doc/input_output.md) with outputs saved to `.json` [file](/output_randomisations_per_frame1697116725.310647.json) with a timestamp
 
 
@@ -45,7 +45,7 @@ git clone https://github.com/UCL/Blender_Randomiser.git
     sh install_randomiser.sh
     ```
     - This will zip the `randomiser` subdirectory, open the `sample.blend` file with Blender, and use Blender's Python interpreter to execute the `install_and_enable_addons.py` script.
-    - The `install_and_enable_addons.py` script installs and enables any add-ons that are passed as command line arguments (add-ons can be one Python file or a zip file)
+    - The `install_and_enable_addons.py` script installs and enables any add-ons that are passed as command line arguments (add-ons can be passed as a path to a single Python file, or as a zip file)
 
 Alternatively, install [manually](/doc/Install_addon_manually.md) via Blender settings
 
@@ -75,7 +75,7 @@ This will follow the same steps as above, but there are optional inputs as well:
 
  [Testing script](/tests/test_integration/test_installing_and_enabling.py) which used [pytest-blender plugin](https://github.com/mondeja/pytest-blender#pytest-blender)
 
- To use the plugin, you need to install `pytest` and all other dependencies used in testing (`pytest-cov`) in the site-packages of Blender's Python. The repo provides some guidance for this [here](https://github.com/mondeja/pytest-blender#usage). It is important to make sure you use the correct Python interpreter and pip (Blender's ones) when installing `pytest` and `pytest-cov`.
+The tests make use of the pytest-blender plugin, which has`pytest` and other packages as dependencies (e.g.,`pytest-cov`). These need to be installed in the site-packages directory of Blender's Python. The pytest-blender repo provides some guidance for this [here](https://github.com/mondeja/pytest-blender#usage). It is important to make sure you use Blender's Python interpreter and Blender's pip when installing `pytest` and its dependencies.
 
  #### Linux:
  Running the following code in a script within Blender:
