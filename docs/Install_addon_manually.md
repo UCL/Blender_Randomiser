@@ -15,7 +15,7 @@
     - The add-on can be found by searching for 'randomisation' in the top right search bar.
     - Before searching, note that the checkbox to show enabled add-ons only ('Enabled Add-ons Only') may be selected!
 
-Note that:
-- if you install an add-on, it will overwrite any pre-existing add-on with the same name.
-- Blender will only have access to the add-ons copied to any of the add-ons directories (see [Blender directory layout](https://docs.blender.org/manual/en/latest/advanced/blender_directory_layout.html)).
-- Remember that if you modify the code, you will need to create a new zip file with the latest version and repeat steps 1-7
+> [!NOTE]
+> - if you install an add-on, it will overwrite any pre-existing add-on with the same name.
+> - Blender will only have access to the add-ons copied to any of the add-ons directories (see [Blender directory layout](https://docs.blender.org/manual/en/latest/advanced/blender_directory_layout.html)).
+>- Remember that if you modify the code, you will need to create a new zip file with the latest version and repeat steps 1-7

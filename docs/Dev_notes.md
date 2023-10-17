@@ -128,7 +128,7 @@ with open(filepath, 'rb') as file:
 Addons are saved into one of (not sure why would it be one or the other)
 ```
     ['/Applications/Blender.app/Contents/Resources/3.4/scripts/addons',
-    '/Users/sofia/Library/Application Support/Blender/3.4/scripts/addons',
+    '/Users/user_account/Library/Application Support/Blender/3.4/scripts/addons',
     '/Applications/Blender.app/Contents/Resources/3.4/scripts/addons_contrib']
 ```
 
@@ -146,20 +146,14 @@ To enable an already installed add-on from the CLI:
 [Accepted space-regions combinations](https://blender.stackexchange.com/a/97268)
 
 
-
-
-## Handover notes 6/6/2023
-from Sofia & Ruaridh, see [here](https://hackmd.io/-e8g50WRTPSH8XeEaNIqlw#)
-(we both have access and can give access to others).
-
-Includes description of work done on the first TI, next steps and some gotchas.
-
 ---
 
 ## Other notes on Python scripting in Blender
 
+From experience the easiest way to work with Blender add-ons is by loading scripts containing snippets of code you want to test in [Blender's Python scripting window](https://docs.blender.org/api/current/info_quickstart.html) at the same time as your add-on/panel to allow interaction of your code with your add-on and to allow access to the Blender scene properties. Alternatively, there are other options to debug and inspect variables (see below).
 
 ### To inspect variables / debug:
+
 - #### Option 1:  Use 'code' module
     Works in Python interactive terminal in Blender and in Windows terminal). See further info in [docs](https://docs.blender.org/api/2.81/info_tips_and_tricks.html#drop-into-a-python-interpreter-in-your-script). For me, pdb works if run from terminal but not with Python console in Blender
     ```

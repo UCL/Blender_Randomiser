@@ -9,8 +9,9 @@ Blender Randomiser is a Blender add-on that allows different scene properties to
 
 The add-on was originally developed to render a highly diverse and (near) photo-realistic synthetic dataset of laparoscopic surgery camera views. To replicate the different camera positions used in surgery as well as the shape and appearance of the tissues involved with surgery, we focused on three main components to randomise:
  - **Camera transforms** (location and Euler rotation with toggle for randomising in absolute or relative i.e. delta terms)
- - [**Geometry**](/docs/Materials_geometry_panel.md)
- - [**Materials**](/docs/Materials_geometry_panel.md)
+ - **Geometry** ([see further details](/docs/Materials_geometry_panel.md))
+ - **Materials**([see further details](/docs/Materials_geometry_panel.md))
+
 In the add-on, these three components appear as separate UI panels.
 
  Additionally, there is a **user-defined properties** panel where the user can specify the full Python path of a property to randomise.  When adding a user-defined property, a subpanel will be created to define its min and max bounds. Certain examples will and won't work (see [user-defined examples](/docs/user_defined_panel.md))
@@ -76,4 +77,4 @@ Alternatively, install [manually](/docs/Install_addon_manually.md) via Blender s
 
  ## Contributions
 
- Please see [Dev Notes](./docs/Dev_notes.md)
+ Please see [Dev Notes](./docs/Dev_notes.md) if you wish to contribute. Feel free to submit suggestions via issues and/or PRs.
