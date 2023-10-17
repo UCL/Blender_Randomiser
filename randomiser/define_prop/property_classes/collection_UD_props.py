@@ -5,25 +5,25 @@ from ..ui import attr_get_type, get_attr_only_str, get_obj_str
 
 
 # ---------------------------------------------------
-# Collection of Geometry Node groups (GNGs)
+# Collection of UD props
 # ---------------------------------------------------
 def compute_UD_props_sets(self):
-    """Compute the relevant sets of geometry node groups (GNGs) and
+    """Compute the relevant sets of UD props and
     add them to self.
 
     These sets include:
-    - the set of GNGs already in the collection
-    - the set of GNGs in the Blender scene / data structure
-    - the set of GNGs that are only in one of the two previous sets
+    - the set of UD props already in the collection
+    - the set of UD props in the Blender scene / data structure
+    - the set of UD props that are only in one of the two previous sets
 
     """
-    # set of GNGs already in collection
+    # set of UD props already in collection
     self.set_UD_props_in_collection = set(UD.name for UD in self.collection)
 
-    # set of node groups in Blender data structure
+    # set of UD props in Blender data structure
     self.set_UD_props_in_data = set(UD.name for UD in self.candidate_UD_props)
 
-    # set of node groups in one of the sets only
+    # set of UD props in one of the sets only
     self.set_UD_props_in_one_only = (
         self.set_UD_props_in_collection.symmetric_difference(
             self.set_UD_props_in_data
@@ -32,14 +32,14 @@ def compute_UD_props_sets(self):
 
 
 def get_update_UD_props_collection(self):
-    """Getter function for the 'update_gngs_collection'
+    """Getter function for the 'update_UD_props_collection'
     attribute.
 
-    Checks if the collection of GNGs needs
+    Checks if the collection of UD props needs
     to be updated, and updates it if required.
 
     The collection will need to be updated if there
-    are GNGs that have been added/deleted from the scene.
+    are UD props that have been added/deleted from the scene.
 
     Returns
     -------
@@ -47,10 +47,10 @@ def get_update_UD_props_collection(self):
         returns True if the collection is updated,
         otherwise it returns False
     """
-    # compute relevant GNG sets and add them to self
+    # compute relevant UD props sets and add them to self
     compute_UD_props_sets(self)
 
-    # if there are node groups that exist only in the Blender
+    # if there are UD props that exist only in the Blender
     # data structure, or only in the collection: edit the collection
     if self.set_UD_props_in_one_only:
         set_update_UD_props_collection(self, True)
@@ -60,7 +60,7 @@ def get_update_UD_props_collection(self):
 
 
 def set_update_UD_props_collection(self, value):
-    """Setter function for the 'update_gngs_collection'
+    """Setter function for the 'update_UD_props_collection'
     attribute
 
     Parameters
@@ -69,7 +69,6 @@ def set_update_UD_props_collection(self, value):
         _description_
     """
 
-    ##### ISSUE WITH DUPLICATION?????
     # if update value is True
     if value:
         # if the update fn is triggered directly and not via
@@ -77,7 +76,7 @@ def set_update_UD_props_collection(self, value):
         if not hasattr(self, "set_UD_props_in_one_only"):
             compute_UD_props_sets(self)
 
-        # for all node groups that are in one set only
+        # for all UD props that are in one set only
         for UD_name in self.set_UD_props_in_one_only:
             # if only in collection: remove it from the collection
 
@@ -89,24 +88,19 @@ def set_update_UD_props_collection(self, value):
                 UD = self.collection.add()
                 UD.name = UD_name
 
-        # TODO: do we need to sort collection of node groups?
-        # (otherwise their order is not guaranteed, this is relevant for
-        #  indexing node groups via subpanel indices)
-        # it is not clear how to sort collection of properties...
-        # https://blender.stackexchange.com/questions/157562/sorting-collections-alphabetically-in-the-outliner
-
 
 class ColUDParentProps(bpy.types.PropertyGroup):
-    """Collection of Geometry Node Groups
+    """Collection of UD props
 
     This class has two attributes and one property
-    - collection (attribute): holds the collection of GNGs
-    - update_gngs_collection (attribute): helper attribute to force updates on
-      the collection of GNGs
-    - candidate_gngs (property): returns the updated list of geometry node
-      groups defined in the scene
+    - collection (attribute): holds the collection of UD props
+    - update_UD_props_collection (attribute): helper attribute
+      to force updates on
+      the collection of UD props
+    - candidate_UD_props (property): returns the updated list of UD props
+    defined in the scene
 
-    This data will be made availabe via bpy.context.scene.socket_props_per_gng
+    This data will be made availabe via bpy.context.scene.socket_props_per_UD
 
     Parameters
     ----------
@@ -119,29 +113,21 @@ class ColUDParentProps(bpy.types.PropertyGroup):
         _description_
     """
 
-    # # collection of [collections of socket properties] (one per node group)
-    # collection: bpy.props.CollectionProperty(  # type: ignore
-    #     type=ColUDSocketProperties  # elements in the collection
-    # )
-
+    # # collection of user defined properties
     collection: bpy.props.CollectionProperty(  # type: ignore
         type=SocketProperties
     )
-    # autopopulate collection of geometry node groups
+    # autopopulate collection of user defined properties
     update_UD_props_collection: bpy.props.BoolProperty(  # type: ignore
         default=False,
         get=get_update_UD_props_collection,
         set=set_update_UD_props_collection,
     )
 
-    ##### CHECK IF VALUE IS PROPERTY HERE FIRST
-    # - make sure working for correct string first
-
-    # candidate geometry node groups
+    # candidate UD props
     @property
     def candidate_UD_props(self):  # getter method
-        """Return list of geometry node groups
-        with nodes that start with the random keyword inside them
+        """Return list of UD props from UIlist
 
         Returns
         -------
@@ -150,7 +136,7 @@ class ColUDParentProps(bpy.types.PropertyGroup):
         """
 
         # get_attr_only_strbpy.context.scene.custom
-        # self is the collection of node groups
+        # self is the collection of UD props
         list_UD_props = []
 
         objects_in_scene = []
@@ -200,7 +186,6 @@ def register():
     bpy.utils.register_class(ColUDParentProps)
 
     # make the property available via bpy.context.scene...
-    # (i.e., bpy.context.scene.socket_props_per_gng)
     bpy.types.Scene.socket_props_per_UD = bpy.props.PointerProperty(
         type=ColUDParentProps
     )
