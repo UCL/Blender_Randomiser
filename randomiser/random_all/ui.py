@@ -11,7 +11,7 @@ class PanelRandomAll(bpy.types.Panel):
     """
 
     bl_idname = "RAND_ALL_PT_random_all"
-    bl_label = "Random RAND_ALL"
+    bl_label = "Randomise All and Save Output"
     # title of the panel / label displayed to the user
     bl_space_type = "NODE_EDITOR"
     bl_region_type = "UI"
@@ -30,15 +30,14 @@ class PanelRandomAll(bpy.types.Panel):
         row = layout.row()
         row_split = row.split()
         col1 = row_split.column(align=True)
-        # col2 = row_split.column(align=True)
-        # col3 = row_split.column(align=True)
-        # col4 = row_split.column(align=True)
-        # col5 = row_split.column(align=True)
 
-        col1.label(
-            text="Randomise camera transforms, materials and geometry \
-            for selected number of frames and save output parameters"
-        )
+        col1.label(text="Randomise camera transforms, materials and geometry")
+
+        row = layout.row()
+        row_split = row.split()
+        col1 = row_split.column(align=True)
+
+        col1.label(text="Save output parameters for selected number of frames")
 
         # Randomise button
         col = self.layout.column()
@@ -58,25 +57,6 @@ class PanelRandomAll(bpy.types.Panel):
             "tot_frame_no",
             icon_only=True,
         )
-
-        # row = self.layout.row(align=True)
-        # split = row.split()
-        # left_col = split.column(align=True)
-        # right_col = split.column(align=True)
-
-        # # put the toggle on the left col
-        # left_col_row = left_col.row(align=True)
-        # left_col_row.alignment = "RIGHT"  # alignment first!
-        # left_col_row.prop(
-        #     context.scene.seed_properties, "seed_toggle", icon_only=True
-        # )
-        # left_col_row.label(text="Set random seed")
-
-        # # put field in right col
-        # right_col.enabled = (
-        #     context.scene.seed_properties.seed_toggle
-        # )  # only disable the next part of the row
-        # right_col.prop(context.scene.seed_properties, "seed", icon_only=True)
 
 
 # -----------------------
