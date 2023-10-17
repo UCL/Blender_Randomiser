@@ -201,7 +201,6 @@ class RandomiseAllMaterialNodes(bpy.types.Operator):
                     )
                     min_val_new = np.where(min_val < max_val, min_val, max_val)
 
-                    # TODO: is there a more elegant way? feels a bit clunky....
                     max_val = max_val_new
                     min_val = min_val_new
 
@@ -271,7 +270,7 @@ class ViewNodeGraphOneMaterial(bpy.types.Operator):
         subpanel_material = cs.socket_props_per_material.collection[
             cls.subpanel_material_idx
         ]
-        # TODO: have this here or in invoke?
+
         # e.g: cls.subpanel_material_name = subpanel_material.name
         return subpanel_material.name in [
             mat.name for mat in bpy.data.materials

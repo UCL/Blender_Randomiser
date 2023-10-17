@@ -196,9 +196,6 @@ class RandomiseAllGeometryNodes(bpy.types.Operator):
                     sckt.default_value = random.choice(
                         [bool(list(m_val)[0]) for m_val in [min_val, max_val]]
                     )  # 1d only
-                    # TODO: change for a faster option?
-                    # bool(random.getrandbits(1))F
-                    # https://stackoverflow.com/questions/6824681/get-a-random-boolean-in-python
 
                 # if socket type is int
                 elif type(sckt) == bpy.types.NodeSocketInt:
@@ -220,8 +217,6 @@ class RandomiseAllGeometryNodes(bpy.types.Operator):
                             min_val < max_val, min_val, max_val
                         )
 
-                        # TODO: is there a more elegant way?
-                        # feels a bit clunky....
                         max_val = max_val_new
                         min_val = min_val_new
 
@@ -322,11 +317,7 @@ class ViewNodeGraphOneGNG(bpy.types.Operator):
         )
 
         # define condition to enable the operator
-        display_operator = (
-            subpanel_gng.name
-            in list_gngs
-            # TODO: maybe this is not required here?
-        ) and (
+        display_operator = (subpanel_gng.name in list_gngs) and (
             (subpanel_gng.name in list_gngs_in_modifiers_names)
             or (
                 subpanel_gng.name

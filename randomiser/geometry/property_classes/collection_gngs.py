@@ -87,12 +87,6 @@ def set_update_node_groups_collection(self, value):
                 gr = self.collection.add()
                 gr.name = gr_name
 
-        # TODO: do we need to sort collection of node groups?
-        # (otherwise their order is not guaranteed, this is relevant for
-        #  indexing node groups via subpanel indices)
-        # it is not clear how to sort collection of properties...
-        # https://blender.stackexchange.com/questions/157562/sorting-collections-alphabetically-in-the-outliner
-
 
 class ColGeomNodeGroups(bpy.types.PropertyGroup):
     """Collection of Geometry Node Groups
@@ -156,11 +150,6 @@ class ColGeomNodeGroups(bpy.types.PropertyGroup):
                 )
             )
         ]
-        # # sort by name
-        # list_node_groups = sorted(
-        #     list_materials,
-        #     key=lambda mat: mat.name.lower()
-        # )
         return list_node_groups
 
 

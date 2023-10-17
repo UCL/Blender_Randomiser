@@ -109,7 +109,6 @@ def set_update_collection(self, value):
                 sckt_prop.name = sckt_name
                 sckt_prop.bool_randomise = True
 
-                # TODO: review - is this code block too hacky?
                 # ---------------------------------------------
                 # get socket object for this socket name
                 # NOTE: my definition of socket name
@@ -130,7 +129,6 @@ def set_update_collection(self, value):
 
                 # extract last number between '_' and 'd/D' in the
                 # attribute name, to determine the shape of the array
-                # TODO: there is probably a nicer way to do this...
                 n_dim = int(
                     re.findall(r"_(\d+)(?:d|D)", socket_attrib_str)[-1]
                 )
