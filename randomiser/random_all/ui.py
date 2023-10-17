@@ -35,37 +35,24 @@ class PanelRandomAll(bpy.types.Panel):
         # col4 = row_split.column(align=True)
         # col5 = row_split.column(align=True)
 
-        col1.label(text=" Randomise all:")
-        # col2.label(text="")
-        # col3.label(text="min")
-        # col4.label(text="max")
-        # col5.label(text="")
-
-        ###################
-        # Camera positon
-        # row = layout.row()  # row = layout.row(align=True)
-        # row.label(text="x")
-
-        # row_split = row.split()
-        # col1 = row_split.column(align=True)
-        # col2 = row_split.column(align=True)
-        # col3 = row_split.column(align=True)
-        # col4 = row_split.column(align=True)
+        col1.label(
+            text="Randomise camera transforms, materials and geometry \
+            for selected number of frames and save output parameters"
+        )
 
         # Randomise button
         col = self.layout.column()
-        col.operator("camera.randomise_all", text="Randomise All Panels")
+        col.operator(
+            "camera.save_param_out", text="Randomise All and Save Output"
+        )
+        # col1.enabled = False
 
-        # Camera rotation y
-        row = layout.row()
-        row.label(text="Save randomisation outputs")
         row = layout.row()
         row_split = row.split()
         col1 = row_split.column(align=True)
         col2 = row_split.column(align=True)
 
-        col1.operator("camera.save_param_out", text="Save Parameter Outputs")
-        # col1.enabled = False
+        col1.label(text="Number of Frames: ")
         col2.prop(
             context.scene.rand_all_properties,
             "tot_frame_no",

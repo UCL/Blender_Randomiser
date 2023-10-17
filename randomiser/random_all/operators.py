@@ -123,7 +123,9 @@ class ApplySaveParams(bpy.types.Operator):
     def execute(self, context):
         """Execute the save param operator
 
-        Save parameter outputs in .json
+        Randomise camera transforms, materials and geometry
+        for selected number of frames and save output parameters
+        in .json
 
         Parameters
         ----------
