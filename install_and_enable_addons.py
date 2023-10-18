@@ -206,7 +206,7 @@ def main():
             print("Output file for key names provided")
 
             # Based on ouput file dictionary keys
-            ## TO DO - use output file keys and type of values
+            # TODO: - use output file keys and type of values
             # to replicated code below
 
         else:
@@ -262,7 +262,6 @@ def main():
 
                 # extract last number between '_' and 'd/D' in the
                 # attribute name, to determine the shape of the array
-                # TODO: there is probably a nicer way to do this...
                 n_dim = int(
                     re.findall(r"_(\d+)(?:d|D)", socket_attrib_str)[-1]
                 )
@@ -295,7 +294,7 @@ def main():
             print("Output file for key names provided")
 
             # Based on ouput file dictionary keys
-            ## TO DO - use output file keys and type of values
+            # TODO: - use output file keys and type of values
             # to replicated code below
 
         else:
@@ -314,24 +313,11 @@ def main():
                 mat_idx
             ]
 
-            # cs.socket_props_per_gng.collection[
-            #     subpanel_gng.name
-            # ].update_input_json
-
-            # then force an update in the sockets per material
-            # subpanel_material_name = subpanel_material.name
             cs.socket_props_per_material.collection[
                 subpanel_material.name
             ].update_sockets_collection
 
             print("INPUT Collection of Materials updated")
-
-            # get (updated) collection of socket properties
-            # for the current material
-            # sockets_props_collection =
-            # cs.socket_props_per_material.collection[
-            #     subpanel_material.name
-            # ].collection
 
             sockets_props_collection = subpanel_material.collection
 
@@ -357,7 +343,6 @@ def main():
 
                 # extract last number between '_' and 'd/D' in the
                 # attribute name, to determine the shape of the array
-                # TODO: there is probably a nicer way to do this...
                 n_dim = int(
                     re.findall(r"_(\d+)(?:d|D)", socket_attrib_str)[-1]
                 )

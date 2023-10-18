@@ -34,6 +34,7 @@ class RandomiseAllGeometryNodes(bpy.types.Operator):
     )
     bl_label = "Randomise selected sockets"
     bl_options = {"REGISTER", "UNDO"}
+    testing = True
 
     @classmethod
     def poll(cls, context):
@@ -57,7 +58,7 @@ class RandomiseAllGeometryNodes(bpy.types.Operator):
 
         return len(context.scene.socket_props_per_gng.collection) > 0
 
-    def invoke(self, context, event):
+    def invoke_proxy(self, context):
         """Initialise parmeters before executing the operator
 
         The invoke() function runs before executing the operator.
@@ -133,6 +134,10 @@ class RandomiseAllGeometryNodes(bpy.types.Operator):
                 if sockets_props_collection[sckt_id].bool_randomise:
                     self.sockets_to_randomise_per_gng[gng_str].append(sckt)
 
+    def invoke(self, context, event):
+        self.testing = False
+        self.invoke_proxy(context)
+
         return self.execute(context)
 
     def execute(self, context):
@@ -151,6 +156,8 @@ class RandomiseAllGeometryNodes(bpy.types.Operator):
         _type_
             _description_
         """
+        if self.testing is True:
+            self.invoke_proxy(context)
 
         cs = context.scene
 
@@ -196,9 +203,6 @@ class RandomiseAllGeometryNodes(bpy.types.Operator):
                     sckt.default_value = random.choice(
                         [bool(list(m_val)[0]) for m_val in [min_val, max_val]]
                     )  # 1d only
-                    # TODO: change for a faster option?
-                    # bool(random.getrandbits(1))F
-                    # https://stackoverflow.com/questions/6824681/get-a-random-boolean-in-python
 
                 # if socket type is int
                 elif type(sckt) == bpy.types.NodeSocketInt:
@@ -220,13 +224,13 @@ class RandomiseAllGeometryNodes(bpy.types.Operator):
                             min_val < max_val, min_val, max_val
                         )
 
-                        # TODO: is there a more elegant way?
-                        # feels a bit clunky....
                         max_val = max_val_new
                         min_val = min_val_new
 
                     # assign randomised socket value
                     sckt.default_value = random.uniform(min_val, max_val)
+
+        self.testing = True
 
         return {"FINISHED"}
 
@@ -322,11 +326,7 @@ class ViewNodeGraphOneGNG(bpy.types.Operator):
         )
 
         # define condition to enable the operator
-        display_operator = (
-            subpanel_gng.name
-            in list_gngs
-            # TODO: maybe this is not required here?
-        ) and (
+        display_operator = (subpanel_gng.name in list_gngs) and (
             (subpanel_gng.name in list_gngs_in_modifiers_names)
             or (
                 subpanel_gng.name

@@ -10,17 +10,10 @@ class PropertiesRandomAll(bpy.types.PropertyGroup):
 
     """
 
-    # seed_toggle_prop = bpy.props.BoolProperty(
-    #     name="Set random seed", default=False
-    # )
-    # seed_toggle: seed_toggle_prop  # type: ignore
-
     tot_frame_no_prop = bpy.props.IntProperty(
         name="Total Frame Number", default=50
     )
     tot_frame_no: tot_frame_no_prop  # type: ignore
-
-    # x_pos = bpy.props.GenericType()
 
 
 # ------------------------------------

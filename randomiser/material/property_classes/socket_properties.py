@@ -150,17 +150,11 @@ class SocketProperties(bpy.types.PropertyGroup):
 
     """
 
-    # TODO: how to set attributes dynamically?
-    # TODO: I don't really get why this type definition is also an assignment?
-
     # ---------------------
     # name of the socket
     # NOTE: if we make a Blender collection of this type of objects,
     # we will be able to access them by name
     name: bpy.props.StringProperty()  # type: ignore
-
-    # TODO: include the socket itself here to?
-    # socket: PointerProperty(type=bpy.types.NodeSocketStandard?)
 
     # ---------------------
     # float 1d

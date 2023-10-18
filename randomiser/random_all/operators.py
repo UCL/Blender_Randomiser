@@ -123,7 +123,9 @@ class ApplySaveParams(bpy.types.Operator):
     def execute(self, context):
         """Execute the save param operator
 
-        Save parameter outputs in .json
+        Randomise camera transforms, materials and geometry
+        for selected number of frames and save output parameters
+        in .json
 
         Parameters
         ----------
@@ -193,7 +195,6 @@ class ApplySaveParams(bpy.types.Operator):
             # get this subpanel's GNG
             subpanel_gng = cs.socket_props_per_gng.collection[gng_idx]
             tmp_GNG = subpanel_gng.name
-            print(tmp_GNG)
 
             sockets_props_collection = cs.socket_props_per_gng.collection[
                 subpanel_gng.name
@@ -213,15 +214,6 @@ class ApplySaveParams(bpy.types.Operator):
             for i_n, nd in enumerate(list_input_nodes_sorted):
                 # add sockets for this node in the subseq rows
                 for sckt in nd.outputs:
-                    print("i_n", i_n)
-                    print("nd", nd)
-                    print(
-                        getattr(
-                            sckt,
-                            "default_value",
-                        )
-                    )
-
                     tmp_values = []
                     for idx in range(tot_frame_no):
                         bpy.app.handlers.frame_change_pre[0]("dummy")
@@ -238,15 +230,10 @@ class ApplySaveParams(bpy.types.Operator):
                             )
                         )
 
-                    print(tmp_values)
                     tmp_sck = nd.name
-                    # all_geom_dict[tmp_GNG] = tmp_sck
                     GNG_sck_values_str = tmp_GNG + tmp_sck
                     GNG_sck_values_str = "Values " + GNG_sck_values_str
-                    print(GNG_sck_values_str)
                     all_geom_dict[GNG_sck_values_str] = tmp_values
-
-        print(all_geom_dict)
 
         ### MATERIALS
         bpy.data.scenes["Scene"].frame_current = 0
@@ -258,7 +245,6 @@ class ApplySaveParams(bpy.types.Operator):
                 mat_idx
             ]
             tmp_mat = subpanel_material.name
-            print(tmp_mat)
 
             list_input_nodes = (
                 nodes2rand.get_material_nodes_to_randomise_indep(
@@ -278,35 +264,18 @@ class ApplySaveParams(bpy.types.Operator):
                 )
             )
 
-            print("list_input_nodes ====== ", list_input_nodes)
-            print(
-                "list nodes2rand in groups ===== ", list_nodes2rand_in_groups
-            )
-            print("list_input_nodes_all ===== ", list_input_nodes_all)
-
             list_input_nodes_sorted = sorted(
                 list_input_nodes_all, key=lambda x: x.name
             )
             for i_n, nd in enumerate(list_input_nodes_sorted):
                 # add sockets for this node in the subseq rows
-                print("nd.name", nd.name)
                 for sckt in nd.outputs:
-                    print(nd.name)
-                    print(
-                        getattr(
-                            sckt,
-                            "default_value",
-                        )
-                    )
-
                     test_attr = getattr(
                         sckt,
                         "default_value",
                     )
-                    print(str(test_attr))
 
                     if "NodeSocketColor" not in str(test_attr):
-                        print("NODESOCKETCOLOR", str(test_attr))
                         tmp_values = []
                         for idx in range(tot_frame_no):
                             bpy.app.handlers.frame_change_pre[0]("dummy")
@@ -323,15 +292,12 @@ class ApplySaveParams(bpy.types.Operator):
                                 )
                             )
 
-                        print(tmp_values)
                         tmp_sck = nd.name
-                        # all_mat_dict[tmp_mat] = tmp_sck
                         if (
                             list_input_nodes_sorted[i_n]
                             in list_nodes2rand_in_groups
                         ):
                             for ng in bpy.data.node_groups:
-                                print("ng in bpy.data.node_groups", ng.name)
                                 MAT_sck_values_str = (
                                     tmp_mat + ng.name + tmp_sck
                                 )
@@ -340,10 +306,8 @@ class ApplySaveParams(bpy.types.Operator):
                             MAT_sck_values_str = tmp_mat + tmp_sck
 
                         MAT_sck_values_str = "Values " + MAT_sck_values_str
-                        print(MAT_sck_values_str)
                         all_mat_dict[MAT_sck_values_str] = tmp_values
 
-        print(all_mat_dict)
         data = {
             "location_str": loc_value_str,
             "loc_x": x_pos_vals,
@@ -369,6 +333,9 @@ class ApplySaveParams(bpy.types.Operator):
             text = json.dumps(data, indent=4)
             # write the text into the file
             out_file_obj.write(text)
+
+        print("Outputs parameters saved to file: ", path_to_file)
+        print("Total number of frames saved = ", tot_frame_no)
 
         return {"FINISHED"}
 

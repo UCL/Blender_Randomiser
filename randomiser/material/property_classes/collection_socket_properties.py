@@ -19,7 +19,6 @@ def compute_sockets_sets(self):
     list_sckt_names_in_graph = []
     for sck in self.candidate_sockets:
         # if socket comes from a node inside a group
-        # (TODO is there a better way to check whether the node is in a group?)
         if sck.node.id_data.name in bpy.data.node_groups:
             list_sckt_names_in_graph.append(
                 sck.node.id_data.name + "_" + sck.node.name + "_" + sck.name
@@ -110,7 +109,6 @@ def set_update_collection(self, value):
                 sckt_prop.bool_randomise = True
 
                 # ---------------------------
-                # TODO: review - is this too hacky?
                 # get socket object for this socket name
                 # NOTE: my definition of socket name
                 # (node.name + _ + socket.name)

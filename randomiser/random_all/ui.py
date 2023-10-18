@@ -11,7 +11,7 @@ class PanelRandomAll(bpy.types.Panel):
     """
 
     bl_idname = "RAND_ALL_PT_random_all"
-    bl_label = "Random RAND_ALL"
+    bl_label = "Randomise All and Save Output"
     # title of the panel / label displayed to the user
     bl_space_type = "NODE_EDITOR"
     bl_region_type = "UI"
@@ -30,66 +30,33 @@ class PanelRandomAll(bpy.types.Panel):
         row = layout.row()
         row_split = row.split()
         col1 = row_split.column(align=True)
-        # col2 = row_split.column(align=True)
-        # col3 = row_split.column(align=True)
-        # col4 = row_split.column(align=True)
-        # col5 = row_split.column(align=True)
 
-        col1.label(text=" Randomise all:")
-        # col2.label(text="")
-        # col3.label(text="min")
-        # col4.label(text="max")
-        # col5.label(text="")
+        col1.label(text="Randomise camera transforms, materials and geometry")
 
-        ###################
-        # Camera positon
-        # row = layout.row()  # row = layout.row(align=True)
-        # row.label(text="x")
+        row = layout.row()
+        row_split = row.split()
+        col1 = row_split.column(align=True)
 
-        # row_split = row.split()
-        # col1 = row_split.column(align=True)
-        # col2 = row_split.column(align=True)
-        # col3 = row_split.column(align=True)
-        # col4 = row_split.column(align=True)
+        col1.label(text="Save output parameters for selected number of frames")
 
         # Randomise button
         col = self.layout.column()
-        col.operator("camera.randomise_all", text="Randomise All Panels")
+        col.operator(
+            "camera.save_param_out", text="Randomise All and Save Output"
+        )
+        # col1.enabled = False
 
-        # Camera rotation y
-        row = layout.row()
-        row.label(text="Save randomisation outputs")
         row = layout.row()
         row_split = row.split()
         col1 = row_split.column(align=True)
         col2 = row_split.column(align=True)
 
-        col1.operator("camera.save_param_out", text="Save Parameter Outputs")
-        # col1.enabled = False
+        col1.label(text="Number of Frames: ")
         col2.prop(
             context.scene.rand_all_properties,
             "tot_frame_no",
             icon_only=True,
         )
-
-        # row = self.layout.row(align=True)
-        # split = row.split()
-        # left_col = split.column(align=True)
-        # right_col = split.column(align=True)
-
-        # # put the toggle on the left col
-        # left_col_row = left_col.row(align=True)
-        # left_col_row.alignment = "RIGHT"  # alignment first!
-        # left_col_row.prop(
-        #     context.scene.seed_properties, "seed_toggle", icon_only=True
-        # )
-        # left_col_row.label(text="Set random seed")
-
-        # # put field in right col
-        # right_col.enabled = (
-        #     context.scene.seed_properties.seed_toggle
-        # )  # only disable the next part of the row
-        # right_col.prop(context.scene.seed_properties, "seed", icon_only=True)
 
 
 # -----------------------

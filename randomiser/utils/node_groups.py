@@ -152,9 +152,6 @@ def get_parent_of_sng(node_group):
         list_all_materials = [
             mat for mat in bpy.data.materials if mat.use_nodes
         ]
-        # TODO: is it possible that a material has no node_tree?
-        # (I think maybe, if use_nodes is set to False)
-        # TODO: use candidate_materials property?
         for mat in list_all_materials:
             for nd in mat.node_tree.nodes:
                 if (
@@ -181,8 +178,6 @@ def get_parent_of_ng(node_group):
 
 
 def get_root_and_depth_of_ng(node_group):
-    # TODO: combine this with path?
-
     # compute root node group: this is the node group in
     # the path whose parent is None. For shader node groups,
     # it will be the material
@@ -214,7 +209,6 @@ def get_map_inner_ngs_given_roots(
     list_candidate_root_node_groups : _type_
         list of node groups
     """
-    # TODO: check in inputs are inded roots and print warning if not?
     list_node_groups = [
         gr for gr in bpy.data.node_groups  # if gr.type == "GEOMETRY"
     ]

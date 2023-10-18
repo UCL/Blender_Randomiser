@@ -61,16 +61,6 @@ def set_update_materials_collection(self, value):
                 # update_sockets_collection
                 mat.name = mat_name
 
-        # TODO: do we need to sort collection of materials?
-        # (otherwise their order is not guaranteed, this is relevant for
-        #  indexing materials via subpanel indices)
-        # it is not clear how to sort collection of properties...
-        # https://blender.stackexchange.com/questions/157562/sorting-collections-alphabetically-in-the-outliner
-        # self.collection = sorted(
-        #     self.collection,
-        #     key=lambda mat: mat.name.lower()
-        # )
-
 
 # ----------------
 # ColMaterials
@@ -94,11 +84,6 @@ class ColMaterials(bpy.types.PropertyGroup):
     def candidate_materials(self):  # getter method
         # self is the collection of materials
         list_materials = [mat for mat in bpy.data.materials if mat.use_nodes]
-        # # sort by name
-        # list_materials = sorted(
-        #     list_materials,
-        #     key=lambda mat: mat.name.lower()
-        # )
         return list_materials
 
     # ----------------------------
