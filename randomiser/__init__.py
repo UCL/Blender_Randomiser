@@ -1,4 +1,4 @@
-from . import material, transform, geometry, seed, define_prop  # random_all
+from . import material, transform, geometry, seed, define_prop, random_all
 
 bl_info = {
     "name": "Randomisations panel",
