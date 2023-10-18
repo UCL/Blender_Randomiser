@@ -3,6 +3,7 @@ from random import seed
 
 import bpy
 import numpy as np
+from bpy.app.handlers import persistent
 from mathutils import Euler, Vector
 
 from .ui import attr_get_type, get_attr_only_str, get_obj_str
@@ -11,7 +12,6 @@ from .ui import attr_get_type, get_attr_only_str, get_obj_str
 def attr_set_val(obj, path, min_val, max_val, UD_type):
     if "." in path:
         # gives us: ('modifiers["Subsurf"]', 'levels')
-        # len_path = len(full_str.rsplit(".", config.MAX_NUMBER_OF_SUBPANELS))
         path_prop, path_attr = path.rsplit(".", 1)
 
         # same as: prop = obj.modifiers["Subsurf"]
@@ -73,26 +73,6 @@ class CUSTOM_OT_actions(bpy.types.Operator):
         except IndexError:
             pass
         else:
-            # if self.action == "DOWN" and idx < len(scn.custom) - 1:
-            #     scn.custom[idx + 1].name
-            #     scn.custom.move(idx, idx + 1)
-            #     scn.custom += 1
-            #     info = 'Item "%s" moved to position %d' % (
-            #         item.name,
-            #         scn.custom + 1,
-            #     )
-            #     self.report({"INFO"}, info)
-
-            # elif self.action == "UP" and idx >= 1:
-            #     scn.custom[idx - 1].name
-            #     scn.custom.move(idx, idx - 1)
-            #     scn.custom_index -= 1
-            #     info = 'Item "%s" moved to position %d' % (
-            #         item.name,
-            #         scn.custom_index + 1,
-            #     )
-            #     self.report({"INFO"}, info)
-
             if self.action == "REMOVE":
                 info = 'Item "%s" removed from list' % (scn.custom[idx].name)
                 scn.custom_index -= 1
@@ -101,7 +81,7 @@ class CUSTOM_OT_actions(bpy.types.Operator):
 
         if self.action == "ADD":
             item = scn.custom.add()
-            item.name = "bpy.context.scene.camera.ranch"
+            item.name = "bpy.objects.data['Cube'].location"
             item.id = len(scn.custom)
             scn.custom_index = len(scn.custom) - 1
             info = '"%s" added to list' % (item.name)
@@ -163,13 +143,12 @@ class CUSTOM_OT_clearList(bpy.types.Operator):
 
 
 # --------------------------------------------
-# Operator Randomise selected sockets
-# across all Geometry node groups
+# Operator Randomise selected
+# User Defined Properties
 # --------------------------------------------
-##### REFACTOR - remove to replace with randomise all?
 class RandomiseAllUDProps(bpy.types.Operator):
-    """Randomise the selected output sockets
-    across all geometry node groups
+    """Randomise the selected
+    User Defined Properties
 
     Parameters
     ----------
@@ -183,7 +162,7 @@ class RandomiseAllUDProps(bpy.types.Operator):
     """
 
     # metadata
-    bl_idname = "opr.randomise_all_ud_sockets"  # this is appended to bpy.ops.
+    bl_idname = "node.randomise_all_ud_sockets"  # this is appended to bpy.ops.
     bl_label = "Randomise selected sockets"
     bl_options = {"REGISTER", "UNDO"}
 
@@ -191,7 +170,7 @@ class RandomiseAllUDProps(bpy.types.Operator):
     def poll(cls, context):
         """Determine whether the operator can be executed.
 
-        The operator can only run if there are geometry node groups
+        The operator can only run if there are user defined properties
         in the collection. If it can't be executed, the
         button will appear as disabled.
 
@@ -204,7 +183,7 @@ class RandomiseAllUDProps(bpy.types.Operator):
         Returns
         -------
         boolean
-            number of geometry node groups in the collection
+            number of user defined properties in the collection
         """
 
         return len(context.scene.socket_props_per_UD.collection) > 0
@@ -214,10 +193,8 @@ class RandomiseAllUDProps(bpy.types.Operator):
 
         The invoke() function runs before executing the operator.
         Here, we
-        - add the list of input nodes and collection of socket properties to
-          the operator (self), and
-        - unselect the randomisation toggle of the sockets of input nodes if
-          they are not linked to any other node
+        - add the list of user defined properties and collection of
+        user defined properties with associated info to the operator (self)
 
         Parameters
         ----------
@@ -231,7 +208,7 @@ class RandomiseAllUDProps(bpy.types.Operator):
         _type_
             _description_
         """
-        # add list of GNGs to operator self
+        # add list of UD props to operator self
         # NOTE: this list should have been updated already,
         # when drawing the panel
 
@@ -239,7 +216,7 @@ class RandomiseAllUDProps(bpy.types.Operator):
         self.list_subpanel_UD_props_names = [
             UD.name for UD in cs.socket_props_per_UD.collection
         ]
-        # for every GNG: save sockets to randomise
+        # for every UD prop: save name of UD prop
         self.sockets_to_randomise_per_UD = {}
         self.sockets_to_randomise_per_UD = []
         for UD_str in self.list_subpanel_UD_props_names:
@@ -252,7 +229,7 @@ class RandomiseAllUDProps(bpy.types.Operator):
     def execute(self, context):
         """Execute the randomiser operator
 
-        Randomise the selected output sockets between
+        Randomise the selected UD props between
         their min and max values.
 
         Parameters
@@ -311,7 +288,7 @@ class RandomiseAllUDProps(bpy.types.Operator):
                     bpy.context.scene, attribute_only_str
                 )[0]
 
-            # get min value for this socket
+            # get min value for this UD prop
             min_val = np.array(
                 getattr(
                     sockets_props_collection,
@@ -319,7 +296,7 @@ class RandomiseAllUDProps(bpy.types.Operator):
                 )
             )
 
-            # get max value for this socket
+            # get max value for this UD prop
             max_val = np.array(
                 getattr(
                     sockets_props_collection,
@@ -358,6 +335,15 @@ class RandomiseAllUDProps(bpy.types.Operator):
         return {"FINISHED"}
 
 
+# NOTE: without the persistent decorator,
+# the function is removed from the handlers' list
+# after it is first executed
+@persistent
+def randomise_UD_props_per_frame(dummy):
+    bpy.ops.node.randomise_all_ud_sockets("INVOKE_DEFAULT")
+    return
+
+
 # ---------------------
 # Classes to register
 # ---------------------
@@ -376,9 +362,7 @@ def register():
     for cls in list_classes_to_register:
         bpy.utils.register_class(cls)
 
-    # bpy.app.handlers.frame_change_pre.append(
-    #     randomise_geometry_nodes_per_frame
-    # )
+    bpy.app.handlers.frame_change_pre.append(randomise_UD_props_per_frame)
 
     print("UD operators registered")
 
@@ -387,8 +371,6 @@ def unregister():
     for cls in list_classes_to_register:
         bpy.utils.unregister_class(cls)
 
-    # bpy.app.handlers.frame_change_pre.remove(
-    #     randomise_geometry_nodes_per_frame
-    # )
+    bpy.app.handlers.frame_change_pre.remove(randomise_UD_props_per_frame)
 
     print("UD operators unregistered")

@@ -16,7 +16,7 @@ MAX_NUMBER_OF_SUBPANELS = 100
 # will be defined as classes, but only those panels with
 # index < total number of group nodes per material
 # will be displayed.
-MAX_NUMBER_OF_SUBSUBPANELS = 10
+MAX_NUMBER_OF_SUBSUBPANELS = 100
 
 
 # Keyword to search for in nodes' names, to identify nodes to randomise
@@ -48,36 +48,25 @@ MAP_SOCKET_TYPE_TO_INI_MIN_MAX = {
     bpy.types.NodeSocketVector: {"min": -np.inf, "max": np.inf},
     bpy.types.NodeSocketColor: {"min": 0.0, "max": 1.0},
     bpy.types.NodeSocketInt: {
-        "min": int(-1000),  # -2147483648
-        "max": int(1000),  # 2147483647
-    },  # ---- not sure this will work?
+        "min": int(-2147483648),
+        "max": int(2147483647),
+    },
     bpy.types.NodeSocketBool: {"min": False, "max": True},
 }
 
 
 MAP_PROPS_TO_ATTR = {
-    # bpy.types.NodeSocketFloat: "float_1d"
-    # bpy.props.FloatVectorProperty size=1,
-    Vector: "float_3d",  # bpy.props.FloatVectorProperty size=3,
+    Vector: "float_3d",
     float: "float_1d",
     int: "int_1d",
     bool: "bool_1d",
     Euler: "euler",
-    # bpy.types.NodeSocketInt: "int_1d"
-    # bpy.props.IntProperty,
-    # bpy.types.NodeSocketColor: "rgba_4d",  # "float_4d", if
-    # bpy.types.NodeSocketBool: "bool_1d", elif
 }
 
 MAP_PROPS_TO_INI_MIN_MAX = {
-    # bpy.types.NodeSocketFloat: {"min": -np.inf, "max": np.inf},
     Vector: {"min": -np.inf, "max": np.inf},
     float: {"min": -np.inf, "max": np.inf},
     int: {"min": int(-2147483648), "max": int(2147483647)},
     bool: {"min": False, "max": True},
     Euler: {"min": -np.inf, "max": np.inf},
-    # bpy.types.NodeSocketInt: {
-    #     "min": int(-1000),  # -2147483648
-    #     "max": int(1000),  # 2147483647
-    # },  # ---- not sure this will work?
 }

@@ -9,32 +9,28 @@ import numpy as np
 # ----------------------------------------------------------------
 
 
-##### REFACTOR
 def compute_UD_sockets_sets(self):
-    """Compute the relevant sets of sockets for this specific
-    user defined property, and add them to self.
+    """Compute the relevant sets of UD props and add them to self.
 
     These sets include:
-    - the set of sockets already in this GNG's collection
-    - the set of sockets present in the Blender graph (for this GNG)
-    - the set of sockets that are only in one of the two previous sets
+    - the set of UD props already in the UD props collection
+    - the set of UD props present in the candidate sockets
+    - the set of UD props that are only in one of the two previous sets
 
     """
 
-    # set of sockets in collection for this GNG
+    # set of UD props in collection for this GNG
     self.set_sckt_names_in_collection_of_props = set(
         sck_p.name for sck_p in self.collection
     )
-    # pdb.set_trace()
-    #####REFACTOR TO WORK WITH UI LIST/REMOVE
-    # since don't need graphs for custom props?
-    # set of sockets in graph for this GNG
+
+    # should be renamed candidate UD props
     list_sckt_names_in_graph = [
         "UD_" + sck.name for sck in self.candidate_sockets
     ]
     self.set_sckt_names_in_graph = set(list_sckt_names_in_graph)
 
-    # set of sockets that are just in one of the two groups
+    # set of UD props that are just in one of the two groups
     self.set_of_sckt_names_in_one_only = (
         self.set_sckt_names_in_collection_of_props.symmetric_difference(
             self.set_sckt_names_in_graph
@@ -44,23 +40,23 @@ def compute_UD_sockets_sets(self):
 
 def get_update_collection(self):
     """Getter function for the update_sockets_collection attribute
-    of the collection of socket properties class (ColSocketProperties)
+    of the collection of UD properties class (SocketProperties)
 
     It will run when the property value is 'get' and
-    it will update the collection of socket properties if required
+    it will update the collection of UD properties if required
 
     Returns
     -------
     boolean
-        returns True if the collection of socket properties is updated,
+        returns True if the collection of UD properties is updated,
         otherwise it returns False
     """
-    # compute the different sets of sockets and add them to self
+    # compute the different sets of UD props and add them to self
     compute_UD_sockets_sets(self)
 
     # if there is a difference between
-    # sets of sockets in graph and in the collection:
-    # edit the set of sockets in the collection
+    # sets of UD props in graph and in the collection:
+    # edit the set of UD props in the collection
     if self.set_of_sckt_names_in_one_only:
         set_update_collection(self, True)
         return True
@@ -71,63 +67,58 @@ def get_update_collection(self):
 def set_update_collection(self, value):
     """
     Setter function for the update_sockets_collection attribute
-    of the collection of socket properties class (ColSocketProperties)
+    of the collection of UD properties class (SocketProperties)
 
     It will run when the property value is 'set'.
 
-    It will update the collection of socket properties as follows:
-        - For the set of sockets that exist only in either
+    It will update the collection of UD properties as follows:
+        - For the set of UD props that exist only in either
         the collection or the graph:
-            - if the socket exists only in the collection: remove from
+            - if the UD prop exists only in the collection: remove from
             collection
-            - if the socket exists only in the node graph: add to collection
+            - if the UD propexists only in the node graph: add to collection
             with initial values
         - For the rest of sockets: leave untouched
 
     Parameters
     ----------
     value : boolean
-        if True, the collection of socket properties is
+        if True, the collection of UDproperties is
         overwritten to consider the latest data
     """
 
-    #####REFACTOR TO WORK WITH UI LIST/REMOVE
-    # since don't need graphs for custom props?
     if value:
         # if the update function is triggered directly and not via
         # the getter function: compute the sets here
         if not hasattr(self, "set_of_sckt_names_in_one_only"):
             compute_UD_sockets_sets(self)
 
-        # update the sockets that are only in either
+        # update the UD props that are only in either
         # the collection set or the graph
         for sckt_name in self.set_of_sckt_names_in_one_only:
-            # if the socket exists only in the collection: remove from
+            # if the UD prop exists only in the collection: remove from
             # collection
             if sckt_name in self.set_sckt_names_in_collection_of_props:
                 self.collection.remove(self.collection.find(sckt_name))
 
-            # if the socket exists only in the node graph: add to collection
+            # if the UD prop exists only in the node graph: add to collection
             # with initial values
             if sckt_name in self.set_sckt_names_in_graph:
                 sckt_prop = self.collection.add()
                 sckt_prop.name = sckt_name
                 sckt_prop.bool_randomise = True
 
-                # TODO: review - is this code block too hacky?
                 # ---------------------------------------------
-                # get socket object for this socket name
-                # NOTE: my definition of socket name
-                # (node.name + _ + socket.name)
+                # get UD prop object for this UD prop name
                 for s in self.candidate_sockets:
-                    # build socket id from scratch
+                    # build UD prop id from scratch
                     socket_id = "UD_" + s.name
 
                     if socket_id == sckt_name:
                         sckt = s
                         break
 
-                # for this socket type, get the name of the attribute
+                # for this UD prop type, get the name of the attribute
                 # holding the min/max properties
                 socket_attrib_str = bpy.context.scene.socket_type_to_attr[
                     type(sckt)
@@ -135,14 +126,13 @@ def set_update_collection(self, value):
 
                 # extract last number between '_' and 'd/D' in the
                 # attribute name, to determine the shape of the array
-                # TODO: there is probably a nicer way to do this...
                 n_dim = int(
                     re.findall(r"_(\d+)(?:d|D)", socket_attrib_str)[-1]
                 )
                 # ---------------------------
 
                 # get dictionary with initial min/max values
-                # for this socket type
+                # for this UD props type
                 ini_min_max_values = (
                     bpy.context.scene.socket_type_to_ini_min_max[type(sckt)]
                 )
@@ -167,7 +157,7 @@ def constrain_min_closure(m_str):
     Parameters
     ----------
     m_str : str
-            string specifying the socket attribute (e.g., float_1d)
+            string specifying the UD propattribute (e.g., float_1d)
 
     Returns
     -------
@@ -187,7 +177,7 @@ def constrain_min_closure(m_str):
         context : _type_
             _description_
         m_str : str
-            string specifying the socket attribute (e.g., float_1d)
+            string specifying the UD propattribute (e.g., float_1d)
         """
         # self is a 'SocketProperties' object
         min_array = np.array(getattr(self, "min_" + m_str))
@@ -210,7 +200,7 @@ def constrain_max_closure(m_str):
     Parameters
     ----------
     m_str : str
-        string specifying the socket attribute (e.g., float_1d)
+        string specifying the UD propattribute (e.g., float_1d)
 
     Returns
     -------
@@ -230,7 +220,7 @@ def constrain_max_closure(m_str):
         context : _type_
             _description_
         m_str : str
-            string specifying the socket attribute (e.g., float_1d)
+            string specifying the UD propattribute (e.g., float_1d)
         """
         # self is a 'SocketProperties' object
         min_array = np.array(getattr(self, "min_" + m_str))
@@ -252,7 +242,7 @@ def constrain_min_closure_int(m_str):
     Parameters
     ----------
     m_str : str
-            string specifying the socket attribute (e.g., int_1d)
+            string specifying the UD propattribute (e.g., int_1d)
 
     Returns
     -------
@@ -272,7 +262,7 @@ def constrain_min_closure_int(m_str):
         context : _type_
             _description_
         m_str : str
-            string specifying the socket attribute (e.g., int_1d)
+            string specifying the UD propattribute (e.g., int_1d)
         """
         # self is a 'SocketProperties' object
         min_array = np.array(getattr(self, "min_" + m_str))
@@ -300,7 +290,7 @@ def constrain_max_closure_int(m_str):
     Parameters
     ----------
     m_str : str
-        string specifying the socket attribute (e.g., float_1d)
+        string specifying the UD propattribute (e.g., float_1d)
 
     Returns
     -------
@@ -320,7 +310,7 @@ def constrain_max_closure_int(m_str):
         context : _type_
             _description_
         m_str : str
-            string specifying the socket attribute (e.g., float_1d)
+            string specifying the UD propattribute (e.g., float_1d)
         """
         # self is a 'SocketProperties' object
         min_array = np.array(getattr(self, "min_" + m_str))
@@ -344,7 +334,7 @@ def constrain_rgba_closure(m_str):
     Parameters
     ----------
     m_str : str
-        string specifying the socket attribute (e.g., float_1d)
+        string specifying the UD propattribute (e.g., float_1d)
 
     Returns
     -------
@@ -363,7 +353,7 @@ def constrain_rgba_closure(m_str):
         context : _type_
             _description_
         m_str : str
-            string specifying the socket attribute (e.g., float_1d)
+            string specifying the UD propattribute (e.g., float_1d)
         """
         min_or_max_array = np.array(getattr(self, min_or_max_full_str))
         if any(min_or_max_array > 1.0) or any(min_or_max_array < 0.0):
@@ -384,12 +374,12 @@ class SocketProperties(bpy.types.PropertyGroup):
     """
     Class holding the set of properties
     for a socket, namely:
-    - socket name,
+    - UD propname,
     - min/max values, and
     - boolean for randomisation
 
     Because I think it is not possible to define attributes dynamically,
-    for now we define an attribute for each possible socket type
+    for now we define an attribute for each possible UD proptype
     in the input nodes. These are all FloatVectors of different sizes.
     The size is specified in the attribute's name:
     - min/max_float_1d
