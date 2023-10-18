@@ -30,7 +30,6 @@ def register():
     collection_UD_props.register()
 
     # link global Python variables to bpy.context.scene
-    # if I use setattr: attribute must exist first right?
     for attr_ky, attr_val in dict_context_scene_attr.items():
         setattr(bpy.types.Scene, attr_ky, attr_val)
 

@@ -29,7 +29,7 @@ class CUSTOM_UL_items(bpy.types.UIList):
 
 
 # ---------------------------------------------------
-# Common layout for list of sockets to randomise
+# Common layout for list of UD props to randomise
 # ----------------------------------------------------
 def draw_sockets_list_UD(
     cs,
@@ -39,9 +39,7 @@ def draw_sockets_list_UD(
     attribute_only_str,
     full_str,
 ):
-    # Define UI fields for every socket property
-    # NOTE: if I don't sort the input nodes, everytime one of the nodes is
-    # selected in the graph it moves to the bottom of the panel.
+    # Define UI fields for every user defined property
     list_UD_props_sorted = list_UD_props
     row = layout.row()
 
@@ -77,36 +75,35 @@ def draw_sockets_list_UD(
     col1.alignment = "RIGHT"
     col1.label(text="value")  # text=sckt.name)
 
-    # if socket is a color: format min/max as a color picker
+    # if UD prop is a color: format min/max as a color picker
     # and an array (color picker doesn't include alpha value)
-    sckt = list_UD_props_sorted  # UD.name
+    sckt = list_UD_props_sorted
     if type(sckt) == bpy.types.NodeSocketColor:
         for m_str, col in zip(["min", "max"], [col3, col4]):
             # color picker
             col.template_color_picker(
-                sockets_props_collection,  # [socket_id],
+                sockets_props_collection,
                 m_str + "_" + cs.socket_type_to_attr[type(sckt)],
             )
             # array
             for j, cl in enumerate(["R", "G", "B", "alpha"]):
                 col.prop(
-                    sockets_props_collection,  # [socket_id],
+                    sockets_props_collection,
                     m_str + "_" + cs.socket_type_to_attr[type(sckt)],
                     icon_only=False,
                     text=cl,
                     index=j,
                 )
-    # if socket is Boolean: add non-editable labels
+    # if UD prop is Boolean: add non-editable labels
     elif type(sckt) == bpy.types.NodeSocketBool:
         for m_str, col in zip(["min", "max"], [col3, col4]):
             m_val = getattr(
-                sockets_props_collection,  # [socket_id],
+                sockets_props_collection,
                 m_str + "_" + cs.socket_type_to_attr[type(sckt)],
             )
             col.label(text=str(list(m_val)[0]))
 
-    # if socket is not color type: format as a regular property
-
+    # if UD prop is not color type: format as a regular property
     else:
         objects_in_scene = []
         for key in bpy.data.objects:
@@ -162,7 +159,6 @@ def get_obj_str(full_str):
 def attr_get_type(obj, path):
     if "." in path:
         # gives us: ('modifiers["Subsurf"]', 'levels')
-        # len_path = len(full_str.rsplit(".", config.MAX_NUMBER_OF_SUBPANELS))
         path_prop, path_attr = path.rsplit(".", 1)
 
         # same as: prop = obj.modifiers["Subsurf"]
@@ -203,10 +199,8 @@ def get_attr_only_str(full_str):
 # ----------------------
 # Main panel
 # ---------------------
-class MainPanelRandomUD(
-    TemplatePanel
-):  # MainPanelRandomGeometryNodes(TemplatePanel):
-    """Parent panel to the geometry node groups' subpanels
+class MainPanelRandomUD(TemplatePanel):
+    """Parent panel to the user defined properties subpanels
 
     Parameters
     ----------
@@ -220,8 +214,8 @@ class MainPanelRandomUD(
         _description_
     """
 
-    bl_idname = "UD_PROPS_PT_mainpanel"  # "NODE_GEOMETRY_PT_mainpanel"
-    bl_label = "Randomise UD"  # "Randomise GEOMETRY"
+    bl_idname = "UD_PROPS_PT_mainpanel"
+    bl_label = "Randomise UD"
 
     @classmethod
     def poll(cls, context):
@@ -295,9 +289,6 @@ class SubPanelUDUIlist(TemplatePanel):
         column.label(
             text="Choose property to see available properties to randomise"
         )
-        # column.prop(context.scene.custom_props, "custom_input", text="")
-        # column.operator("opr.add_custom_prop_to_list",
-        # text="Add to Custom List")
 
         layout = self.layout
         scn = bpy.context.scene
@@ -321,31 +312,20 @@ class SubPanelUDUIlist(TemplatePanel):
         col.operator(
             "custom.list_action", icon="ZOOM_OUT", text=""
         ).action = "REMOVE"
-        # col.separator()
-        # col.operator(
-        #     "custom.list_action", icon="TRIA_UP", text=""
-        # ).action = "UP"
-        # col.operator(
-        #     "custom.list_action", icon="TRIA_DOWN", text=""
-        # ).action = "DOWN"
 
         row = layout.row()
         col = row.column(align=True)
         row = col.row(align=True)
-        row.operator(
-            "custom.print_items", icon="LINENUMBERS_ON"
-        )  # LINENUMBERS_OFF, ANIM
+        row.operator("custom.print_items", icon="LINENUMBERS_ON")
         row = col.row(align=True)
         row.operator("custom.clear_list", icon="X")
 
 
 # ------------------------------
-# Subpanel for each node group
+# Subpanel for each user defined property
 # -----------------------------
-class SubPanelRandomUD(
-    TemplatePanel
-):  # SubPanelRandomGeometryNodes(TemplatePanel):
-    """Parent class for the geometry node groups' (GNG)
+class SubPanelRandomUD(TemplatePanel):
+    """Parent class for the user defined properties
     subpanels
 
     Parameters
@@ -369,10 +349,12 @@ class SubPanelRandomUD(
 
     @classmethod
     def poll(cls, context):
-        """Determine whether the GNG subpanel can be displayed.
+        """Determine whether the UD props subpanel can be displayed.
 
-        To display a subpanels, its index must be lower than the
-        total number of GNGs defined in the scene
+        To display a subpanel, its index must be lower than the
+        total number of UD props defined in the scene and
+        the property must be a valid property i.e. not a dummy
+        property
 
         Parameters
         ----------
@@ -386,13 +368,11 @@ class SubPanelRandomUD(
         """
         cs = context.scene
 
-        ##### CHECK VALID PROPERTY
-        # force an update on the group nodes collection first
+        # force an update on the UD props collection first
         if cs.socket_props_per_UD.update_UD_props_collection:
             print("Collection of UD props updated")
 
         if cls.subpanel_UD_idx < len(cs.socket_props_per_UD.collection):
-            # pdb.set_trace()
             sockets_props_collection = cs.socket_props_per_UD.collection[
                 cls.subpanel_UD_idx
             ]
@@ -446,16 +426,15 @@ class SubPanelRandomUD(
         """
         cs = context.scene
 
-        # get this subpanel's GNG
+        # get this subpanel's UD prop
         cs.socket_props_per_UD.collection[self.subpanel_UD_idx]
 
-        # add view graph operator to layout
         layout = self.layout
         layout.use_property_split = True
         layout.use_property_decorate = False
 
     def draw(self, context):
-        """Define the content to display in the GNG subpanel
+        """Define the content to display in the UD prop subpanel
 
         Parameters
         ----------
@@ -464,15 +443,15 @@ class SubPanelRandomUD(
         """
         cs = context.scene
 
-        # get this subpanel's GNG
+        # get this subpanel's UD prop
         cs.socket_props_per_UD.collection[self.subpanel_UD_idx]
 
         # get (updated) collection of chosen prop for this subpanel
         sockets_props_collection = cs.socket_props_per_UD.collection[
             self.subpanel_UD_idx
-        ]  # .collection
+        ]
 
-        # Get list of input nodes to randomise for this subpanel's GNG
+        # Get list of UD props to randomise for this subpanel's UD prop
         full_str = sockets_props_collection.name
         attribute_only_str = get_attr_only_str(full_str)
 
@@ -522,8 +501,8 @@ class SubPanelRandomUD(
             bpy.context.scene.custom_index
         ].name
 
-        # Draw sockets to randomise per input node, including their
-        # current value and min/max boundaries
+        # Draw UD props to randomise including their
+        # min/max boundaries
         draw_sockets_list_UD(
             cs,
             self.layout,
@@ -537,9 +516,7 @@ class SubPanelRandomUD(
 # -------------------------------------------
 # Subpanel for the 'randomise-all' operator
 # -------------------------------------------
-class SubPanelRandomUDOperator(
-    TemplatePanel
-):  # SubPanelRandomGeometryOperator(TemplatePanel): #RANDOMISATION
+class SubPanelRandomUDOperator(TemplatePanel):
     """Panel containing the 'randomise-all' button
 
     Parameters
@@ -553,10 +530,8 @@ class SubPanelRandomUDOperator(
         _description_
     """
 
-    bl_idname = (
-        "UD_PT_subpanel_operator"  # "NODE_GEOMETRY_PT_subpanel_operator"
-    )
-    bl_parent_id = "UD_PROPS_PT_mainpanel"  # "NODE_GEOMETRY_PT_mainpanel"
+    bl_idname = "UD_PT_subpanel_operator"
+    bl_parent_id = "UD_PROPS_PT_mainpanel"
     bl_label = ""  # title of the panel displayed to the user
     bl_options = {"HIDE_HEADER"}
 
@@ -589,7 +564,7 @@ class SubPanelRandomUDOperator(
         """
         column = self.layout.column(align=True)
         column.operator(
-            "opr.randomise_all_ud_sockets",
+            "node.randomise_all_ud_sockets",
             text="Randomise",
         )
 
@@ -604,28 +579,19 @@ list_classes_to_register = [
     CUSTOM_UL_items,
 ]
 
-# Define (dynamically) a subpanel class for each Geometry Node Group (GNGs)
+# Define (dynamically) a subpanel class for each UD prop
 # and add them to the list of classes to register
-# NOTE: because we don't know the number of GNGs that will be
+# NOTE: because we don't know the number of UD props that will be
 # defined a priori, we define n=MAX_NUMBER_OF_SUBPANELS classes and
 # assign an index to each of them. We will only display the subpanels
-# whose index is lower than the total number of GNGs defined in the scene.
+# whose index is lower than the total number of UD props defined in the scene.
 for i in range(config.MAX_NUMBER_OF_SUBPANELS):
-    # define subpanel class for GNG i
-    # subpanel_class_i = type(
-    #     f"NODE_GEOMETRY_PT_subpanel_{i}",
-    #     (SubPanelRandomGeometryNodes,),
-    #     {
-    #         "bl_idname": f"NODE_GEOMETRY_PT_subpanel_{i}",
-    #         "subpanel_gng_idx": i,
-    #     },
-    # )
     subpanel_class_i = type(
         f"UD_PT_subpanel_{i}",
         (SubPanelRandomUD,),
         {
             "bl_idname": f"UD_PT_subpanel_{i}",
-            "subpanel_UD_idx": i,  # IN UI AND OPERATORS
+            "subpanel_UD_idx": i,
         },
     )
 
@@ -638,11 +604,6 @@ for i in range(config.MAX_NUMBER_OF_SUBPANELS):
 # we add it as the last one to the list
 list_classes_to_register.append(SubPanelUDUIlist)
 list_classes_to_register.append(SubPanelRandomUDOperator)
-
-
-#     SubPanelRandomUDOperator,
-#     SubPanelUDUIlist
-# )
 
 
 # -----------------------------------------
