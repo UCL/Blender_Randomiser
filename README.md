@@ -78,3 +78,12 @@ Alternatively, install [manually](/docs/Install_addon_manually.md) via Blender s
  ## Contributions
 
  Please see [Dev Notes](./docs/Dev_notes.md) if you wish to contribute. Feel free to submit suggestions via issues and/or PRs.
+
+ 
+ ## Authors
+
+[Tom Dowrick](https://github.com/tdowrick)
+[Ruaridh Gollifer](https://github.com/ruaridhg)
+[Sofía Miñano](https://github.com/sfmig)
+[Harvey Mannering](https://github.com/harveymannering)
+
