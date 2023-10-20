@@ -79,6 +79,13 @@ Alternatively, install [manually](/docs/Install_addon_manually.md) via Blender s
 
  Please see [Dev Notes](./docs/Dev_notes.md) if you wish to contribute. Feel free to submit suggestions via issues and/or PRs.
 
+ There are a few outstanding issues for enhancements:
+ - Not able to currently export materials colour default value for save params button
+ - Materials colour min-max can only be set to the same values in the 4D matrix using the [input file](/input_bounds.json)
+ - No functionality for reading in min-max input boundaries for user defined panel
+ - Not able to currently handle an empty UIlist in the user defined panel which causes issues for other funtionality in the add-on (which are resolved by adding at least one UD prop to UIlist)
+ - General refactoring for repeated code
+
 
  ## Authors
 
