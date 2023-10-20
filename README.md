@@ -5,6 +5,11 @@ Blender Randomiser is a Blender add-on that allows different scene properties to
  - Manually setting the bounds in the UI Randomiser panel located in the Geometry Nodes space
  - Using an input `.json` [file](/input_bounds.json) to [set the bounds from the command line](/docs/input_output.md)
 
+
+   The add-on panel called "Randomiser" is located in the Geometry Nodes space within Blender:
+   ![Addon_location](/docs/images/Addon_location.png)
+
+
 ## Purpose
 
 The add-on was originally developed to render a highly diverse and (near) photo-realistic synthetic dataset of laparoscopic surgery camera views. To replicate the different camera positions used in surgery as well as the shape and appearance of the tissues involved with surgery, we focused on three main components to randomise:
@@ -21,9 +26,6 @@ In the add-on, these three components appear as separate UI panels.
    - Possibility of setting a randomisation seed for reproducibility
    - Capability to randomise the desired properties at every frame of an animation
    - [Save Parameter panel](/docs/input_output.md) with outputs saved to `.json` [file](/output_randomisations_per_frame1697116725.310647.json) with a timestamp
-
-   The add-on panel called "Randomiser" is located in the Geometry Nodes tab on Blender:
-   ![Addon_location](/docs/images/Addon_location.png)
 
 
  ## Installation via command line
