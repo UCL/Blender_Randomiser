@@ -27,7 +27,6 @@ In the add-on, these three components appear as separate UI panels.
    - Capability to randomise the desired properties at every frame of an animation
    - [Save Parameter panel](/docs/input_output.md) with outputs saved to `.json` [file](/output_randomisations_per_frame1697116725.310647.json) with a timestamp
 
-
  ## Installation via command line
 1. First, clone the repository in your desired directory
 ```
