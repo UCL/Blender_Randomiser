@@ -91,6 +91,9 @@ Alternatively, install [manually](/docs/Install_addon_manually.md) via Blender s
  ## Authors
 
 [Tom Dowrick](https://github.com/tdowrick)
+
 [Ruaridh Gollifer](https://github.com/ruaridhg)
+
 [Sofía Miñano](https://github.com/sfmig)
+
 [Harvey Mannering](https://github.com/harveymannering)
