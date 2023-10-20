@@ -8,7 +8,7 @@ Blender Randomiser is a Blender add-on that allows different scene properties to
 ## Purpose
 
 The add-on was originally developed to render a highly diverse and (near) photo-realistic synthetic dataset of laparoscopic surgery camera views. To replicate the different camera positions used in surgery as well as the shape and appearance of the tissues involved with surgery, we focused on three main components to randomise:
- - **Camera transforms** (location and Euler rotation with toggle for randomising in absolute or relative i.e. delta terms)
+ - **Camera transforms** (location and Euler rotation with toggle for randomising in absolute or relative i.e. delta terms) ![camera_transforms](/docs/images/Transforms_panel.png)
  - **Geometry** ([see further details](/docs/Materials_geometry_panel.md))
  - **Materials**([see further details](/docs/Materials_geometry_panel.md))
 
@@ -21,6 +21,9 @@ In the add-on, these three components appear as separate UI panels.
    - Possibility of setting a randomisation seed for reproducibility
    - Capability to randomise the desired properties at every frame of an animation
    - [Save Parameter panel](/docs/input_output.md) with outputs saved to `.json` [file](/output_randomisations_per_frame1697116725.310647.json) with a timestamp
+
+   The add-on panel called "Randomiser" is located in the Geometry Nodes tab on Blender:
+   ![Addon_location](/docs/images/Addon_location.png)
 
 
  ## Installation via command line
@@ -36,6 +39,9 @@ git clone https://github.com/UCL/Blender_Randomiser.git
     ```
     - This will zip the `randomiser` subdirectory, open the `sample.blend` file with Blender, and use Blender's Python interpreter to execute the `install_and_enable_addons.py` script.
     - The `install_and_enable_addons.py` script installs and enables any add-ons that are passed as command line arguments (add-ons can be passed as a path to a single Python file, or as a zip file)
+
+> [!NOTE] `source ~/.bash_profile` is used in the bash script to create an alias for blender with the following line in the bash_profile:
+> `alias blender=/Applications/Blender.app/Contents/MacOS/Blender`
 
 > **Advanced Usage**
 >  In step 3, run the [randomisation_seed.sh](/randomisation_seed.sh) bash script instead which has optional inputs:
@@ -78,6 +84,8 @@ Alternatively, install [manually](/docs/Install_addon_manually.md) via Blender s
  ## Contributions
 
  Please see [Dev Notes](./docs/Dev_notes.md) if you wish to contribute. Feel free to submit suggestions via issues and/or PRs.
+
+ It can be helpful to use different `.blend` files for prototyping as it can preload certain features you're testing.
 
  There are a few outstanding issues for enhancements:
  - Not able to currently export materials colour default value for save params button
