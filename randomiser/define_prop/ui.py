@@ -192,7 +192,6 @@ def get_attr_only_str(full_str):
     len_path = len(full_str.rsplit(".", config.MAX_NUMBER_OF_SUBPANELS)) - mod
     list_parent_nodes_str = full_str.rsplit(".", len_path - 3)
     attribute_only_str = full_str.replace(list_parent_nodes_str[0] + ".", "")
-
     return attribute_only_str
 
 
@@ -395,13 +394,13 @@ class SubPanelRandomUD(TemplatePanel):
                 if "Camera" in current_obj:
                     action = attr_get_type(
                         bpy.data.cameras[idx],
-                        get_attr_only_str(attribute_only_str),
+                        attribute_only_str,
                     )[1]
 
                 else:
                     action = attr_get_type(
                         bpy.data.objects[idx],
-                        get_attr_only_str(attribute_only_str),
+                        attribute_only_str,
                     )[1]
 
             elif "bpy.context.scene" in full_str:
@@ -455,51 +454,53 @@ class SubPanelRandomUD(TemplatePanel):
         full_str = sockets_props_collection.name
         attribute_only_str = get_attr_only_str(full_str)
 
-        list_all_UD_props = []
-        for UD_str in bpy.context.scene.custom:
-            objects_in_scene = []
-            for key in bpy.data.objects:
-                objects_in_scene.append(key.name)
+        # list_all_UD_props = []
+        # for UD_str in bpy.context.scene.custom:
+        #     objects_in_scene = []
+        #     for key in bpy.data.objects:
+        #         objects_in_scene.append(key.name)
 
-            if "[" in UD_str.name:
-                obj_str = get_obj_str(UD_str.name)
+        #     if "[" in UD_str.name:
+        #         obj_str = get_obj_str(UD_str.name)
 
-                for i, obj in enumerate(objects_in_scene):
-                    if obj in obj_str:
-                        current_obj = obj
-                        idx = i
+        #         for i, obj in enumerate(objects_in_scene):
+        #             if obj in obj_str:
+        #                 current_obj = obj
+        #                 idx = i
 
-                if "Camera" in current_obj:
-                    if (
-                        attr_get_type(
-                            bpy.data.cameras[idx],
-                            get_attr_only_str(UD_str.name),
-                        )[1]
-                        != "dummy"
-                    ):
-                        list_all_UD_props.append(UD_str)
+        #         if "Camera" in current_obj:
+        #             if (
+        #                 attr_get_type(
+        #                     bpy.data.cameras[idx],
+        #                     get_attr_only_str(UD_str.name),
+        #                 )[1]
+        #                 != "dummy"
+        #             ):
+        #                 list_all_UD_props.append(UD_str)
 
-                else:
-                    if (
-                        attr_get_type(
-                            bpy.data.objects[idx],
-                            get_attr_only_str(UD_str.name),
-                        )[1]
-                        != "dummy"
-                    ):
-                        list_all_UD_props.append(UD_str)
+        #         else:
+        #             if (
+        #                 attr_get_type(
+        #                     bpy.data.objects[idx],
+        #                     get_attr_only_str(UD_str.name),
+        #                 )[1]
+        #                 != "dummy"
+        #             ):
+        #                 list_all_UD_props.append(UD_str)
 
-            elif (
-                attr_get_type(
-                    bpy.context.scene, get_attr_only_str(UD_str.name)
-                )[1]
-                != "dummy"
-            ):
-                list_all_UD_props.append(UD_str)
+        #     elif (
+        #         attr_get_type(
+        #             bpy.context.scene, get_attr_only_str(UD_str.name)
+        #         )[1]
+        #         != "dummy"
+        #     ):
+        #         list_all_UD_props.append(UD_str)
 
-        list_current_UD_props = list_all_UD_props[
-            bpy.context.scene.custom_index
-        ].name
+        # list_current_UD_props = list_all_UD_props[
+        #     bpy.context.scene.custom_index
+        # ].name
+
+        list_current_UD_props = sockets_props_collection.name
 
         # Draw UD props to randomise including their
         # min/max boundaries

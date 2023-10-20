@@ -1,3 +1,9 @@
+## User Defined Properties Panel
+
+![UD_props_panel](/docs/images/UD_panel.png)
+
+This example panel set-up can produce an [output_file](/output_randomisations_per_frame1697817657.502794_UD_example.json)
+
 Some examples of useful user-defined properties could be:
 - bpy.data.objects["Cube"].location (Float 3D)
 - bpy.context.scene.frame_current (int 1D)

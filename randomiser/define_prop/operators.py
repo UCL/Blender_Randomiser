@@ -29,21 +29,21 @@ def attr_set_val(obj, path, min_val, max_val, UD_type):
         # print("Property does not exist")
         pass
 
-    print("obj = ", path_attr)
+    # print("obj = ", path_attr)
     if UD_type == float:
         value = random.uniform(min_val, max_val)
-        print("1D float = ", value)
+        # print("1D float = ", value)
     elif UD_type == Vector:
         value = random.uniform(min_val, max_val)
-        print("3D Vector float = ", value)
+        # print("3D Vector float = ", value)
     elif UD_type == Euler:
         deg2rad = np.pi / 180
         value = random.uniform(min_val, max_val)
         value = value * deg2rad
-        print("Euler = ", value)
+        # print("Euler = ", value)
     else:
         value = random.randint(min_val, max_val)
-        print("Integer = ", value)
+        # print("Integer = ", value)
 
     setattr(prop, path_attr, value)
 
