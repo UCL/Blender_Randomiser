@@ -84,7 +84,8 @@ Alternatively, install [manually](/docs/Install_addon_manually.md) via Blender s
  - Materials colour min-max can only be set to the same values in the 4D matrix using the [input file](/input_bounds.json)
  - No functionality for reading in min-max input boundaries for user defined panel
  - Not able to currently handle an empty UIlist in the user defined panel which causes issues for other funtionality in the add-on (which are resolved by adding at least one UD prop to UIlist)
- - General refactoring for repeated code
+ - Can randomise all panels and save the output parameters, however the functionality to toggle on/off selection of individual parameters is only available for camera transforms and user defined properties currently, but not geometry and materials panels where all these properties will be randomised and exported when this functionality is used.
+ - General refactoring for repeated code for example [for the geometry and materials issue mentioned above](/randomiser/utils/list_props_to_randomise.py)
 
 
  ## Authors
