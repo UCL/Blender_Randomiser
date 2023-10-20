@@ -147,6 +147,24 @@ class ApplySaveParams(bpy.types.Operator):
         ### TRANSFORMS
         bpy.data.scenes["Scene"].frame_current = 0
 
+        (
+            loc,
+            loc_x_range,
+            loc_y_range,
+            loc_z_range,
+            rot,
+            rot_x_range,
+            rot_y_range,
+            rot_z_range,
+            delta_on,
+            rand_posx,
+            rand_posy,
+            rand_posz,
+            rand_rotx,
+            rand_roty,
+            rand_rotz,
+        ) = get_transform_inputs(context)
+
         x_pos_vals = []
         y_pos_vals = []
         z_pos_vals = []
@@ -163,29 +181,56 @@ class ApplySaveParams(bpy.types.Operator):
             value_str = "rotation_euler"
 
         rad2deg = 180 / np.pi
+        if rand_posx:
+            print("bool on")
+        all_transform_dict = {}
+        tmp_values_loc = {}
+        tmp_values_rot = {}
         for idx in range(tot_frame_no):
             bpy.app.handlers.frame_change_pre[0]("dummy")
             bpy.data.scenes["Scene"].frame_current = idx
 
-            x_pos_vals.append(
-                getattr(bpy.context.scene.camera, loc_value_str)[0]
-            )
-            y_pos_vals.append(
-                getattr(bpy.context.scene.camera, loc_value_str)[1]
-            )
-            z_pos_vals.append(
-                getattr(bpy.context.scene.camera, loc_value_str)[2]
-            )
+            if rand_posx:
+                x_pos_vals.append(
+                    getattr(bpy.context.scene.camera, loc_value_str)[0]
+                )
+                tmp_values_loc["x_pos_vals"] = x_pos_vals
 
-            x_rot_vals.append(
-                getattr(bpy.context.scene.camera, value_str)[0] * rad2deg
-            )
-            y_rot_vals.append(
-                getattr(bpy.context.scene.camera, value_str)[1] * rad2deg
-            )
-            z_rot_vals.append(
-                getattr(bpy.context.scene.camera, value_str)[2] * rad2deg
-            )
+            if rand_posy:
+                y_pos_vals.append(
+                    getattr(bpy.context.scene.camera, loc_value_str)[1]
+                )
+                tmp_values_loc["y_pos_vals"] = y_pos_vals
+
+            if rand_posz:
+                z_pos_vals.append(
+                    getattr(bpy.context.scene.camera, loc_value_str)[2]
+                )
+                tmp_values_loc["z_pos_vals"] = z_pos_vals
+
+            if rand_rotx:
+                x_rot_vals.append(
+                    getattr(bpy.context.scene.camera, value_str)[0] * rad2deg
+                )
+                tmp_values_rot["x_rot_vals"] = x_rot_vals
+
+            if rand_roty:
+                y_rot_vals.append(
+                    getattr(bpy.context.scene.camera, value_str)[1] * rad2deg
+                )
+                tmp_values_rot["y_rot_vals"] = y_rot_vals
+
+            if rand_rotz:
+                z_rot_vals.append(
+                    getattr(bpy.context.scene.camera, value_str)[2] * rad2deg
+                )
+                tmp_values_rot["z_rot_vals"] = z_rot_vals
+
+        if tmp_values_loc:
+            all_transform_dict[loc_value_str] = tmp_values_loc
+
+        if tmp_values_rot:
+            all_transform_dict[value_str] = tmp_values_rot
 
         ### GEOMETRY
         bpy.data.scenes["Scene"].frame_current = 0
@@ -286,6 +331,7 @@ class ApplySaveParams(bpy.types.Operator):
                             )  # issue
                             # w/ this being called so often -
                             # might need moved to diff for loop?
+
                             tmp_values.append(
                                 getattr(
                                     sckt,
@@ -425,14 +471,15 @@ class ApplySaveParams(bpy.types.Operator):
                     all_UD_props_dict[nd] = tmp_values
 
         data = {
-            "location_str": loc_value_str,
-            "loc_x": x_pos_vals,
-            "loc_y": y_pos_vals,
-            "loc_z": z_pos_vals,
-            "rotation_str": value_str,
-            "rot_x": x_rot_vals,
-            "rot_y": y_rot_vals,
-            "rot_z": z_rot_vals,
+            # "location_str": loc_value_str,
+            # "loc_x": x_pos_vals,
+            # "loc_y": y_pos_vals,
+            # "loc_z": z_pos_vals,
+            # "rotation_str": value_str,
+            # "rot_x": x_rot_vals,
+            # "rot_y": y_rot_vals,
+            # "rot_z": z_rot_vals,
+            "camera_transforms": all_transform_dict,
             "geometry": all_geom_dict,
             "materials": all_mat_dict,
             "user_defined_props": all_UD_props_dict,
@@ -445,16 +492,16 @@ class ApplySaveParams(bpy.types.Operator):
         path_to_file = "output_randomisations_per_frame" + ts_str
         path_to_file = path_to_file + file_ext
 
-        with open(path_to_file, "w") as out_file_obj:
-            try:
-                # convert the dictionary into text
-                text = json.dumps(data, indent=4)
+        try:
+            # convert the dictionary into text
+            text = json.dumps(data, indent=4)
+            with open(path_to_file, "w") as out_file_obj:
                 # write the text into the file
                 out_file_obj.write(text)
                 print("Outputs parameters saved to file: ", path_to_file)
                 print("Total number of frames saved = ", tot_frame_no)
-            except Exception:
-                print("Cannot save parameters to file")
+        except Exception:
+            print("Cannot save parameters to file")
 
         return {"FINISHED"}
 
