@@ -77,7 +77,8 @@ Alternatively, install [manually](/docs/Install_addon_manually.md) via Blender s
 `pip.main(["install", "pytest-blender", "--user"])`
 
 
-> **MacOS**
+> [!CAUTION]
+> **MacOS** can cause issues with running pytest normally with other projects so Linux is recommended for testing or installing Blender in an isolated environment
 >  The following steps were needed to install these dependencies correctly on MacOS:
 > - `get-pip.py` downloaded (this step may not be needed since newer versions of Blender have pip installed already in the Blender python)
 > - Changing Mac permissions to grant full disk access from where you're running pytest i.e. VS code or terminal
