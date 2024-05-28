@@ -79,9 +79,12 @@ Alternatively, install [manually](/docs/Install_addon_manually.md) via Blender s
 
 > **MacOS**
 >  The following steps were needed to install these dependencies correctly on MacOS:
-> - `get-pip.py` downloaded (this step may not be needed since newer versions of Blender have pip installed already in the Blender python)
-> - Changing Mac permissions to grant full disk access from where you're running pytest i.e. VS code or terminal
-> - `/Applications/Blender.app/Contents/Resources/3.4/python/bin/python3.10 -m pip install pytest -t "/Applications/Blender.app/Contents/Resources/3.4/python/lib/python3.10/site-packages"` the target flag -t makes sure that the installation ends up in the correct place
+pip install pytest-blender
+pip install pytest
+blender_python="$(pytest-blender)"
+$blender_python -m ensurepip
+$blender_python -m pip install . pytest
+pytest --blender-executable /Applications/Blender.app/Contents/MacOS/Blender
 
  ## Contributions
 
