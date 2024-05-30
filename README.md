@@ -42,7 +42,8 @@ git clone https://github.com/UCL/Blender_Randomiser.git
     - This will zip the `randomiser` subdirectory, open the `sample.blend` file with Blender, and use Blender's Python interpreter to execute the `install_and_enable_addons.py` script.
     - The `install_and_enable_addons.py` script installs and enables any add-ons that are passed as command line arguments (add-ons can be passed as a path to a single Python file, or as a zip file)
 
-> [!NOTE] `source ~/.bash_profile` is used in the bash script to create an alias for blender with the following line in the bash_profile:
+> [!NOTE]
+>  `source ~/.bash_profile` is used in the bash script to create an alias for blender with the following line in the bash_profile:
 > `alias blender=/Applications/Blender.app/Contents/MacOS/Blender`
 
 > **Advanced Usage**
@@ -69,22 +70,27 @@ Alternatively, install [manually](/docs/Install_addon_manually.md) via Blender s
 >  Only relevant if you are wanting to run the tests.
 > The tests make use of the [pytest-blender plugin](https://github.com/mondeja/pytest-blender#pytest-blender), which has `pytest` and other packages as dependencies (e.g. `pytest-cov`). These need to be installed in the site-packages directory of Blender's Python. The pytest-blender repo provides some guidance for this [here](https://github.com/mondeja/pytest-blender#usage). It is important to make sure you use Blender's Python interpreter and Blender's pip when installing `pytest` and its dependencies. Below are some tips on how to do this in Linux and MacOS.
 
-> **Linux**
->  An easy way to install these dependencies correctly in Linux is to run the following code in [Blender's Python scripting window](https://docs.blender.org/api/current/info_quickstart.html):
-> `import pip `
-`pip.main(["install", "pytest", "--user"])`
-`pip.main(["install", "pytest-cov", "--user"])`
-`pip.main(["install", "pytest-blender", "--user"])`
+**Linux**
+An easy way to install these dependencies correctly in Linux is to run the following code in [Blender's Python scripting window](https://docs.blender.org/api/current/info_quickstart.html):
+```
+import pip
+pip.main(["install", "pytest", "--user"])
+pip.main(["install", "pytest-cov", "--user"])
+pip.main(["install", "pytest-blender", "--user"])
+```
 
 
-> **MacOS**
->  The following steps were needed to install these dependencies correctly on MacOS:
+**MacOS**
+
+The following steps were needed to install these dependencies correctly on MacOS:
+```
 pip install pytest-blender
 pip install pytest
 blender_python="$(pytest-blender)"
 $blender_python -m ensurepip
 $blender_python -m pip install . pytest
 pytest --blender-executable /Applications/Blender.app/Contents/MacOS/Blender
+```
 
  ## Contributions
 
