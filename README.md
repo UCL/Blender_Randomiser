@@ -46,7 +46,8 @@ git clone https://github.com/UCL/Blender_Randomiser.git
 >  `source ~/.bash_profile` is used in the bash script to create an alias for blender with the following line in the bash_profile:
 > `alias blender=/Applications/Blender.app/Contents/MacOS/Blender`
 
-> **Advanced Usage**
+**Advanced Usage**
+
 >  In step 3, run the [randomisation_seed.sh](/randomisation_seed.sh) bash script instead which has optional inputs:
 > - `--seed 32` which is an input to Blender
 > - `--input ./input_bounds.json` (input to `install_and_enable_addons.py`)
