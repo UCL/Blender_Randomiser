@@ -68,8 +68,7 @@ Alternatively, install [manually](/docs/Install_addon_manually.md) via Blender s
 
 
 > [!NOTE]
->  Only relevant if you are wanting to run the tests.
-> The tests make use of the [pytest-blender plugin](https://github.com/mondeja/pytest-blender#pytest-blender), which has `pytest` and other packages as dependencies (e.g. `pytest-cov`). These need to be installed in the site-packages directory of Blender's Python. The pytest-blender repo provides some guidance for this [here](https://github.com/mondeja/pytest-blender#usage). It is important to make sure you use Blender's Python interpreter and Blender's pip when installing `pytest` and its dependencies. Below are some tips on how to do this in Linux and MacOS.
+The tests make use of the [pytest-blender plugin](https://github.com/mondeja/pytest-blender#pytest-blender), which has `pytest` and other packages as dependencies (e.g. `pytest-cov`). These need to be installed in the site-packages directory of Blender's Python. The pytest-blender repo provides some guidance for this [here](https://github.com/mondeja/pytest-blender#usage). It is important to make sure you use Blender's Python interpreter and Blender's pip when installing `pytest` and its dependencies. Below are some tips on how to do this in Linux and MacOS.
 
 **Linux**
 
