@@ -1,3 +1,7 @@
+# Adding materials and geometry panels
+
+Materials and geometry panels are added to the UI if the node to be randomised is renamed with a prefix of "random". The node is then added to the panel and the user can select the min and max values for the randomisation. The user can also select the nodes to be randomised and the output file will contain the parameters that have been randomised.
+
 ## Materials
 ![Materials_panel](/docs/images/Materials_panel.png)
 - A panel to randomise properties relative to the material nodes:

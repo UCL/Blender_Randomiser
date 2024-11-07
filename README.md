@@ -42,10 +42,12 @@ git clone https://github.com/UCL/Blender_Randomiser.git
     - This will zip the `randomiser` subdirectory, open the `sample.blend` file with Blender, and use Blender's Python interpreter to execute the `install_and_enable_addons.py` script.
     - The `install_and_enable_addons.py` script installs and enables any add-ons that are passed as command line arguments (add-ons can be passed as a path to a single Python file, or as a zip file)
 
-> [!NOTE] `source ~/.bash_profile` is used in the bash script to create an alias for blender with the following line in the bash_profile:
+> [!NOTE]
+>  `source ~/.bash_profile` is used in the bash script to create an alias for blender with the following line in the bash_profile:
 > `alias blender=/Applications/Blender.app/Contents/MacOS/Blender`
 
-> **Advanced Usage**
+**Advanced Usage**
+
 >  In step 3, run the [randomisation_seed.sh](/randomisation_seed.sh) bash script instead which has optional inputs:
 > - `--seed 32` which is an input to Blender
 > - `--input ./input_bounds.json` (input to `install_and_enable_addons.py`)
@@ -66,24 +68,46 @@ Alternatively, install [manually](/docs/Install_addon_manually.md) via Blender s
 
 
 > [!NOTE]
->  Only relevant if you are wanting to run the tests.
-> The tests make use of the [pytest-blender plugin](https://github.com/mondeja/pytest-blender#pytest-blender), which has `pytest` and other packages as dependencies (e.g. `pytest-cov`). These need to be installed in the site-packages directory of Blender's Python. The pytest-blender repo provides some guidance for this [here](https://github.com/mondeja/pytest-blender#usage). It is important to make sure you use Blender's Python interpreter and Blender's pip when installing `pytest` and its dependencies. Below are some tips on how to do this in Linux and MacOS.
+The tests make use of the [pytest-blender plugin](https://github.com/mondeja/pytest-blender#pytest-blender), which has `pytest` and other packages as dependencies (e.g. `pytest-cov`). These need to be installed in the site-packages directory of Blender's Python. The pytest-blender repo provides some guidance for this [here](https://github.com/mondeja/pytest-blender#usage). It is important to make sure you use Blender's Python interpreter and Blender's pip when installing `pytest` and its dependencies. Below are some tips on how to do this in Linux and MacOS.
 
-> **Linux**
->  An easy way to install these dependencies correctly in Linux is to run the following code in [Blender's Python scripting window](https://docs.blender.org/api/current/info_quickstart.html):
-> `import pip `
-`pip.main(["install", "pytest", "--user"])`
-`pip.main(["install", "pytest-cov", "--user"])`
-`pip.main(["install", "pytest-blender", "--user"])`
+**Installing Pytest in Python**
 
+The following steps were needed to install these dependencies (tested in MacOS only):
+```
+# create and activate conda environment:
+conda create -n blender-dev python=3.10 -y
+conda activate blender-dev
 
-> [!CAUTION]
-> **MacOS**
-> Installing Blender in an isolated environment may be preferable. We occasionally found some issues with the `pytest` installation for Blender, where it seemed that running pytest from a different environment would use the `pytest` installed in the Blender environment. To troubleshoot this, it may be useful to run `which pytest`from the active environment: if all is working fine, that should point to the `pytest` of the active environment. One can also force to run the `pytest` installation of the active environment by running `python -m pytest`.
->  The following steps were needed to install these dependencies correctly on MacOS:
-> - `get-pip.py` downloaded (this step may not be needed since newer versions of Blender have pip installed already in the Blender python)
-> - Changing Mac permissions to grant full disk access from where you're running pytest i.e. VS code or terminal
-> - `/Applications/Blender.app/Contents/Resources/3.4/python/bin/python3.10 -m pip install pytest -t "/Applications/Blender.app/Contents/Resources/3.4/python/lib/python3.10/site-packages"` the target flag -t makes sure that the installation ends up in the correct place
+# install pytest-blender:
+pip install pytest-blender
+pip install pytest-cov
+
+# Get path to the Python interpreter that ships with Blender - this may take a long time:
+blender_python="$(pytest-blender)"
+
+# from the `Blender_Randomiser` directory, install the randomiser package with dev dependencies by running:
+$blender_python -m pip install ".[dev]"
+
+#Run pytest:
+python -m pytest tests
+
+## ~/.local/bin may need to be added to path
+```
+
+**Installing Pytest in Blender's Python**
+
+An easy way to install these dependencies (tested in Linux only) is to run the following code in [Blender's Python scripting window](https://docs.blender.org/api/current/info_quickstart.html#running-scripts):
+```
+import pip
+pip.main(["install", "pytest", "--user"])
+pip.main(["install", "pytest-cov", "--user"])
+pip.main(["install", "pytest-blender", "--user"])
+```
+
+Then outside of Blender, run the following command:
+```
+<path_to_blender_python> -m pytest --blender-executable <path-to-blender-executable>
+```
 
  ## Contributions
 
