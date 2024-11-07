@@ -72,7 +72,7 @@ The tests make use of the [pytest-blender plugin](https://github.com/mondeja/pyt
 
 **Linux**
 
-An easy way to install these dependencies correctly in Linux is to run the following code in [Blender's Python scripting window](https://docs.blender.org/api/current/info_quickstart.html):
+An easy way to install these dependencies correctly in Linux is to run the following code in [Blender's Python scripting window](https://docs.blender.org/api/current/info_quickstart.html#running-scripts):
 ```
 import pip
 pip.main(["install", "pytest", "--user"])
