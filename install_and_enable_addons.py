@@ -23,6 +23,14 @@ import bpy
 
 
 def main():
+    """
+    User defined:
+    --seed:     Randomisaiton Seed
+    --input:    Input json file
+    --output:   Output json file
+
+
+    """
     import argparse
     import sys
 
@@ -80,14 +88,34 @@ def main():
         help="Input .json file to set the min-max values for each panel",
     )
 
+    # parser.add_argument(
+    #    "-o",
+    #    "--output",
+    #    nargs="*",
+    #    type=str,  # types: string, int, long, choice, float and complex.
+    #    metavar="OUTPUT_JSON_FILE",
+    #    # A name for argument in usage messages.
+    #    help="Output .json save path and/or .json file for geom/mat names",
+    # )
+
+    # LB: Add frame number
     parser.add_argument(
-        "-o",
-        "--output",
+        "-f",
+        "--frame",
+        nargs="*",
+        type=int,  # types: string, int, long, choice, float and complex.
+        # A name for argument in usage messages.
+        help="Input frame number to render",
+    )
+
+    # LB: Add basename
+    parser.add_argument(
+        "-b",
+        "--basename",
         nargs="*",
         type=str,  # types: string, int, long, choice, float and complex.
-        metavar="OUTPUT_JSON_FILE",
         # A name for argument in usage messages.
-        help="Output .json save path and/or .json file for geom/mat names",
+        help="Input basename number to render",
     )
 
     # build parser object
@@ -118,7 +146,17 @@ def main():
 
     # install and enable addons in list
     for p in list_files:
+        Path(p).stem
+
+        # LB if its already installed don't do anything
+        # if addon_name not in bpy.context.preferences.addons:
+        #    bpy.ops.preferences.addon_install(filepath=p)
+        # if addon_name not in bpy.context.preferences.addons:
+        #    bpy.ops.preferences.addon_enable(module=addon_name)
+        print(p)
+
         bpy.ops.preferences.addon_install(filepath=p)
+        print(Path(p).stem)
         bpy.ops.preferences.addon_enable(module=Path(p).stem)
 
         print(f'"{Path(p).stem}" installed from source script and enabled')
@@ -195,25 +233,25 @@ def main():
         ][0]
 
         ### GEOMETRY
-        if args.output is not None:
-            out_path_to_file = args.output[0]
-            with open(out_path_to_file, "r") as in_file_obj:
-                text = in_file_obj.read()
-                # convert the text into a dictionary
-                out_data = json.loads(text)
+        # if args.output is not None:
+        #    out_path_to_file = args.output[0]
+        #    with open(out_path_to_file, "r") as in_file_obj:
+        #        text = in_file_obj.read()
+        #        # convert the text into a dictionary
+        #        out_data = json.loads(text)
 
-            out_data["geometry"]
-            print("Output file for key names provided")
+        #    out_data["geometry"]
+        #    print("Output file for key names provided")
 
-            # Based on ouput file dictionary keys
-            # TODO: - use output file keys and type of values
-            # to replicated code below
-
-        else:
-            print(
-                "No Output file for key names \
-                provided - generate from .blend file objects"
-            )
+        #    # Based on ouput file dictionary keys
+        #    # TODO: - use output file keys and type of values
+        #    # to replicated code below
+        #
+        # else:
+        #    print(
+        #        "No Output file for key names \
+        #        provided - generate from .blend file objects"
+        #    )
 
         # from testing function
         for obj in bpy.data.objects:
@@ -283,25 +321,25 @@ def main():
                     )
 
         ### MATERIALS
-        if args.output is not None:
-            out_path_to_file = args.output[0]
-            with open(out_path_to_file, "r") as in_file_obj:
-                text = in_file_obj.read()
-                # convert the text into a dictionary
-                out_data = json.loads(text)
+        # if args.output is not None:
+        #     out_path_to_file = args.output[0]
+        #     with open(out_path_to_file, "r") as in_file_obj:
+        #         text = in_file_obj.read()
+        #         # convert the text into a dictionary
+        #         out_data = json.loads(text)
 
-            out_data["materials"]
-            print("Output file for key names provided")
+        #     out_data["materials"]
+        #     print("Output file for key names provided")
 
-            # Based on ouput file dictionary keys
-            # TODO: - use output file keys and type of values
-            # to replicated code below
+        #     # Based on ouput file dictionary keys
+        #     # TODO: - use output file keys and type of values
+        #     # to replicated code below
 
-        else:
-            print(
-                "No Output file for key names \
-                provided - generate from .blend file objects"
-            )
+        # else:
+        #     print(
+        #         "No Output file for key names \
+        #         provided - generate from .blend file objects"
+        #     )
 
         bpy.context.scene.socket_props_per_material.update_materials_collection
         bpy.ops.node.randomise_all_material_sockets("INVOKE_DEFAULT")
@@ -363,6 +401,151 @@ def main():
                         m_str + "_" + socket_attrib_str,
                         (ini_min_max_values[m_str],) * n_dim,
                     )
+        print("HERE")
+        # RENDERING
+        # Randomise geometry
+        bpy.ops.node.randomise_all_geometry_sockets("INVOKE_DEFAULT")
+
+        # Set frame
+        bpy.context.scene.frame_current = args.frame[0]
+        # Set resolution and format
+        bpy.context.scene.render.resolution_x = 554
+        bpy.context.scene.render.resolution_y = 448
+        bpy.context.scene.render.image_settings.file_format = "PNG"
+
+        # Ensure render engine is set
+        bpy.context.scene.render.engine = "CYCLES"  # or 'BLENDER_EEVEE'
+
+        # Define and set the output path
+        output_filename = (
+            str(args.basename[0]) + "_f" + str(args.frame[0]) + ".png"
+        )
+        output_path = Path(output_filename)
+        bpy.context.scene.render.filepath = str(output_path)
+
+        # Render the image
+        bpy.ops.render.render(write_still=True)
+
+        # Set materials to segmentation
+        red_material = bpy.data.materials.get("Red")
+        black_material = bpy.data.materials.get("Black")
+
+        # Get the node tree and the Set Material node
+        node_tree = bpy.data.node_groups["Colon Geo Node"]
+        set_material_node = node_tree.nodes["StalkPolypsMaterial"]
+        set_material_node.inputs["Material"].default_value = red_material
+
+        node_tree = bpy.data.node_groups["Colon Geo Node"]
+        set_material_node = node_tree.nodes["SpherePolypsMaterial"]
+        set_material_node.inputs["Material"].default_value = red_material
+
+        node_tree = bpy.data.node_groups["Colon Geo Node"]
+        set_material_node = node_tree.nodes["ColonMat1"]
+        set_material_node.inputs["Material"].default_value = black_material
+
+        node_tree = bpy.data.node_groups["Colon Geo Node"]
+        set_material_node = node_tree.nodes["ColonMat2"]
+        set_material_node.inputs["Material"].default_value = black_material
+
+        node_tree = bpy.data.node_groups["Colon Geo Node"]
+        set_material_node = node_tree.nodes["ColonMat3"]
+        set_material_node.inputs["Material"].default_value = black_material
+
+        # Render segmentation
+        bpy.context.scene.frame_current = args.frame[0]
+        # Set resolution and format
+        bpy.context.scene.render.resolution_x = 554
+        bpy.context.scene.render.resolution_y = 448
+        bpy.context.scene.render.image_settings.file_format = "PNG"
+
+        # Ensure render engine is set
+        bpy.context.scene.render.engine = "CYCLES"  # or 'BLENDER_EEVEE'
+
+        # Define and set the output path
+        output_filename = (
+            str(args.basename[0]) + "_seg" + str(args.frame[0]) + ".png"
+        )
+        output_path = Path(output_filename)
+        bpy.context.scene.render.filepath = str(output_path)
+
+        # Render the image
+        bpy.ops.render.render(write_still=True)
+
+        # print(set_material_node)
+        # Set the material to "Red"
+        # set_material_node.inputs[0].default_value = "Red"
+
+        # ColonMat1
+        # SpherePolypsMaterial
+
+        # import math
+        # from mathutils import Euler
+
+        # angle_1 = math.radians(-166.92)
+        # angle_2 = math.radians(-273.775)
+        # angle_3 = math.radians(101.423)
+        #
+        # Apply to camera's rotation
+        # camera = bpy.data.objects["Camera"]
+
+        # print(camera.rotation_euler)
+        # camera.rotation_euler = Euler((-2.91, -4.77, 1.77))
+        # # Rotate 90 degrees around the X-axis
+        # print(camera.rotation_euler)
+
+        # print(bpy.data.node_groups["Colon Geo Node"].\
+        # nodes["StalkPolypsMaterial"])
+
+        # camera = bpy.data.objects["Camera"]
+        # path = bpy.data.objects["BezierCurve"]
+
+        # # Apply the Follow Path constraint to the camera
+        # follow_path_constraint = camera.constraints.new(type="FOLLOW_PATH")
+        # follow_path_constraint.target = path
+        # follow_path_constraint.use_fixed_location = True
+        # # Keeps the camera fixed along the path
+
+        # # Ensure the camera is set to align forward along the curve
+        # follow_path_constraint.forward_axis = 'FORWARD_Y'
+        # # Aligns camera forward along the Y-axis
+
+        # red_material = bpy.data.materials.get("Red")
+
+        # # Get the node tree and the Set Material node
+        # node_tree = bpy.data.node_groups["Colon Geo Node"]
+        # set_material_node = node_tree.nodes["StalkPolypsMaterial"]
+        # set_material_node.inputs["Material"].default_value = red_material
+
+        # print(set_material_node)
+        # # Set the material to "Red"
+        # set_material_node.inputs[0].default_value = "Red"
+
+        # Set frame
+        # bpy.context.scene.frame_current = args.frame[0]
+
+        # #camera = bpy.data.objects["Camera"]
+        # #camera.rotation_euler = Euler((-2.9, -4.77, 1.77))
+        # # Rotate 90 degrees around the X-axis
+
+        # # Set frame
+        # bpy.context.scene.frame_current = args.frame[0]
+        # # Set resolution and format
+        # bpy.context.scene.render.resolution_x = 554
+        # bpy.context.scene.render.resolution_y = 448
+        # bpy.context.scene.render.image_settings.file_format = 'PNG'
+
+        # # Ensure render engine is set
+        # bpy.context.scene.render.engine = 'CYCLES'
+        # # or 'BLENDER_EEVEE'
+
+        # # Define and set the output path
+        # output_filename = str(args.basename[0]) + "_f" + \
+        # str(args.frame[0]) + ".png"
+        # output_path = Path(output_filename)
+        # bpy.context.scene.render.filepath = str(output_path)
+
+        # # Render the image
+        # bpy.ops.render.render(write_still=True)
 
 
 if __name__ == "__main__":
