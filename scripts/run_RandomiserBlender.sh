@@ -99,4 +99,4 @@ fi
 zip ../randomiser.zip -FS -r ../randomiser/
 
 # Run blender in the background (-b) and run the python script inputting the seed,
-blender -b ${blend_file} --python ../install_and_enable_addons.py -- ../randomiser.zip --seed ${seed_num} --input ${json_input} --frame ${frame} --basename ${base_output} --render_main ${render_main}
+blender -b ${blend_file} --python ../install_and_enable_addons_render.py -- ../randomiser.zip --seed ${seed_num} --input ${json_input} --frame ${frame} --basename ${base_output} --render_main ${render_main}
