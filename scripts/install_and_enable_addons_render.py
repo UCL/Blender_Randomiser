@@ -433,8 +433,8 @@ def main():
         if render_main is True:
             # Get the node tree and the Set Material node
             node_tree = bpy.data.node_groups["Colon Geo Node"]
-            set_material_node = node_tree.nodes["StalkPolypsMaterial"]
-            set_material_node.inputs["Material"].default_value = red_material
+            # set_material_node = node_tree.nodes["StalkPolypsMaterial"]
+            # set_material_node.inputs["Material"].default_value = red_material
 
             node_tree = bpy.data.node_groups["Colon Geo Node"]
             set_material_node = node_tree.nodes["SpherePolypsMaterial"]
