@@ -420,7 +420,7 @@ def main():
         red_material = bpy.data.materials.get("Red")
         black_material = bpy.data.materials.get("Black")
         # Ensure render engine is set
-        bpy.context.scene.render.engine = "CYCLES"  # or 'BLENDER_EEVEE'
+        bpy.context.scene.render.engine = "BLENDER_EEVEE"  # or 'CYCLES'
 
         # Set resolution and format
         bpy.context.scene.render.resolution_x = 554
