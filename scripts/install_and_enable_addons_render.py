@@ -271,7 +271,7 @@ def main():
 
         bpy.context.view_layer.objects.active = active_obj
         bpy.context.scene.socket_props_per_gng.update_gngs_collection
-        bpy.ops.node.randomise_all_geometry_sockets("INVOKE_DEFAULT")
+        # bpy.ops.node.randomise_all_geometry_sockets("INVOKE_DEFAULT")
 
         # Save params?
         # bpy.ops.camera.save_param_out("INVOKE_DEFAULT")
