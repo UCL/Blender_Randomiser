@@ -417,8 +417,8 @@ def main():
         # bpy.ops.node.randomise_all_geometry_sockets("INVOKE_DEFAULT")
         bpy.context.scene.frame_current = args.frame[0]
 
-        red_material = bpy.data.materials.get("Red")
-        black_material = bpy.data.materials.get("Black")
+        bpy.data.materials.get("Red")
+        bpy.data.materials.get("Black")
         # Ensure render engine is set
         bpy.context.scene.render.engine = "BLENDER_EEVEE"  # or 'CYCLES'
 
@@ -432,25 +432,23 @@ def main():
         print("Rendering images...")
         if render_main is True:
             # Get the node tree and the Set Material node
-            node_tree = bpy.data.node_groups["Colon Geo Node"]
+            bpy.data.node_groups["Colon Geo Node"]
             # set_material_node = node_tree.nodes["StalkPolypsMaterial"]
             # set_material_node.inputs["Material"].default_value = red_material
 
-            node_tree = bpy.data.node_groups["Colon Geo Node"]
-            set_material_node = node_tree.nodes["SpherePolypsMaterial"]
-            set_material_node.inputs["Material"].default_value = red_material
+            bpy.data.node_groups["Colon Geo Node"]
+            # set_material_node = node_tree.nodes["SpherePolypsMaterial"]
+            # set_material_node.inputs["Material"].default_value = red_material
 
             # node_tree = bpy.data.node_groups["Colon Geo Node"]
             # set_material_node = node_tree.nodes["ColonMat3"]
             # set_material_node.inputs["Material"].default_value = red_material
 
-            node_tree = bpy.data.node_groups["Colon Geo Node"]
-            set_material_node = node_tree.nodes["ColonMat1"]
-            set_material_node.inputs["Material"].default_value = black_material
+            bpy.data.node_groups["Colon Geo Node"]
+            # set_material_node = node_tree.nodes["ColonMat1"]
 
-            node_tree = bpy.data.node_groups["Colon Geo Node"]
-            set_material_node = node_tree.nodes["ColonMat2"]
-            set_material_node.inputs["Material"].default_value = black_material
+            bpy.data.node_groups["Colon Geo Node"]
+            # set_material_node = node_tree.nodes["ColonMat2"]
 
             bpy.context.scene.socket_props_per_material.update_materials_collection
 
@@ -469,29 +467,29 @@ def main():
             # bpy.ops.render.render(write_still=True)
 
         # Set materials to segmentation
-        red_material = bpy.data.materials.get("Red")
-        black_material = bpy.data.materials.get("Black")
+        bpy.data.materials.get("Red")
+        bpy.data.materials.get("Black")
 
         # Get the node tree and the Set Material node
-        node_tree = bpy.data.node_groups["Colon Geo Node"]
-        set_material_node = node_tree.nodes["StalkPolypsMaterial"]
-        set_material_node.inputs["Material"].default_value = red_material
+        bpy.data.node_groups["Colon Geo Node"]
+        # set_material_node = node_tree.nodes["StalkPolypsMaterial"]
+        # set_material_node.inputs["Material"].default_value = red_material
 
-        node_tree = bpy.data.node_groups["Colon Geo Node"]
-        set_material_node = node_tree.nodes["SpherePolypsMaterial"]
-        set_material_node.inputs["Material"].default_value = red_material
+        bpy.data.node_groups["Colon Geo Node"]
+        # set_material_node = node_tree.nodes["SpherePolypsMaterial"]
+        # set_material_node.inputs["Material"].default_value = red_material
 
         # node_tree = bpy.data.node_groups["Colon Geo Node"]
         # set_material_node = node_tree.nodes["ColonMat3"]
         # set_material_node.inputs["Material"].default_value = red_material
 
-        node_tree = bpy.data.node_groups["Colon Geo Node"]
-        set_material_node = node_tree.nodes["ColonMat1"]
-        set_material_node.inputs["Material"].default_value = black_material
+        bpy.data.node_groups["Colon Geo Node"]
+        # set_material_node = node_tree.nodes["ColonMat1"]
+        # set_material_node.inputs["Material"].default_value = black_material
 
-        node_tree = bpy.data.node_groups["Colon Geo Node"]
-        set_material_node = node_tree.nodes["ColonMat2"]
-        set_material_node.inputs["Material"].default_value = black_material
+        bpy.data.node_groups["Colon Geo Node"]
+        # set_material_node = node_tree.nodes["ColonMat2"]
+        # set_material_node.inputs["Material"].default_value = black_material
 
         # Set resolution and format
         # bpy.context.scene.render.resolution_x = 554
