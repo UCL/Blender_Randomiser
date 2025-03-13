@@ -57,7 +57,7 @@ while [ $i -lt $# ]; do
     elif [ "${args[i]}" = "-render_main" ]; then
       # Set Render main as true or false
       let i=i+1
-      render_main=True
+      render_main="${args[i]}"
     fi
     let i=i+1
 done
@@ -68,6 +68,7 @@ echo "Seed: ${seed_num}"
 echo "JSON input: ${json_input}"
 echo "Frame: ${frame}"
 echo "Base output: ${base_output}"
+echo "Render main: ${render_main}"
 
 # Check to make sure all required inputs are assigned
 if [ -z "${blend_file}" ] || [ -z "${seed_num}" ] || [ -z "${json_input}" ]; then
