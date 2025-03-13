@@ -20,22 +20,22 @@
     ],
     "value_str": "rotation_euler",
     "camera_rot_x_min": [
-        0
+        40
     ],
     "camera_rot_x_max": [
-        0
+        50
     ],
     "camera_rot_y_min": [
-        0
+        -10
     ],
     "camera_rot_y_max": [
-        0
+        10
     ],
     "camera_rot_z_min": [
-        0
+        -10
     ],
     "camera_rot_z_max": [
-        0
+        10
     ],
     "Values Colon Geo NoderandomiseRidgeDetail": {
         "min": 1,
