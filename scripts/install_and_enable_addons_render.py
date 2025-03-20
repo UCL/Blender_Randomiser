@@ -541,7 +541,7 @@ def main():
             bpy.context.scene.frame_current = current_frame
  
             # Ensure render engine is set
-            bpy.context.scene.render.engine = "CYCLES"  # 'BLENDER_EEVEE' or 'CYCLES'
+            bpy.context.scene.render.engine = "BLENDER_EEVEE"  # 'BLENDER_EEVEE' or 'CYCLES'
 
             # Set resolution and format
             bpy.context.scene.render.resolution_x = 554
