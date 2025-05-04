@@ -1,9 +1,13 @@
 #!/bin/bash
 
-# Check if the mandatory arguments are provided
-if [ "$#" -lt 4 ]; then
-    echo "Usage: $0 <number_of_examples> <json_in> <blender_file_path> <blender_file_path_label>"
-    exit 1
+usage() {
+  echo "Usage: $0 <number_of_examples> <json_in> <blender_file_path> <blender_file_path_label> <basename_prefix> [initial_seed]"
+  exit 1
+}
+
+# Ensure we have at least 5 args now
+if [ "$#" -lt 5 ]; then
+  usage
 fi
 
 NUM_EXAMPLES=$1
@@ -13,11 +17,7 @@ BLENDER_FILE_PATH_LABEL=$4
 BASENAME_PREFIX=$5
 
 # Optional parameter: initial seed (default: 0)
-if [ -n "$6" ]; then
-    INITIAL_SEED=$6
-else
-    INITIAL_SEED=0
-fi
+INITIAL_SEED="${6:-0}"
 
 # Calculate the final seed value to run until (inclusive)
 END_SEED=$(( INITIAL_SEED + NUM_EXAMPLES - 1 ))
