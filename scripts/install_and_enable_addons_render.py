@@ -302,51 +302,6 @@ def main():
             value_str = "rotation_euler"
             bpy.context.scene.randomise_camera_props.bool_delta = False
     
-        # bpy.context.scene.randomise_camera_props.camera_pos_x_max[0] = data[
-        #     "camera_pos_x_max"
-        # ][0]
-        # bpy.context.scene.randomise_camera_props.camera_pos_x_min[0] = data[
-        #     "camera_pos_x_min"
-        # ][0]
-
-        # bpy.context.scene.randomise_camera_props.camera_pos_y_max[0] = data[
-        #     "camera_pos_y_max"
-        # ][0]
-        # bpy.context.scene.randomise_camera_props.camera_pos_y_min[0] = data[
-        #     "camera_pos_y_min"
-        # ][0]
-
-        # bpy.context.scene.randomise_camera_props.camera_pos_z_max[0] = data[
-        #     "camera_pos_z_max"
-        # ][0]
-        # bpy.context.scene.randomise_camera_props.camera_pos_z_min[0] = data[
-        #     "camera_pos_z_min"
-        # ][0]
-
-        # rotation_mode = bpy.data.objects["Camera"].rotation_mode
-        # if rotation_mode in {"QUATERNION", "AXIS_ANGLE"}:
-        #     bpy.data.objects["Camera"].rotation_mode = "XYZ"
-
-        # bpy.context.scene.randomise_camera_props.camera_rot_x_max[0] = data[
-        #     "camera_rot_x_max"
-        # ][0]
-        # bpy.context.scene.randomise_camera_props.camera_rot_x_min[0] = data[
-        #     "camera_rot_x_min"
-        # ][0]
-
-        # bpy.context.scene.randomise_camera_props.camera_rot_y_max[0] = data[
-        #     "camera_rot_y_max"
-        # ][0]
-        # bpy.context.scene.randomise_camera_props.camera_rot_y_min[0] = data[
-        #     "camera_rot_y_min"
-        # ][0]
-
-        # bpy.context.scene.randomise_camera_props.camera_rot_z_max[0] = data[
-        #     "camera_rot_z_max"
-        # ][0]
-        # bpy.context.scene.randomise_camera_props.camera_rot_z_min[0] = data[
-        #     "camera_rot_z_min"
-        # ][0]
 
 # =============================================================================
 # =============================================================================
