@@ -18,15 +18,16 @@ Example:
 # %% Libs
 import argparse
 import json
+import math
 import re
 import sys
 from pathlib import Path
 from random import seed
-import math
 
 import bpy
 
 # =============================================================================
+
 
 def set_camera_settings(data):
     bpy.context.scene.randomise_camera_props.camera_pos_x_max[0] = data[
@@ -76,60 +77,97 @@ def set_camera_settings(data):
     ][0]
 
     print("===============Camera settings set=================")
-    print("Position\n", 
-            bpy.context.scene.randomise_camera_props.camera_pos_x_min[0],
-            bpy.context.scene.randomise_camera_props.camera_pos_x_max[0],
-            bpy.context.scene.randomise_camera_props.camera_pos_y_min[0],
-            bpy.context.scene.randomise_camera_props.camera_pos_y_max[0],
-            bpy.context.scene.randomise_camera_props.camera_pos_z_min[0],
-            bpy.context.scene.randomise_camera_props.camera_pos_z_max[0])
-    print("Rotation\n", 
-            bpy.context.scene.randomise_camera_props.camera_rot_x_min[0],
-            bpy.context.scene.randomise_camera_props.camera_rot_x_max[0],
-            bpy.context.scene.randomise_camera_props.camera_rot_y_min[0],
-            bpy.context.scene.randomise_camera_props.camera_rot_y_max[0],
-            bpy.context.scene.randomise_camera_props.camera_rot_z_min[0],
-            bpy.context.scene.randomise_camera_props.camera_rot_z_max[0])
+    print(
+        "Position\n",
+        bpy.context.scene.randomise_camera_props.camera_pos_x_min[0],
+        bpy.context.scene.randomise_camera_props.camera_pos_x_max[0],
+        bpy.context.scene.randomise_camera_props.camera_pos_y_min[0],
+        bpy.context.scene.randomise_camera_props.camera_pos_y_max[0],
+        bpy.context.scene.randomise_camera_props.camera_pos_z_min[0],
+        bpy.context.scene.randomise_camera_props.camera_pos_z_max[0],
+    )
+    print(
+        "Rotation\n",
+        bpy.context.scene.randomise_camera_props.camera_rot_x_min[0],
+        bpy.context.scene.randomise_camera_props.camera_rot_x_max[0],
+        bpy.context.scene.randomise_camera_props.camera_rot_y_min[0],
+        bpy.context.scene.randomise_camera_props.camera_rot_y_max[0],
+        bpy.context.scene.randomise_camera_props.camera_rot_z_min[0],
+        bpy.context.scene.randomise_camera_props.camera_rot_z_max[0],
+    )
     print("===============Camera settings set=================")
+
 
 # =============================================================================
 
-def save_camera_settings(current_x_pos, 
-                            current_y_pos, 
-                            current_z_pos, 
-                            current_x_rot, 
-                            current_y_rot, 
-                            current_z_rot): 
-    bpy.context.scene.randomise_camera_props.camera_pos_x_min[0] = current_x_pos
-    bpy.context.scene.randomise_camera_props.camera_pos_x_max[0] = current_x_pos
-    bpy.context.scene.randomise_camera_props.camera_pos_y_min[0] = current_y_pos
-    bpy.context.scene.randomise_camera_props.camera_pos_y_max[0] = current_y_pos
-    bpy.context.scene.randomise_camera_props.camera_pos_z_min[0] = current_z_pos
-    bpy.context.scene.randomise_camera_props.camera_pos_z_max[0] = current_z_pos
 
-    bpy.context.scene.randomise_camera_props.camera_rot_x_min[0] = current_x_rot
-    bpy.context.scene.randomise_camera_props.camera_rot_x_max[0] = current_x_rot
-    bpy.context.scene.randomise_camera_props.camera_rot_y_min[0] = current_y_rot
-    bpy.context.scene.randomise_camera_props.camera_rot_y_max[0] = current_y_rot
-    bpy.context.scene.randomise_camera_props.camera_rot_z_min[0] = current_z_rot
-    bpy.context.scene.randomise_camera_props.camera_rot_z_max[0] = current_z_rot
+def save_camera_settings(
+    current_x_pos,
+    current_y_pos,
+    current_z_pos,
+    current_x_rot,
+    current_y_rot,
+    current_z_rot,
+):
+    bpy.context.scene.randomise_camera_props.camera_pos_x_min[
+        0
+    ] = current_x_pos
+    bpy.context.scene.randomise_camera_props.camera_pos_x_max[
+        0
+    ] = current_x_pos
+    bpy.context.scene.randomise_camera_props.camera_pos_y_min[
+        0
+    ] = current_y_pos
+    bpy.context.scene.randomise_camera_props.camera_pos_y_max[
+        0
+    ] = current_y_pos
+    bpy.context.scene.randomise_camera_props.camera_pos_z_min[
+        0
+    ] = current_z_pos
+    bpy.context.scene.randomise_camera_props.camera_pos_z_max[
+        0
+    ] = current_z_pos
+
+    bpy.context.scene.randomise_camera_props.camera_rot_x_min[
+        0
+    ] = current_x_rot
+    bpy.context.scene.randomise_camera_props.camera_rot_x_max[
+        0
+    ] = current_x_rot
+    bpy.context.scene.randomise_camera_props.camera_rot_y_min[
+        0
+    ] = current_y_rot
+    bpy.context.scene.randomise_camera_props.camera_rot_y_max[
+        0
+    ] = current_y_rot
+    bpy.context.scene.randomise_camera_props.camera_rot_z_min[
+        0
+    ] = current_z_rot
+    bpy.context.scene.randomise_camera_props.camera_rot_z_max[
+        0
+    ] = current_z_rot
 
     print("===============Camera settings saved=================")
-    print("Position\n", 
-            bpy.context.scene.randomise_camera_props.camera_pos_x_min[0],
-            bpy.context.scene.randomise_camera_props.camera_pos_x_max[0],
-            bpy.context.scene.randomise_camera_props.camera_pos_y_min[0],
-            bpy.context.scene.randomise_camera_props.camera_pos_y_max[0],
-            bpy.context.scene.randomise_camera_props.camera_pos_z_min[0],
-            bpy.context.scene.randomise_camera_props.camera_pos_z_max[0])
-    print("Rotation\n", 
-            bpy.context.scene.randomise_camera_props.camera_rot_x_min[0],
-            bpy.context.scene.randomise_camera_props.camera_rot_x_max[0],
-            bpy.context.scene.randomise_camera_props.camera_rot_y_min[0],
-            bpy.context.scene.randomise_camera_props.camera_rot_y_max[0],
-            bpy.context.scene.randomise_camera_props.camera_rot_z_min[0],
-            bpy.context.scene.randomise_camera_props.camera_rot_z_max[0])
+    print(
+        "Position\n",
+        bpy.context.scene.randomise_camera_props.camera_pos_x_min[0],
+        bpy.context.scene.randomise_camera_props.camera_pos_x_max[0],
+        bpy.context.scene.randomise_camera_props.camera_pos_y_min[0],
+        bpy.context.scene.randomise_camera_props.camera_pos_y_max[0],
+        bpy.context.scene.randomise_camera_props.camera_pos_z_min[0],
+        bpy.context.scene.randomise_camera_props.camera_pos_z_max[0],
+    )
+    print(
+        "Rotation\n",
+        bpy.context.scene.randomise_camera_props.camera_rot_x_min[0],
+        bpy.context.scene.randomise_camera_props.camera_rot_x_max[0],
+        bpy.context.scene.randomise_camera_props.camera_rot_y_min[0],
+        bpy.context.scene.randomise_camera_props.camera_rot_y_max[0],
+        bpy.context.scene.randomise_camera_props.camera_rot_z_min[0],
+        bpy.context.scene.randomise_camera_props.camera_rot_z_max[0],
+    )
     print("===============Camera settings saved=================")
+
 
 # %% Main function
 def main():
@@ -279,7 +317,7 @@ def main():
         seed(args.seed[0])
         bpy.context.scene.seed_properties.seed_toggle = True
 
-# =============================================================================
+    # =============================================================================
 
     if args.input is not None:
         print("Input file for setting min-max boundaries")
@@ -301,10 +339,9 @@ def main():
             loc_value_str = "location"
             value_str = "rotation_euler"
             bpy.context.scene.randomise_camera_props.bool_delta = False
-    
 
-# =============================================================================
-# =============================================================================
+        # =============================================================================
+        # =============================================================================
 
         ### GEOMETRY
         # if args.output is not None:
@@ -478,10 +515,9 @@ def main():
                         m_str + "_" + socket_attrib_str,
                         (ini_min_max_values[m_str],) * n_dim,
                     )
-#  =============================================================================
-#  =============================================================================
-#  =============================================================================
-
+        #  =============================================================================
+        #  =============================================================================
+        #  =============================================================================
 
         print("Randomising image...")
         # bpy.ops.node.randomise_all_geometry_sockets("INVOKE_DEFAULT")
@@ -490,19 +526,20 @@ def main():
         fat_material = bpy.data.materials.get("Fat.001")
         red_material = bpy.data.materials.get("Red")
         black_material = bpy.data.materials.get("Black")
-        
+
         # bpy.context.scene.frame_current = args.frame[0]
         for current_frame in range(1, args.frame[0] + 1):
             bpy.context.scene.frame_current = current_frame
- 
+
             # Ensure render engine is set
-            bpy.context.scene.render.engine = "CYCLES"  # 'BLENDER_EEVEE' or 'CYCLES'
+            bpy.context.scene.render.engine = (
+                "CYCLES"  # 'BLENDER_EEVEE' or 'CYCLES'
+            )
 
             # Set resolution and format
             bpy.context.scene.render.resolution_x = 554
             bpy.context.scene.render.resolution_y = 448
             bpy.context.scene.render.image_settings.file_format = "PNG"
-            
 
             # bpy.ops.render.render()
 
@@ -510,36 +547,51 @@ def main():
 
             print(f"\n\n\n\n\n{data}\n\n\n\n\n")
 
-
             print("\n\nRendering main images...")
             print("render_main = ", render_main)
             if render_main is True:
                 # Set Material for main images
-                bpy.data.node_groups["Colon Geo Node"].nodes["Set Material.001"].inputs[2].default_value = fat_material
-                bpy.data.node_groups["Colon Geo Node"].nodes["Set Material.004"].inputs[2].default_value = fat_material
-                bpy.data.node_groups["Colon Geo Node"].nodes["Set Material.002"].inputs[2].default_value = fat_material
-                bpy.data.node_groups["Colon Geo Node"].nodes["Set Material"].inputs[2].default_value = fat_material
+                bpy.data.node_groups["Colon Geo Node"].nodes[
+                    "Set Material.001"
+                ].inputs[2].default_value = fat_material
+                bpy.data.node_groups["Colon Geo Node"].nodes[
+                    "Set Material.004"
+                ].inputs[2].default_value = fat_material
+                bpy.data.node_groups["Colon Geo Node"].nodes[
+                    "Set Material.002"
+                ].inputs[2].default_value = fat_material
+                bpy.data.node_groups["Colon Geo Node"].nodes[
+                    "Set Material"
+                ].inputs[2].default_value = fat_material
 
                 bpy.context.scene.socket_props_per_material.update_materials_collection
-
 
                 set_camera_settings(data)
 
                 bpy.ops.render.render()
-                
+
                 current_x_p = bpy.data.objects["Camera"].location[0]
                 current_y_p = bpy.data.objects["Camera"].location[1]
                 current_z_p = bpy.data.objects["Camera"].location[2]
-                current_x_r = math.degrees(bpy.data.objects["Camera"].rotation_euler[0])
-                current_y_r = math.degrees(bpy.data.objects["Camera"].rotation_euler[1])
-                current_z_r = math.degrees(bpy.data.objects["Camera"].rotation_euler[2])
-                print("\n\nCurrent camera position and rotation after rendering main image before segmentation\n",
-                      current_x_p, 
-                      current_y_p, 
-                      current_z_p,
-                      current_x_r, 
-                      current_y_r, 
-                      current_z_r, "\n")
+                current_x_r = math.degrees(
+                    bpy.data.objects["Camera"].rotation_euler[0]
+                )
+                current_y_r = math.degrees(
+                    bpy.data.objects["Camera"].rotation_euler[1]
+                )
+                current_z_r = math.degrees(
+                    bpy.data.objects["Camera"].rotation_euler[2]
+                )
+                print(
+                    "\n\nCurrent camera position and rotation after rendering main image before segmentation\n",
+                    current_x_p,
+                    current_y_p,
+                    current_z_p,
+                    current_x_r,
+                    current_y_r,
+                    current_z_r,
+                    "\n",
+                )
 
                 # Define and set the output path
                 output_filename = (
@@ -553,52 +605,70 @@ def main():
                     filepath=str(output_path)
                 )
             else:
-                
-
                 print("\n\nRendering segmentation masks...")
                 # Set Material node
-                bpy.data.node_groups["Colon Geo Node"].nodes["Set Material.001"].inputs[2].default_value = red_material
-                bpy.data.node_groups["Colon Geo Node"].nodes["Set Material.004"].inputs[2].default_value = red_material
-                bpy.data.node_groups["Colon Geo Node"].nodes["Set Material.002"].inputs[2].default_value = red_material
-                bpy.data.node_groups["Colon Geo Node"].nodes["Set Material"].inputs[2].default_value = black_material
+                bpy.data.node_groups["Colon Geo Node"].nodes[
+                    "Set Material.001"
+                ].inputs[2].default_value = red_material
+                bpy.data.node_groups["Colon Geo Node"].nodes[
+                    "Set Material.004"
+                ].inputs[2].default_value = red_material
+                bpy.data.node_groups["Colon Geo Node"].nodes[
+                    "Set Material.002"
+                ].inputs[2].default_value = red_material
+                bpy.data.node_groups["Colon Geo Node"].nodes[
+                    "Set Material"
+                ].inputs[2].default_value = black_material
 
-            # Ensure render engine is set
-            # bpy.context.scene.render.engine = 'CYCLES'  # 'CYCLES' or 'BLENDER_EEVEE'
+                # Ensure render engine is set
+                # bpy.context.scene.render.engine = 'CYCLES'  # 'CYCLES' or 'BLENDER_EEVEE'
 
-            # save_camera_settings(current_x_pos = current_x_p, 
-            #                     current_y_pos = current_y_p, 
-            #                     current_z_pos = current_z_p, 
-            #                     current_x_rot = current_x_r, 
-            #                     current_y_rot = current_y_r, 
-            #                     current_z_rot = current_z_r)
-            
+                # save_camera_settings(current_x_pos = current_x_p,
+                #                     current_y_pos = current_y_p,
+                #                     current_z_pos = current_z_p,
+                #                     current_x_rot = current_x_r,
+                #                     current_y_rot = current_y_r,
+                #                     current_z_rot = current_z_r)
+
                 set_camera_settings(data)
-            
-                # Render the segmentation mask
-                bpy.ops.render.render()  
 
+                # Render the segmentation mask
+                bpy.ops.render.render()
 
                 current_x_p = bpy.data.objects["Camera"].location[0]
                 current_y_p = bpy.data.objects["Camera"].location[1]
                 current_z_p = bpy.data.objects["Camera"].location[2]
-                current_x_r = math.degrees(bpy.data.objects["Camera"].rotation_euler[0])
-                current_y_r = math.degrees(bpy.data.objects["Camera"].rotation_euler[1])
-                current_z_r = math.degrees(bpy.data.objects["Camera"].rotation_euler[2])
-                print("\n\nCurrent camera position and rotation after segmentation\n",
-                        current_x_p, 
-                        current_y_p, 
-                        current_z_p,
-                        current_x_r, 
-                        current_y_r, 
-                        current_z_r, "\n")
-                
+                current_x_r = math.degrees(
+                    bpy.data.objects["Camera"].rotation_euler[0]
+                )
+                current_y_r = math.degrees(
+                    bpy.data.objects["Camera"].rotation_euler[1]
+                )
+                current_z_r = math.degrees(
+                    bpy.data.objects["Camera"].rotation_euler[2]
+                )
+                print(
+                    "\n\nCurrent camera position and rotation after segmentation\n",
+                    current_x_p,
+                    current_y_p,
+                    current_z_p,
+                    current_x_r,
+                    current_y_r,
+                    current_z_r,
+                    "\n",
+                )
 
                 # Define and set the output path
                 output_filename = (
-                    str(args.basename[0]) + "_seg" + str(current_frame) + ".png"
+                    str(args.basename[0])
+                    + "_seg"
+                    + str(current_frame)
+                    + ".png"
                 )
                 output_path = Path(output_filename)
-                bpy.data.images["Render Result"].save_render(filepath=str(output_path))
+                bpy.data.images["Render Result"].save_render(
+                    filepath=str(output_path)
+                )
 
             ##bpy.context.scene.render.filepath = str(output_path)
 
