@@ -543,7 +543,8 @@ def main():
 
             # bpy.ops.render.render()
 
-            # bpy.data.scenes["Colon"].randomise_camera_props.bool_rand_rotx = False
+            # bpy.data.scenes["Colon"].randomise_camera_props.bool_rand_rotx
+            # = False
 
             print(f"\n\n\n\n\n{data}\n\n\n\n\n")
 
@@ -583,7 +584,8 @@ def main():
                     bpy.data.objects["Camera"].rotation_euler[2]
                 )
                 print(
-                    "\n\nCurrent camera position and rotation after rendering main image before segmentation\n",
+                    "\n\nCurrent camera position and rotation after rendering \
+                        main image before segmentation\n",
                     current_x_p,
                     current_y_p,
                     current_z_p,
@@ -621,7 +623,8 @@ def main():
                 ].inputs[2].default_value = black_material
 
                 # Ensure render engine is set
-                # bpy.context.scene.render.engine = 'CYCLES'  # 'CYCLES' or 'BLENDER_EEVEE'
+                # bpy.context.scene.render.engine = 'CYCLES'
+                # # 'CYCLES' or 'BLENDER_EEVEE'
 
                 # save_camera_settings(current_x_pos = current_x_p,
                 #                     current_y_pos = current_y_p,
@@ -648,7 +651,8 @@ def main():
                     bpy.data.objects["Camera"].rotation_euler[2]
                 )
                 print(
-                    "\n\nCurrent camera position and rotation after segmentation\n",
+                    "\n\nCurrent camera position and \
+                        rotation after segmentation\n",
                     current_x_p,
                     current_y_p,
                     current_z_p,

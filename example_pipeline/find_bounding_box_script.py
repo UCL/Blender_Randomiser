@@ -71,7 +71,8 @@ def find_connected_components(image_path, output_dir):
 
 def process_all_images(input_dir, output_dir):
     """
-    Processes all PNG images in input_dir and saves bounding box annotations in output_dir.
+    Processes all PNG images in input_dir and saves bounding box annotations in
+    output_dir.
     """
     # Ensure input directory exists
     if not os.path.exists(input_dir):
