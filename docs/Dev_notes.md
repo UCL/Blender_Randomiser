@@ -39,7 +39,7 @@ Things to be aware of re add-ons:
 
 For development it is still advisable to work in a virtual environment, even if that is not the Python interpreter Blender will use... In this environment it is useful to install `fake-bpy-module` for autocomplete. I am using these requirements for the development virtual environment:
 ```
-certifi==2022.12.7
+certifi==2024.7.4
 fake-bpy-module-3.4==20230117
 numpy==1.22.0
 pip==23.3
