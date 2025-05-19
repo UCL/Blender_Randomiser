@@ -42,7 +42,7 @@ For development it is still advisable to work in a virtual environment, even if 
 certifi==2022.12.7
 fake-bpy-module-3.4==20230117
 numpy==1.22.0
-pip==22.3.1
+pip==23.3
 setuptools==70.0.0
 wheel==0.38.1
 ```
