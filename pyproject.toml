@@ -39,7 +39,7 @@ dev = [
 
 [build-system]
 requires = [
-    "setuptools>=65",
+    "setuptools>=70.0",
     "wheel",
     "setuptools_scm[toml]>=6.2",
 ]
