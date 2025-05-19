@@ -43,8 +43,8 @@ certifi==2022.12.7
 fake-bpy-module-3.4==20230117
 numpy==1.22.0
 pip==22.3.1
-setuptools==65.6.3
-wheel==0.37.1
+setuptools==70.0.0
+wheel==0.38.1
 ```
 
 [Bundled Python and extensions](https://docs.blender.org/api/current/info_tips_and_tricks.html#bundled-python-extensions)
