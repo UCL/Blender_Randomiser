@@ -2,5 +2,5 @@ certifi==2024.7.4
 fake-bpy-module-3.4==20230117
 numpy==1.22.0
 pip==23.3
-setuptools==70.0.0
+setuptools==80.0.0
 wheel==0.38.1
